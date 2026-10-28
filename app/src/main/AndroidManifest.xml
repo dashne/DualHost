@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
+        <intent><action android:name="android.media.action.IMAGE_CAPTURE" /></intent>
+        <intent><action android:name="android.media.action.VIDEO_CAPTURE" /></intent>
+        <intent>
+            <action android:name="android.intent.action.GET_CONTENT" />
+            <data android:mimeType="*/*" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.OPEN_DOCUMENT" />
+            <data android:mimeType="*/*" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.PICK" />
+            <data android:mimeType="image/*" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.SEND" />
+            <data android:mimeType="*/*" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="https" />
+        </intent>
+    </queries>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+    <uses-permission android:name="android.permission.MANAGE_MEDIA" />
+    <uses-permission android:name="android.permission.DETECT_SCREEN_CAPTURE" />
+
+
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.microphone" android:required="false" />
+    <application
+        android:name=".DualApplication"
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.DualHost">
+        <meta-data android:name="com.google.android.gms.version" android:value="12451000" />
+        <service android:name=".HostJob0" android:process=":p0"
+            android:permission="android.permission.BIND_JOB_SERVICE" android:exported="false"/>
+        <service android:name=".HostJob1" android:process=":p1"
+            android:permission="android.permission.BIND_JOB_SERVICE" android:exported="false"/>
+        <service android:name=".HostJob2" android:process=":p2"
+            android:permission="android.permission.BIND_JOB_SERVICE" android:exported="false"/>
+        <service android:name=".HostJob3" android:process=":p3"
+            android:permission="android.permission.BIND_JOB_SERVICE" android:exported="false"/>
+        <service android:name=".HostJob4" android:process=":p4"
+            android:permission="android.permission.BIND_JOB_SERVICE" android:exported="false"/>
+        <service android:name=".HostJob5" android:process=":p5"
+            android:permission="android.permission.BIND_JOB_SERVICE" android:exported="false"/>
+        <service android:name=".HostJob6" android:process=":p6" android:permission="android.permission.BIND_JOB_SERVICE" android:exported="false"/>
+        <service android:name=".HostJob7" android:process=":p7" android:permission="android.permission.BIND_JOB_SERVICE" android:exported="false"/>
+        <service android:name=".HostJob8" android:process=":p8" android:permission="android.permission.BIND_JOB_SERVICE" android:exported="false"/>
+        <service android:name=".HostJob9" android:process=":p9" android:permission="android.permission.BIND_JOB_SERVICE" android:exported="false"/>
+
+        <provider android:name=".HostFileProxy0" android:authorities="com.ims134.dualhost.fp0"
+            android:process=":p0" android:exported="false" android:grantUriPermissions="true"/>
+        <provider android:name=".HostFileProxy1" android:authorities="com.ims134.dualhost.fp1"
+            android:process=":p1" android:exported="false" android:grantUriPermissions="true"/>
+        <provider android:name=".HostFileProxy2" android:authorities="com.ims134.dualhost.fp2"
+            android:process=":p2" android:exported="false" android:grantUriPermissions="true"/>
+        <provider android:name=".HostFileProxy3" android:authorities="com.ims134.dualhost.fp3"
+            android:process=":p3" android:exported="false" android:grantUriPermissions="true"/>
+        <provider android:name=".HostFileProxy4" android:authorities="com.ims134.dualhost.fp4"
+            android:process=":p4" android:exported="false" android:grantUriPermissions="true"/>
+        <provider android:name=".HostFileProxy5" android:authorities="com.ims134.dualhost.fp5"
+            android:process=":p5" android:exported="false" android:grantUriPermissions="true"/>
+        <provider android:name=".HostFileProxy6" android:authorities="com.ims134.dualhost.fp6" android:process=":p6" android:exported="false" android:grantUriPermissions="true"/>
+        <provider android:name=".HostFileProxy7" android:authorities="com.ims134.dualhost.fp7" android:process=":p7" android:exported="false" android:grantUriPermissions="true"/>
+        <provider android:name=".HostFileProxy8" android:authorities="com.ims134.dualhost.fp8" android:process=":p8" android:exported="false" android:grantUriPermissions="true"/>
+        <provider android:name=".HostFileProxy9" android:authorities="com.ims134.dualhost.fp9" android:process=":p9" android:exported="false" android:grantUriPermissions="true"/>
+
+        <receiver android:name=".HostReceiver0" android:process=":p0" android:exported="false"/>
+        <receiver android:name=".HostReceiver1" android:process=":p1" android:exported="false"/>
+        <receiver android:name=".HostReceiver2" android:process=":p2" android:exported="false"/>
+        <receiver android:name=".HostReceiver3" android:process=":p3" android:exported="false"/>
+        <receiver android:name=".HostReceiver4" android:process=":p4" android:exported="false"/>
+        <receiver android:name=".HostReceiver5" android:process=":p5" android:exported="false"/>
+        <receiver android:name=".HostReceiver6" android:process=":p6" android:exported="false"/>
+        <receiver android:name=".HostReceiver7" android:process=":p7" android:exported="false"/>
+        <receiver android:name=".HostReceiver8" android:process=":p8" android:exported="false"/>
+        <receiver android:name=".HostReceiver9" android:process=":p9" android:exported="false"/>
+        <service android:name=".HostService0" android:process=":p0" android:exported="false" android:foregroundServiceType="mediaPlayback|dataSync|location|microphone|specialUse">
+            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Runs services of the cloned app" />
+        </service>
+        <service android:name=".HostService1" android:process=":p1" android:exported="false" android:foregroundServiceType="mediaPlayback|dataSync|location|microphone|specialUse">
+            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Runs services of the cloned app" />
+        </service>
+        <service android:name=".HostService2" android:process=":p2" android:exported="false" android:foregroundServiceType="mediaPlayback|dataSync|location|microphone|specialUse">
+            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Runs services of the cloned app" />
+        </service>
+        <service android:name=".HostService3" android:process=":p3" android:exported="false" android:foregroundServiceType="mediaPlayback|dataSync|location|microphone|specialUse">
+            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Runs services of the cloned app" />
+        </service>
+        <service android:name=".HostService4" android:process=":p4" android:exported="false" android:foregroundServiceType="mediaPlayback|dataSync|location|microphone|specialUse">
+            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Runs services of the cloned app" />
+        </service>
+        <service android:name=".HostService5" android:process=":p5" android:exported="false" android:foregroundServiceType="mediaPlayback|dataSync|location|microphone|specialUse">
+            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Runs services of the cloned app" />
+        </service>
+        <service android:name=".HostService6" android:process=":p6" android:exported="false" android:foregroundServiceType="mediaPlayback|dataSync|location|microphone|specialUse">
+            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Runs services of the cloned app" />
+        </service>
+        <service android:name=".HostService7" android:process=":p7" android:exported="false" android:foregroundServiceType="mediaPlayback|dataSync|location|microphone|specialUse">
+            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Runs services of the cloned app" />
+        </service>
+        <service android:name=".HostService8" android:process=":p8" android:exported="false" android:foregroundServiceType="mediaPlayback|dataSync|location|microphone|specialUse">
+            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Runs services of the cloned app" />
+        </service>
+        <service android:name=".HostService9" android:process=":p9" android:exported="false" android:foregroundServiceType="mediaPlayback|dataSync|location|microphone|specialUse">
+            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Runs services of the cloned app" />
+        </service>
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.DualHost"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".StaleLaunch" android:exported="false"/>
+        <activity android:name=".StubViber" android:label="Viber"
+            android:taskAffinity="com.ims134.dualhost.viber"
+            android:process="com.viber.voip"
+            android:exported="true" />
+
+        <activity android:name=".AppPickerActivity"
+            android:exported="false"/>
+        <activity android:name=".OpenLinkActivity"
+            android:exported="false"/>
+        <activity android:name=".PermissionsActivity" android:exported="false" />
+        <activity android:name=".ReturnLinkActivity" android:exported="true"
+            android:excludeFromRecents="true" android:theme="@android:style/Theme.NoDisplay">
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="io.element.android" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".StubActivity"
+            android:label="Clone 1"
+            android:taskAffinity="com.ims134.dualhost.clone0"
+            android:process=":p0"
+            android:exported="false"/>
+        <activity android:name=".StubP1"
+            android:label="Clone 2"
+            android:taskAffinity="com.ims134.dualhost.clone1"
+            android:process=":p1"
+            android:exported="false"/>
+        <activity android:name=".StubP2"
+            android:label="Clone 3"
+            android:taskAffinity="com.ims134.dualhost.clone2"
+            android:process=":p2"
+            android:exported="false"/>
+        <activity android:name=".StubP3"
+            android:label="Clone 4"
+            android:taskAffinity="com.ims134.dualhost.clone3"
+            android:process=":p3"
+            android:exported="false"/>
+        <activity android:name=".StubP4"
+            android:label="Clone 5"
+            android:taskAffinity="com.ims134.dualhost.clone4"
+            android:process=":p4"
+            android:exported="false"/>
+        <activity android:name=".StubP5"
+            android:label="Clone 6"
+            android:taskAffinity="com.ims134.dualhost.clone5"
+            android:process=":p5"
+            android:exported="false"/>
+        <activity android:name=".StubP6"
+            android:label="Clone 7"
+            android:taskAffinity="com.ims134.dualhost.clone6"
+            android:process=":p6"
+            android:exported="false"/>
+        <activity android:name=".StubP7" android:label="Clone 8" android:taskAffinity="com.ims134.dualhost.clone7"  android:process=":p7" android:exported="false"/>
+        <activity android:name=".StubP8" android:label="Clone 9" android:taskAffinity="com.ims134.dualhost.clone8"  android:process=":p8" android:exported="false"/>
+        <activity android:name=".StubP9" android:label="Clone 10" android:taskAffinity="com.ims134.dualhost.clone9"  android:process=":p9" android:exported="false"/>
+
+    </application>
+
+</manifest>

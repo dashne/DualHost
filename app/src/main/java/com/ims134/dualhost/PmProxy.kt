@@ -1,0 +1,343 @@
+package com.ims134.dualhost
+
+import android.content.ComponentName
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageInfo
+import android.content.pm.PackageManager
+import android.util.Log
+import java.io.File
+import java.lang.reflect.InvocationTargetException
+import java.lang.reflect.Proxy
+
+object PmProxy {
+    private const val HOST = "com.ims134.dualhost"
+    @Volatile var guestApk: String? = null
+    @Volatile private var proxy: Any? = null
+    private var real: Any? = null
+    private val seen = HashSet<String>()
+    private val busy = ThreadLocal<Boolean>()
+
+    private fun logOnce(s: String) {
+        if (synchronized(seen) { seen.add(s) }) FileLog.d(s)
+    }
+
+    // Parse the guest manifest in-process (does not go through IPackageManager)
+    private fun guestInfo(flags: Int): PackageInfo? {
+        val apk = guestApk ?: return null
+        busy.set(true)
+        try {
+            val app = Class.forName("android.app.ActivityThread")
+                .getDeclaredMethod("currentApplication").invoke(null) as android.app.Application
+            return app.packageManager.getPackageArchiveInfo(apk, flags)
+        } catch (e: Throwable) {
+            return null
+        } finally {
+            busy.set(false)
+        }
+    }
+
+    private var svcActions: Map<String, List<String>>? = null
+
+    // service class -> actions of its intent-filters, read from the guest manifest
+    private fun guestServiceActions(): Map<String, List<String>> {
+        svcActions?.let { return it }
+        val apk = guestApk ?: return emptyMap()
+        val map = HashMap<String, MutableList<String>>()
+        busy.set(true)
+        try {
+            val app = Class.forName("android.app.ActivityThread")
+                .getDeclaredMethod("currentApplication").invoke(null) as android.app.Application
+            val pm = app.packageManager
+            val ai = pm.getPackageArchiveInfo(apk, 0)!!.applicationInfo!!
+            ai.sourceDir = apk
+            ai.publicSourceDir = apk
+            val p = pm.getResourcesForApplication(ai).assets.openXmlResourceParser("AndroidManifest.xml")
+            val ns = "http://schemas.android.com/apk/res/android"
+            var pkg = ""
+            var svc: String? = null
+            var ev = p.eventType
+            while (ev != org.xmlpull.v1.XmlPullParser.END_DOCUMENT) {
+                if (ev == org.xmlpull.v1.XmlPullParser.START_TAG) {
+                    when (p.name) {
+                        "manifest" -> pkg = p.getAttributeValue(null, "package") ?: ""
+                        "service" -> {
+                            var n = p.getAttributeValue(ns, "name") ?: ""
+                            if (n.startsWith(".")) n = pkg + n
+                            else if (!n.contains(".")) n = pkg + "." + n
+                            svc = n
+                        }
+                        "receiver", "activity", "provider", "activity-alias" -> svc = null
+                        "action" -> {
+                            val a = p.getAttributeValue(ns, "name")
+                            if (svc != null && a != null) map.getOrPut(svc) { ArrayList() }.add(a)
+                        }
+                    }
+                } else if (ev == org.xmlpull.v1.XmlPullParser.END_TAG && p.name == "service") {
+                    svc = null
+                }
+                ev = p.next()
+            }
+        } catch (e: Throwable) {
+            logOnce("PM guest service actions failed: " + e)
+        } finally {
+            busy.set(false)
+        }
+        svcActions = map
+        return map
+    }
+
+    private fun handle(m: java.lang.reflect.Method, args: Array<Any?>?): Any?
+    {
+//        if (args != null && args.isNotEmpty() && args[0] is android.content.Intent)
+//        {
+//            FileLog.d( "PMQ " + m.name + " action=" + (args[0] as android.content.Intent).action)
+//        }
+        var result: Any?
+        try {
+            result = if (args == null) m.invoke(real) else m.invoke(real, *args)
+        } catch (e: InvocationTargetException) {
+            val cn = args?.getOrNull(0) as? ComponentName
+            val gp = guestApk?.let { java.io.File(it).parentFile?.parentFile?.name }
+            val te = e.targetException
+            if (m.name == "setComponentEnabledSetting" && cn != null && gp != null &&
+                (cn.packageName == HOST || cn.packageName == gp) &&
+                (te is IllegalArgumentException || te is SecurityException)) {
+                logOnce("PM ignored setComponentEnabledSetting for guest " + cn.className + " (" + te.javaClass.simpleName + ")")
+                return null
+            }
+            throw e.targetException
+        }
+
+        if (m.name == "getPackageInfo" && args != null && args.isNotEmpty() && args[0] is String) {
+            val asked = args[0] as String
+            if (result == null) FileLog.d("DIAG getPackageInfo('$asked') = NULL")
+        }
+
+        if (m.name == "getNameForUid" && guestApk != null && args != null && args.isNotEmpty()) {
+            try {
+                val uid = (args[0] as? Number)?.toInt()
+                val gpkg = File(guestApk!!).parentFile?.parentFile?.name
+                if (uid != null && gpkg != null && uid == NativeBridge.getVirtualUid()) {
+                    result = gpkg
+                    logOnce("PM getNameForUid intercepted for $uid -> $gpkg")
+                }
+            } catch (e: Throwable) {
+                logOnce("PM getNameForUid failed: $e")
+            }
+        }
+
+        if (m.name == "queryIntentServices" && busy.get() != true && guestApk != null &&
+            args != null && args.isNotEmpty() && args[0] is android.content.Intent) {
+            val q = args[0] as android.content.Intent
+            val target = q.`package` ?: q.component?.packageName
+            val action = q.action
+            if (target == HOST && action != null) {
+                try {
+                    val acts = guestServiceActions()
+                    val g = guestInfo(PackageManager.GET_SERVICES or PackageManager.GET_META_DATA)
+                    val found = ArrayList<android.content.pm.ResolveInfo>()
+                    for (s in g?.services ?: emptyArray()) {
+                        if (acts[s.name]?.contains(action) == true) {
+                            s.applicationInfo = g!!.applicationInfo
+                            val ri = android.content.pm.ResolveInfo()
+                            ri.serviceInfo = s
+                            found.add(ri)
+                        }
+                    }
+                    if (found.isNotEmpty()) {
+                        result = Class.forName("android.content.pm.ParceledListSlice")
+                            .getConstructor(java.util.List::class.java).newInstance(found)
+                        logOnce("PM guest service query answered: " + action + " -> " +
+                                found.joinToString { it.serviceInfo.name })
+                    }
+                } catch (e: Throwable) {
+                    logOnce("PM guest service query failed: " + e)
+                }
+            }
+        }
+
+        if ((m.name == "resolveIntent" || m.name == "queryIntentActivities") && args != null &&
+            args.isNotEmpty() && args[0] is android.content.Intent && busy.get() != true)
+        {
+            val q = args[0] as android.content.Intent
+            var count = ""
+            if (m.name == "queryIntentActivities")
+            {
+                busy.set(true)
+                try {
+                    val app = Class.forName("android.app.ActivityThread")
+                        .getDeclaredMethod("currentApplication").invoke(null) as android.app.Application
+                    count = " count=" + app.packageManager.queryIntentActivities(android.content.Intent(q), 0).size
+                } catch (e: Throwable) {
+                    count = " count=error " + e
+                } finally {
+                    busy.set(false)
+                }
+            }
+            logOnce("PM " + m.name + " action=" + q.action + " type=" + q.type +
+                    " pkg=" + (q.`package` ?: q.component?.packageName) + count +
+                    (if (m.name == "resolveIntent") " found=" + (result != null) else ""))
+        }
+        if (m.name == "resolveContentProvider" && args != null && args.isNotEmpty()) {
+            logOnce("PM resolveContentProvider authority=" + args[0] + " found=" + (result != null))
+        }
+
+        if (m.name == "resolveContentProvider" && result == null && busy.get() != true &&
+            guestApk != null && args != null && args.isNotEmpty()) {
+            val authority = args[0] as? String
+            if (authority != null && authority.startsWith(HOST + ".")) {
+                try {
+                    val g = guestInfo(PackageManager.GET_PROVIDERS or PackageManager.GET_META_DATA)
+                    val gp = g?.packageName
+                    if (g != null && gp != null) {
+                        val wanted = gp + authority.substring(HOST.length)
+                        val hit = g.providers?.firstOrNull { it.authority?.split(";")?.contains(wanted) == true }
+                        if (hit != null) {
+                            hit.applicationInfo = g.applicationInfo
+                            result = hit
+                            logOnce("PM provider authority " + authority + " mapped to " + wanted)
+                        }
+                    }
+                } catch (e: Throwable) {
+                    logOnce("PM provider map failed: " + e)
+                }
+            }
+        }
+
+        // Step 206c: Android does not know the guest's manifest receivers, so answer "none"
+// when the guest asks about receivers in its own package
+        if (m.name == "queryIntentReceivers" && busy.get() != true && guestApk != null &&
+            args != null && args.isNotEmpty()) {
+            try {
+                val q = args[0] as? android.content.Intent
+                val gpkg = java.io.File(guestApk!!).parentFile?.parentFile?.name
+                val asked = q?.`package` ?: q?.component?.packageName
+                if (q != null && gpkg != null && asked == gpkg) {
+                    result = Class.forName("android.content.pm.ParceledListSlice")
+                        .getConstructor(java.util.List::class.java)
+                        .newInstance(ArrayList<android.content.pm.ResolveInfo>())
+                    logOnce("PM guest receivers answered empty: " + q.action)
+                }
+            } catch (e: Throwable) {
+                logOnce("PM receiver answer failed: " + e)
+            }
+        }
+
+        if (m.name == "getPackagesForUid" && result is Array<*> && busy.get() != true &&
+            guestApk != null && args != null && args.isNotEmpty()) {
+            try {
+                val gpkg = java.io.File(guestApk!!).parentFile?.parentFile?.name
+                val uid = (args[0] as? Number)?.toInt()
+                @Suppress("UNCHECKED_CAST")
+                val arr = result as Array<String>
+                if (gpkg != null && uid == android.os.Process.myUid() && !arr.contains(gpkg)) {
+                    result = arr + gpkg
+                    logOnce("PM packagesForUid added guest name " + gpkg)
+                }
+            } catch (e: Throwable) { logOnce("PM packagesForUid failed: " + e) }
+        }
+
+        // Step 270b (log only): what do guests ask for, and which certificate do they get?
+        if (guestApk != null && busy.get() != true && args != null && args.isNotEmpty() &&
+            (m.name == "getPackageInfo" || m.name == "getInstallerPackageName" ||
+                    m.name == "getInstallSourceInfo")) {
+            try {
+                var sig = ""
+                if (m.name == "getPackageInfo" && result is PackageInfo) {
+                    val c = result.signingInfo?.apkContentsSigners?.firstOrNull()
+                        ?: result.signatures?.firstOrNull()
+                    if (c != null) sig = " sha1=" + java.security.MessageDigest.getInstance("SHA-1")
+                        .digest(c.toByteArray()).joinToString("") { "%02x".format(it) }.take(12)
+                }
+                logOnce("PMSIG " + m.name + " pkg=" + args[0] + " flags=0x" +
+                        java.lang.Long.toHexString((args.getOrNull(1) as? Number)?.toLong() ?: 0L) +
+                        " result=" + (if (result == null) "null" else result.javaClass.simpleName) + sig)
+            } catch (e: Throwable) { }
+        }
+
+        if (busy.get() == true || guestApk == null || args == null || args.isEmpty()) return result
+
+        try {
+            val first = args[0]
+            val name = m.name
+            if (name == "getApplicationInfo" && first == HOST) {
+                val flags = (args[1] as? Number)?.toLong() ?: 0L
+                val wantsMeta = (flags and PackageManager.GET_META_DATA.toLong()) != 0L
+                logOnce("PM ask getApplicationInfo meta=" + wantsMeta + " resultNull=" + (result == null))
+                if (wantsMeta && result is ApplicationInfo) {
+                    val gm = guestInfo(PackageManager.GET_META_DATA)?.applicationInfo?.metaData
+                    if (gm != null) {
+                        val ai = ApplicationInfo(result)
+                        ai.metaData = gm
+                        result = ai
+                        logOnce("PM guest meta-data served: " + gm.size() + " keys")
+                    }
+                }
+            } else if (first is ComponentName && first.packageName == HOST &&
+                (name == "getServiceInfo" || name == "getProviderInfo" || name == "getReceiverInfo" ||
+                        (name == "getActivityInfo" && result == null))) {
+                val g = guestInfo(PackageManager.GET_SERVICES or PackageManager.GET_PROVIDERS or
+                        PackageManager.GET_RECEIVERS or PackageManager.GET_ACTIVITIES or
+                        PackageManager.GET_META_DATA)
+                val list: Array<out android.content.pm.ComponentInfo>? = when (name) {
+                    "getServiceInfo" -> g?.services
+                    "getProviderInfo" -> g?.providers
+                    "getReceiverInfo" -> g?.receivers
+                    else -> g?.activities
+                }
+                val hit = list?.firstOrNull { it.name == first.className }
+                if (hit != null) {
+                    hit.applicationInfo = g!!.applicationInfo
+                    result = hit
+                    logOnce("PM guest " + name + " served: " + first.className)
+                } else if (result == null) {
+                    logOnce("PM guest " + name + " NOT found: " + first.className)
+                }
+//                } else {
+//                    logOnce("PM guest " + name + " NOT found: " + first.className)
+//                }
+            }
+        } catch (e: Throwable) {
+            logOnce("PM proxy error: " + e)
+        }
+        return result
+    }
+
+    // The foreground service type a guest service declares in its own manifest (0 = none)
+    fun guestServiceType(cls: String): Int {
+        val g = guestInfo(PackageManager.GET_SERVICES) ?: return 0
+        return g.services?.firstOrNull { it.name == cls }?.foregroundServiceType ?: 0
+    }
+
+    fun install() {
+        try {
+            val at = Class.forName("android.app.ActivityThread")
+            real = at.getDeclaredMethod("getPackageManager").invoke(null)
+            val iface = Class.forName("android.content.pm.IPackageManager")
+            proxy = Proxy.newProxyInstance(iface.classLoader, arrayOf(iface)) { _, m, args ->
+                handle(m, args)
+            }
+            val f = at.getDeclaredField("sPackageManager")
+            f.isAccessible = true
+            f.set(null, proxy)
+            FileLog.d( "PmProxy installed")
+        } catch (e: Throwable) {
+            FileLog.d( "PmProxy failed: " + e)
+        }
+    }
+
+    // PackageManager objects created before install() still hold the real IPackageManager
+    fun patch(pm: PackageManager) {
+        val p = proxy ?: return
+        try {
+            val f = pm.javaClass.getDeclaredField("mPM")
+            f.isAccessible = true
+            if (f.get(pm) !== p) {
+                f.set(pm, p)
+                logOnce("PM patched existing PackageManager")
+            }
+        } catch (e: Throwable) {
+            logOnce("PM patch failed: " + e)
+        }
+    }
+}
