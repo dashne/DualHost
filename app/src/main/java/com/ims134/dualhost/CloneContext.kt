@@ -16,6 +16,14 @@ import android.database.DatabaseErrorHandler
 import android.database.sqlite.SQLiteDatabase
 import java.io.File
 
+// Apps whose native engine (open64/openat64/... hooks) is actually installed by
+// HostInstrumentation.getGuestEnv's "NATIVE ENGINE" block. Shared with
+// HostInstrumentation so the two lists can't drift apart. Only these packages'
+// literal /data/data/<pkg>/... paths get redirected underneath by the native
+// hooks — every other ("pure Java mode") guest must get a real path directly,
+// since nothing will ever redirect a fake one for it.
+val NATIVE_ENGINE_PACKAGES = setOf("com.viber.voip", "org.telegram.messenger")
+
 class CloneContext(
     base: Context,
     private val root: File,
@@ -318,12 +326,20 @@ class CloneContext(
 
     override fun getDatabasePath(name: String): File {
         if (name.startsWith("/")) return File(name)
-        // Make sure the real virtual dir exists (SQLite will write here via our native hook redirect)
-        dir("databases")
-        // Return a short fake path that matches real Viber, so Viber's fixed-offset parsing works.
-        // Our native open hook redirects this to the virtual path underneath.
+        val dbDir = dir("databases")
         val guestPkg = root.parentFile?.name ?: "unknown"
-        return File("/data/data/$guestPkg/databases/$name")
+        // Only apps with the native engine actually installed (Viber/Telegram, see
+        // HostInstrumentation's NATIVE ENGINE block) get the short fake path that matches
+        // their real on-device layout (needed for Viber's fixed-offset native parsing) —
+        // our native open hook redirects that literal path to the virtual one underneath.
+        // Fixed (Step: Calculator SQLITE_CANTOPEN): every other, "pure Java mode" guest has
+        // no native hook to redirect it, so handing it a fake host-literal path meant SQLite
+        // tried to open a directory that genuinely does not exist on disk. Those guests now
+        // get the real virtual directory directly.
+        if (guestPkg in NATIVE_ENGINE_PACKAGES) {
+            return File("/data/data/$guestPkg/databases/$name")
+        }
+        return File(dbDir, name)
     }
 
     override fun openOrCreateDatabase(

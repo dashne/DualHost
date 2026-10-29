@@ -9,6 +9,10 @@ add_library(
         RedirectTable.cpp
         Hooks.cpp
         InlineHooker.cpp
+        arm64_reloc.cpp
+        HookRegistry.cpp
+        ElfResolver.cpp
+        PltResolver.cpp
 )
 
 find_library(log-lib log)

@@ -9,6 +9,7 @@
 #include <cstring>
 #include "Hooks.h"
 #include "RedirectTable.h"
+#include "PltResolver.h"
 
 #define LOG_TAG "DualCore"
 #define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
@@ -158,4 +159,20 @@ Java_com_ims134_dualhost_NativeBridge_setStaticStringByName(
     LOGD("setStaticStringByName: %s set", n);
     env->ReleaseStringUTFChars(name, n);
     return JNI_TRUE;
+}
+
+// Feature 7.6 (adopted from HookEngine's PltResolver). Exposes
+// PltResolveForSymbol to Kotlin as NativeBridge.pltResolve(lib, symbol).
+// Returns 0 (as a Long) when the library/symbol isn't found, matching
+// PltResolveForSymbol's own 0-on-failure contract.
+extern "C" JNIEXPORT jlong JNICALL
+Java_com_ims134_dualhost_NativeBridge_pltResolve(
+        JNIEnv* env, jobject /*this*/, jstring libStr, jstring symbolStr) {
+    const char* lib = env->GetStringUTFChars(libStr, nullptr);
+    const char* sym = env->GetStringUTFChars(symbolStr, nullptr);
+    uint64_t addr = PltResolveForSymbol(lib, sym);
+    LOGD("pltResolve(%s, %s) = 0x%llx", lib, sym, (unsigned long long)addr);
+    env->ReleaseStringUTFChars(libStr, lib);
+    env->ReleaseStringUTFChars(symbolStr, sym);
+    return (jlong)addr;
 }

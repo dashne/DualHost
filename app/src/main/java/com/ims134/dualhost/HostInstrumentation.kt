@@ -226,8 +226,7 @@ class HostInstrumentation(private val base: Instrumentation) : Instrumentation()
         ctx.guestTheme = th
 
         // --- NATIVE ENGINE START ---
-        val nativeTargets = setOf("com.viber.voip", "org.telegram.messenger")
-        if (ai.packageName in nativeTargets) {
+        if (ai.packageName in NATIVE_ENGINE_PACKAGES) {
             try {
                 val guestPkg = ai.packageName
                 val cmdlineFile = File(root, "cmdline")

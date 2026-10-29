@@ -4,6 +4,9 @@
 #include <unistd.h>
 #include <android/log.h>
 #include <errno.h>
+#include <mutex>
+#include "arm64_reloc.h"
+#include "HookRegistry.h"
 
 #define LOG_TAG "DualCore"
 #define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
@@ -13,6 +16,8 @@
 #define ARM64_BRANCH_OFFSET(offset) (0x14000000 | (((offset) >> 2) & 0x03FFFFFF))
 #define ARM64_LDR_X17_8 0x58000051
 #define ARM64_BR_X17    0xD61F0220
+
+static std::mutex g_inline_mutex;
 
 // Helper to allocate memory near a specific address (within +/- 128MB for the B instruction)
 void* AllocateMemoryNear(void* target, size_t size) {
@@ -55,6 +60,13 @@ void* AllocateMemoryNear(void* target, size_t size) {
 extern "C" bool InstallInlineHook(void* targetFunc, void* fakeFunc, void** originalTrampoline) {
     if (!targetFunc || !fakeFunc) return false;
 
+    std::lock_guard<std::mutex> lock(g_inline_mutex);
+
+    if (FindHandle(targetFunc)) {
+        LOGD("InstallInlineHook: %p already hooked", targetFunc);
+        return false;
+    }
+
     uint32_t* targetCode = (uint32_t*)targetFunc;
     long pageSize = sysconf(_SC_PAGESIZE);
 
@@ -80,15 +92,42 @@ extern "C" bool InstallInlineHook(void* targetFunc, void* fakeFunc, void** origi
 
     uint32_t* trampCode = (uint32_t*)trampoline;
 
-    // 3. Save the original first instruction (this is our restore source)
+    // 3. Save the original first instruction, then relocate it into the
+    //    trampoline for its new address.
+    //
+    //    Adopted from HookEngine's arm64_reloc.cpp. The previous version of
+    //    this function just byte-copied targetCode[0] into the trampoline.
+    //    That is correct ONLY if the instruction is position-independent.
+    //    For any PC-relative instruction (ADRP/ADR/B/BL/B.cond/CBZ/CBNZ/
+    //    TBZ/TBNZ/LDR-literal) — which computes its target as an offset
+    //    from its OWN address — copying the raw bytes to the trampoline's
+    //    different address silently changes what it points at. This never
+    //    fired in DualHost's testing because the libc functions hooked so
+    //    far (open/openat/stat/access/...) happen to start with ordinary
+    //    instructions, but it was a real corruption risk waiting on any
+    //    future hook target that doesn't. EmitRelocated re-encodes the
+    //    instruction correctly for its new address, or returns 0 if it
+    //    can't be relocated safely (e.g. an out-of-range ADR) — in which
+    //    case we abort the hook install rather than install a trampoline
+    //    that corrupts on first call.
     uint32_t origFirstInsn = targetCode[0];
-    trampCode[0] = origFirstInsn;
+    uint32_t relocBuf[8];
+    int relocWords = EmitRelocated(origFirstInsn, (uint64_t)targetFunc,
+                                    (uint64_t)trampoline, relocBuf, 8);
+    if (relocWords <= 0) {
+        LOGE("InstallInlineHook: cannot relocate first instruction 0x%08x at %p — SKIPPING hook",
+             origFirstInsn, targetFunc);
+        munmap(trampoline, pageSize);
+        munmap(relayPage, pageSize);
+        return false;
+    }
+    for (int i = 0; i < relocWords; i++) trampCode[i] = relocBuf[i];
 
-    // 4. Append jump-back to target + 4
+    // 4. Append jump-back to target + 4, right after the relocated prologue.
     uint64_t jumpBackAddr = (uint64_t)targetFunc + 4;
-    trampCode[1] = ARM64_LDR_X17_8;
-    trampCode[2] = ARM64_BR_X17;
-    *(uint64_t*)&trampCode[3] = jumpBackAddr;
+    trampCode[relocWords]     = ARM64_LDR_X17_8;
+    trampCode[relocWords + 1] = ARM64_BR_X17;
+    *(uint64_t*)&trampCode[relocWords + 2] = jumpBackAddr;
 
     // 5. mprotect trampoline to RX (RW-only above, then RX here)
     if (mprotect(trampoline, pageSize, PROT_READ | PROT_EXEC) != 0) {
@@ -107,8 +146,6 @@ extern "C" bool InstallInlineHook(void* targetFunc, void* fakeFunc, void** origi
         return false;
     }
 
-
-
     // 7. Compute and write the 4-byte branch
     int64_t offset = (int64_t)relayPage - (int64_t)targetFunc;
     uint32_t branchInstruction = ARM64_BRANCH_OFFSET(offset);
@@ -126,9 +163,60 @@ extern "C" bool InstallInlineHook(void* targetFunc, void* fakeFunc, void** origi
         return false;
     }
 
+    // 9. Register with HookRegistry. orig_insn stores the LITERAL original
+    //    bytes (not trampCode[0], which may be a relocated re-encoding) so
+    //    UninstallInlineHook can restore byte-exact regardless of what kind
+    //    of instruction was overwritten.
+    HookHandle* h = RegistryAlloc();
+    if (h) {
+        h->type = HT_INLINE;
+        h->target = targetFunc;
+        h->replacement = fakeFunc;
+        h->saved = relayPage;
+        h->trampoline = trampoline;
+        h->tramp_size = (size_t)pageSize;
+        h->relay_size = (size_t)pageSize;
+        h->orig_insn = origFirstInsn;
+        h->page_size = (size_t)pageSize;
+        h->state = HS_INSTALLED;
+    } else {
+        LOGD("InstallInlineHook: HookRegistry full — hook %p installed without accounting", targetFunc);
+    }
+
     *originalTrampoline = trampoline;
-    LOGD("hook %p OK: relay %p, distance 0x%lx",
+    LOGD("hook %p OK: relay %p, distance 0x%lx, relocated %d word(s)",
          targetFunc, relayPage,
-         (unsigned long)((intptr_t)relayPage - (intptr_t)targetFunc));
+         (unsigned long)((intptr_t)relayPage - (intptr_t)targetFunc), relocWords);
     return true;
+}
+
+// New — not wired into any call site yet (DualHost never uninstalls an
+// inline hook today), added so HookRegistry's accounting has a real
+// counterpart rather than being fire-and-forget, the same way
+// UnhookGotEntry now exists alongside HookGotEntryEx. Available for a
+// future slot-teardown path.
+extern "C" HookResult UninstallInlineHook(void* targetFunc) {
+    std::lock_guard<std::mutex> lock(g_inline_mutex);
+    HookHandle* h = FindHandle(targetFunc);
+    if (!h || h->type != HT_INLINE) return HOOK_NOT_HOOKED;
+    h->state = HS_REMOVING;
+
+    long pageSize = sysconf(_SC_PAGESIZE);
+    uintptr_t pageStart = (uintptr_t)targetFunc & ~(pageSize - 1);
+
+    if (mprotect((void*)pageStart, pageSize, PROT_READ | PROT_WRITE | PROT_EXEC) != 0) {
+        h->state = HS_INSTALLED;
+        return HOOK_MPROTECT_FAILED;
+    }
+    *(uint32_t*)targetFunc = h->orig_insn;
+    __builtin___clear_cache((char*)targetFunc, (char*)targetFunc + 4);
+    if (mprotect((void*)pageStart, pageSize, PROT_READ | PROT_EXEC) != 0) {
+        h->state = HS_INSTALLED;
+        return HOOK_MPROTECT_FAILED;
+    }
+
+    if (h->trampoline) munmap(h->trampoline, h->tramp_size);
+    if (h->saved) munmap(h->saved, h->relay_size);
+    RegistryFree(h);
+    return HOOK_OK;
 }
