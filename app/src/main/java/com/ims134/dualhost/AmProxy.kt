@@ -3,6 +3,7 @@ package com.ims134.dualhost
 import android.app.Application
 import android.app.Notification
 import android.content.ComponentName
+import android.content.ContentProvider
 import android.content.Intent
 import java.io.File
 import java.lang.reflect.InvocationTargetException
@@ -17,7 +18,77 @@ object AmProxy {
         if (synchronized(seen) { seen.add(s) }) FileLog.d(s)
     }
 
-    private fun fix(i: Intent): Intent {
+    // Fixed (2026-10-30, Viber registration crash part 3): the numbered-slot redirect path
+    // (rewrite authority to "com.ims134.dualhost.fp$slot", invoke the REAL AMS, then patch the
+    // returned holder's provider field) only works because HostFileProxyN is declared in the
+    // manifest with android:process bound to exactly that numbered process, so the real AMS call
+    // resolves and serves it locally without ever leaving this process. The dedicated Viber
+    // process (ProcessClone.realName == "com.viber.voip" literally, no ":pN" — so it can present
+    // as the real package name) has no such binding: ProcessClone.slot is null there, so that
+    // whole path (and the isDeclared() safety net) was being skipped entirely, and every provider
+    // query — including com.viber.provider.contacts.ViberContactsProvider — fell straight through
+    // to the real system and crashed against the real, separately-installed Viber app's own
+    // registration under a different UID. For THIS process there's no real numbered authority to
+    // route through, so skip the real AMS round trip altogether and hand back a
+    // ContentProviderHolder built entirely in-process from our own already-started guest provider.
+    private fun buildLocalHolder(authority: String, cp: ContentProvider): Any? {
+        return try {
+            val gi = ContentProvider::class.java.getDeclaredMethod("getIContentProvider")
+            gi.isAccessible = true
+            val icp = gi.invoke(cp) ?: return null
+
+            // 2026-10-30 fix: ActivityThread.installProviderAuthoritiesLocked reads
+            // holder.info.applicationInfo.uid unconditionally — a bare ProviderInfo() with that
+            // field left null crashed with a NullPointerException there (confirmed from device log:
+            // "Attempt to read from field 'int android.content.pm.ApplicationInfo.uid' on a null
+            // object reference"), one level past where the earlier SecurityException was happening
+            // (which this buildLocalHolder path DID already fix — no more real-AMS round trip).
+            // DynProxies.get() already does this correctly for the numbered-slot path; mirror it.
+            val app = Class.forName("android.app.ActivityThread")
+                .getDeclaredMethod("currentApplication").invoke(null) as Application
+            val piClass = Class.forName("android.content.pm.ProviderInfo")
+            val info = piClass.getDeclaredConstructor().newInstance() as android.content.pm.ProviderInfo
+            info.authority = authority
+            info.packageName = HOST
+            info.name = cp.javaClass.name
+            info.applicationInfo = app.applicationInfo
+            info.exported = false
+            info.enabled = true
+
+            val holderClass = Class.forName("android.app.ContentProviderHolder")
+            val ctor = holderClass.getDeclaredConstructor(piClass)
+            ctor.isAccessible = true
+            val holder = ctor.newInstance(info)
+
+            val provF = holderClass.getDeclaredField("provider")
+            provF.isAccessible = true
+            provF.set(holder, icp)
+
+            try {
+                val nf = holderClass.getDeclaredField("noReleaseNeeded")
+                nf.isAccessible = true
+                nf.setBoolean(holder, true)
+            } catch (e: Throwable) {
+                logOnce("AM buildLocalHolder: noReleaseNeeded not set: $e")
+            }
+
+            logOnce("AM getContentProvider: local in-process holder built for $authority")
+            holder
+        } catch (e: Throwable) {
+            // Not yet verified against this exact Android build's hidden ContentProviderHolder
+            // shape — if the reflection fails, this logs and falls back to null below (no crash,
+            // just that one query silently returning nothing, same degraded behavior as before
+            // this fix existed).
+            logOnce("AM buildLocalHolder failed for $authority: $e")
+            null
+        }
+    }
+
+    // Widened from private (2026-10-31) so TmProxy can reuse the exact same guest-component
+    // detection/redirect logic for the IActivityTaskManager.startActivity(...) path — a direct
+    // Context.startActivity() call from a Service/Receiver/Application context never goes through
+    // Instrumentation at all, so it needs the same fix() this file already applies to PendingIntents.
+    fun fix(i: Intent): Intent {
         val cn = i.component ?: return i
         if (cn.className.startsWith("com.ims134.dualhost.")) return i
         val vuid = ProcessClone.slot ?: return i
@@ -161,13 +232,49 @@ object AmProxy {
                 if (m.name == "getContentProvider" && a != null) {
                     val nm = a.getOrNull(2) as? String
                     val slot = ProcessClone.slot
-                    if (nm != null && slot != null && !nm.startsWith("com.ims134.dualhost.fp") &&
-                        GuestProviders.find(nm) != null) {
-                        a = a.copyOf()
-                        a[2] = "com.ims134.dualhost.fp$slot"
-                        redirectedName = nm
-                        redirectedSlot = slot
-                        logOnce("AM getContentProvider redirected $nm -> fp$slot")
+                    if (nm != null && !nm.startsWith("com.ims134.dualhost.fp")) {
+                        if (slot != null) {
+                            // Numbered-slot clone process (:p0.., ProcessClone.slot != null): route
+                            // through the real, manifest-declared fp$slot provider bound to this
+                            // same process, then patch its holder.
+                            if (GuestProviders.find(nm) != null) {
+                                a = a.copyOf()
+                                a[2] = "com.ims134.dualhost.fp$slot"
+                                redirectedName = nm
+                                redirectedSlot = slot
+                                logOnce("AM getContentProvider redirected $nm -> fp$slot")
+                            } else if (GuestProviders.isDeclared(nm)) {
+                                // Fixed (2026-10-30, Viber registration crash): this authority belongs
+                                // to the guest's own manifest but our in-process instance for it never
+                                // started (constructor threw — see "guest provider failed" in the log).
+                                // Previously this fell through to the real system, which is only safe
+                                // when nothing else on the device happens to own the same authority
+                                // string. It isn't always safe: a real, separately-installed copy of
+                                // the SAME app (e.g. the real Viber alongside a Viber clone) can already
+                                // have that exact authority registered under its own real UID, and the
+                                // real ActivityManagerService then correctly refuses our clone's cross-
+                                // UID access with a SecurityException that crashes the guest. A guest
+                                // authority we can't serve must fail safely (no provider) instead of
+                                // risking a real cross-app lookup.
+                                logOnce("AM getContentProvider: declared guest authority $nm has no running " +
+                                        "instance (provider failed to start) — refusing without a real system call")
+                                return@newProxyInstance null
+                            }
+                        } else {
+                            // No numbered slot (the dedicated Viber process, ProcessClone.realName ==
+                            // "com.viber.voip" literally — see buildLocalHolder's comment above for why
+                            // the fp$slot trick doesn't apply here). Serve directly in-process or fail
+                            // safe; never let it reach the real system.
+                            val cp = GuestProviders.find(nm)
+                            if (cp != null) {
+                                logOnce("AM getContentProvider: serving $nm locally (no slot, dedicated process)")
+                                return@newProxyInstance buildLocalHolder(nm, cp)
+                            } else if (GuestProviders.isDeclared(nm)) {
+                                logOnce("AM getContentProvider: declared guest authority $nm has no running " +
+                                        "instance (no slot, dedicated process) — refusing without a real system call")
+                                return@newProxyInstance null
+                            }
+                        }
                     }
                 }
 

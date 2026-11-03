@@ -92,6 +92,113 @@ object PmProxy {
 //        {
 //            FileLog.d( "PMQ " + m.name + " action=" + (args[0] as android.content.Intent).action)
 //        }
+
+        // Added 2026-10-31: PackageManager.checkPermission(permission, packageName) — the
+        // check-ANY-named-package overload, as opposed to the pid/uid overload CloneContext
+        // already virtualizes correctly via checkPermission/checkSelfPermission — never went
+        // through this proxy at all. A guest (or a shared library inside it, e.g. a
+        // contacts-sync helper) that calls packageManager.checkPermission(perm,
+        // context.getPackageName()) passes OUR SPOOFED guest package name ("com.viber.voip"),
+        // and unredirected that asks the REAL system about the real, separately-installed
+        // Viber app's grant state — not ours. Confirmed from the exact symptom this was added
+        // to fix: Viber's Contacts screen kept showing "Allow access" even after Contacts was
+        // genuinely granted to com.ims134.dualhost, and tapping it opened the REAL Viber's
+        // app-info settings page (Settings.ACTION_APPLICATION_DETAILS_SETTINGS has no explicit
+        // component, just action+data, so nothing else in this project could have redirected
+        // it either — fixing the check here removes the guest's own reason to show that button
+        // at all). Rewritten to ask about HOST instead, then re-applies the same ClonePerms
+        // narrowing CloneContext.gate() already does for the Context-level path, so both paths
+        // agree.
+        if ((m.name == "checkPermission" || m.name == "checkUidPermission") &&
+            args != null && args.size >= 2 && args[0] is String && args[1] is String) {
+            val permName = args[0] as String
+            val askedPkg = args[1] as String
+            val gp = guestApk?.let { File(it).parentFile?.parentFile?.name }
+            if (gp != null && askedPkg == gp) {
+                try {
+                    val fixedArgs = args.copyOf()
+                    fixedArgs[1] = HOST
+                    var r = (m.invoke(real, *fixedArgs) as? Int) ?: PackageManager.PERMISSION_DENIED
+                    if (r == PackageManager.PERMISSION_GRANTED && permName in ClonePerms.GATED) {
+                        val app = Class.forName("android.app.ActivityThread")
+                            .getDeclaredMethod("currentApplication").invoke(null) as android.app.Application
+                        val cloneId = (ProcessClone.id.takeIf { it >= 0 } ?: ProcessClone.slot)
+                        if (cloneId != null && !ClonePerms.isAllowed(app, gp, cloneId, permName)) {
+                            r = PackageManager.PERMISSION_DENIED
+                        }
+                    }
+                    logOnce("PM " + m.name + " redirected pkg=" + askedPkg + " -> " + HOST +
+                            " perm=" + permName + " result=" + r)
+                    return r
+                } catch (e: Throwable) {
+                    logOnce("PM " + m.name + " redirect failed: " + e)
+                    // fall through to the normal (pre-existing, unredirected) path below
+                }
+            }
+        }
+
+        // Added 2026-10-31 (Contacts "Allow access" persisted despite real READ_CONTACTS grant,
+        // courtesy of a third-party analysis the user supplied — §5): getPackageInfo(packageName,
+        // GET_PERMISSIONS) is a SEPARATE path from checkPermission/checkUidPermission above. An
+        // app can read its own grant state either by calling checkSelfPermission (virtualized by
+        // CloneContext.gate() + the checkPermission redirect just above) OR by calling
+        // pm.getPackageInfo(getPackageName(), GET_PERMISSIONS) and reading
+        // requestedPermissionsFlags directly off the result — a totally different code path that
+        // nothing here was redirecting. That's almost certainly why Contacts stayed stuck even
+        // after the checkPermission/PermProxy fixes: unredirected, this call asked the REAL
+        // system about the REAL, separately-installed Viber app (own UID, own — likely ungranted
+        // — Contacts permission), never about this clone's genuinely-granted state at all.
+        // Fix: ask HOST for the real flags, but keep the GUEST's own identity (package name,
+        // requestedPermissions list, uid) in what's handed back — only borrow HOST's grant BITS
+        // for whichever permissions the guest's own manifest actually declares, so the result
+        // still looks like "my package, but with my real OS grants" to the caller.
+        if (m.name == "getPackageInfo" && args != null && args.isNotEmpty() && args[0] is String) {
+            val asked = args[0] as String
+            val gp = guestApk?.let { File(it).parentFile?.parentFile?.name }
+            if (gp != null && asked == gp) {
+                try {
+                    val fixedArgs = args.copyOf()
+                    fixedArgs[0] = HOST
+                    val r = if (fixedArgs.size >= 2) m.invoke(real, *fixedArgs) else m.invoke(real, fixedArgs[0])
+                    if (r is PackageInfo) {
+                        val flags = (args.getOrNull(1) as? Number)?.toInt() ?: 0
+                        val guestPi = guestInfo(flags)
+                        val guestReq = guestPi?.requestedPermissions
+                        if (guestPi != null && guestReq != null) {
+                            // android.content.pm.PackageInfo has no copy constructor (unlike
+                            // ApplicationInfo, which does) — "PackageInfo(r)" does not compile.
+                            // `r` is a fresh object this call just got back from m.invoke(), not
+                            // shared or cached anywhere else, so it's safe to mutate in place
+                            // instead of copying.
+                            val hostFlags = r.requestedPermissionsFlags
+                            val hostMap = HashMap<String, Int>()
+                            r.requestedPermissions?.forEachIndexed { i, p ->
+                                hostMap[p] = hostFlags?.getOrNull(i) ?: 0
+                            }
+                            r.packageName = gp
+                            r.applicationInfo = r.applicationInfo?.also {
+                                it.packageName = gp
+                                it.uid = android.os.Process.myUid()
+                            }
+                            r.requestedPermissions = guestReq
+                            r.requestedPermissionsFlags = IntArray(guestReq.size) { i ->
+                                (hostMap[guestReq[i]] ?: 0) and PackageInfo.REQUESTED_PERMISSION_GRANTED
+                            }
+                            logOnce("PM getPackageInfo guest-permissions redirected for " + gp +
+                                    " (hostGrantedCount=" +
+                                    (hostFlags?.count { it and PackageInfo.REQUESTED_PERMISSION_GRANTED != 0 } ?: 0) +
+                                    ", guestAskedCount=" + guestReq.size + ")")
+                            return r
+                        }
+                    }
+                    return r
+                } catch (e: Throwable) {
+                    logOnce("PM getPackageInfo guest-permissions redirect failed: " + e)
+                    // fall through to the normal (pre-existing, unredirected) path below
+                }
+            }
+        }
+
         var result: Any?
         try {
             result = if (args == null) m.invoke(real) else m.invoke(real, *args)

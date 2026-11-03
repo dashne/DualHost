@@ -14,6 +14,12 @@ import java.util.concurrent.ConcurrentHashMap
 object GuestProviders {
     val map = ConcurrentHashMap<String, ContentProvider>()
 
+    // Every authority the guest's manifest DECLARES, whether or not startGuestProviders()
+    // actually managed to construct an in-process instance for it (map only holds the
+    // successes). Needed so AmProxy can tell "this belongs to the guest but failed to start"
+    // apart from "this is a genuinely third-party authority" — see isDeclared().
+    val declared = java.util.concurrent.ConcurrentHashMap.newKeySet<String>()
+
     fun find(authority: String): ContentProvider? {
         val exact = map[authority]
         if (exact != null) return exact
@@ -24,6 +30,20 @@ object GuestProviders {
             for ((k, v) in map) if (k.endsWith(suffix)) return v
         }
         return null
+    }
+
+    // Same matching as find(), but against every declared authority, not just the ones that
+    // actually started. True means "this authority is the guest's own, regardless of whether
+    // we can currently serve it" — the signal AmProxy needs to decide whether a getContentProvider
+    // call for it is safe to forward to the real system, or must never leave this process.
+    fun isDeclared(authority: String): Boolean {
+        if (authority in declared) return true
+        val host = "com.ims134.dualhost"
+        if (authority.startsWith(host + ".")) {
+            val suffix = authority.substring(host.length)
+            for (k in declared) if (k.endsWith(suffix)) return true
+        }
+        return false
     }
 }
 

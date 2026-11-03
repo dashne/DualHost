@@ -47,8 +47,23 @@ object HookInstaller {
                 } catch (e: Throwable) { }
                 setWebViewSuffix(proc)
                 PmProxy.install()
+                // Added 2026-10-31: see PermProxy's file comment — on Android versions where
+                // checkPermission moved off IPackageManager onto its own IPermissionManager
+                // service, PmProxy's own checkPermission interception (just below it in this
+                // file's history) never fires, so this covers that case too. Must come after
+                // PmProxy.install() since guestApk (used to detect the guest's own package name)
+                // is read from PmProxy, not duplicated here.
+                PermProxy.install()
                 NmProxy.install()
                 AmProxy.install()
+                // Added 2026-10-31: see TmProxy's file comment. Must come after AmProxy.install()
+                // since it calls AmProxy.fix() directly (no dependency on AmProxy's installed
+                // proxy object itself, just the function, but keeping the order documents intent).
+                TmProxy.install()
+                // Added 2026-10-31: see CsProxy's file comment — durable local-answer fix for
+                // ContentResolver.isSyncActive() instead of depending on this ROM's
+                // READ_SYNC_STATS grant state.
+                CsProxy.install()
             }
             FileLog.d( "HookInstaller: installed in " + proc)
         } catch (e: Throwable) {

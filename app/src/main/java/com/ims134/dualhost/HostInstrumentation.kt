@@ -146,9 +146,61 @@ class HostInstrumentation(private val base: Instrumentation) : Instrumentation()
 
     private fun startGuestProviders(apkPath: String, ai: ApplicationInfo, loader: ClassLoader, ctx: Context): Int {
         var failed = 0
-        val info = ctx.packageManager.getPackageArchiveInfo(apkPath, PackageManager.GET_PROVIDERS) ?: return 0
-        val list = info.providers ?: return 0
+        // Fixed (2026-10-30, Viber registration crash part 2): getPackageArchiveInfo(apkPath, ...)
+        // only parses the ONE apk file passed in — for a split/multi-APK guest (Viber ships this
+        // way) any <provider> declared in a split manifest rather than base.apk was silently
+        // missing from both GuestProviders.map AND GuestProviders.declared, so AmProxy's isDeclared()
+        // guard (added earlier the same day) never recognized it as "ours" either and still let the
+        // getContentProvider call fall through to the real system, reproducing the exact same
+        // cross-UID SecurityException on com.viber.provider.contacts.ViberContactsProvider. Fix:
+        // scan every APK in this guest's install directory (guestApks() — same list already used
+        // for the classloader and for ai.splitSourceDirs), not just the one passed in, and merge
+        // their provider lists.
+        val list = ArrayList<android.content.pm.ProviderInfo>()
+        val seenProvider = HashSet<String>()
+        for (path in guestApks(apkPath)) {
+            try {
+                // Fixed 2026-11-01 (Viber Contacts sync investigation, root cause): this used to
+                // request GET_PROVIDERS alone, with no GET_META_DATA — so every ProviderInfo built
+                // from it got a NULL metaData bundle. Harmless for most providers, but fatal for
+                // androidx.startup.InitializationProvider specifically: that provider's entire job
+                // at onCreate() is to read its OWN <meta-data> entries to discover which
+                // androidx.startup.Initializer classes to auto-run (WorkManager's initializer among
+                // them) and run them. With metaData null, it finds nothing to initialize and does
+                // nothing — no crash, no log, "guest provider started" fires clean either way.
+                // Confirmed on-device: InitializationProvider "starts" successfully every launch,
+                // but WorkManager's own job-result logging (WM-WorkerWrapper "Worker result
+                // SUCCESS/FAILURE") never once fires inside the Viber clone process across a full
+                // capture, even while its generic SystemJobService dispatch keeps returning true —
+                // i.e. the OS-level job plumbing runs, but nothing is actually initialized to do the
+                // work. This is very likely the real reason Viber's Contacts import (which almost
+                // certainly runs as a WorkManager-scheduled background worker, not a live
+                // AccountManager/SyncAdapter check — see AccProxy's file comment for why that
+                // theory was ruled out) never completes. Adding GET_META_DATA so
+                // InitializationProvider — and anything else that depends on its own provider
+                // meta-data to self-configure — actually sees what it's supposed to.
+                val info = ctx.packageManager.getPackageArchiveInfo(
+                    path, PackageManager.GET_PROVIDERS or PackageManager.GET_META_DATA
+                )
+                for (pi in info?.providers ?: emptyArray()) {
+                    // A provider could in principle show up in more than one archive scan; keep the first.
+                    if (seenProvider.add(pi.name + "|" + pi.authority)) list.add(pi)
+                }
+            } catch (e: Throwable) {
+                FileLog.d("startGuestProviders: archive scan failed for $path: $e")
+            }
+        }
+        if (list.isEmpty()) return 0
         for (pi in list.sortedByDescending { it.initOrder }) {
+            // Record every authority this guest manifest declares BEFORE trying to construct it,
+            // success or failure — AmProxy needs this (GuestProviders.isDeclared) to tell "ours,
+            // but failed to start" apart from a genuinely third-party authority, so a failed
+            // guest provider never falls through to a real getContentProvider call that could
+            // collide with a different, real app owning the same authority string on this device
+            // (confirmed 2026-10-30: real Viber installed alongside a Viber clone collided on
+            // com.viber.provider.contacts.ViberContactsProvider and crashed with a cross-UID
+            // SecurityException once the query reached the real ActivityManagerService).
+            pi.authority?.split(";")?.forEach { GuestProviders.declared.add(it) }
             try {
                 pi.applicationInfo = ai
                 val cp = loader.loadClass(pi.name).getDeclaredConstructor().newInstance() as ContentProvider
@@ -171,6 +223,21 @@ class HostInstrumentation(private val base: Instrumentation) : Instrumentation()
         val ai = pm.getPackageArchiveInfo(apkPath, 0)!!.applicationInfo!!
         ai.sourceDir = apkPath
         PmProxy.guestApk = apkPath
+        // Added 2026-11-01 (Contacts Account/SyncAdapter investigation, re-ordering fix): this is
+        // the EARLIEST point in this process's lifetime that the guest's own apk path is known —
+        // strictly before CloneContext is even constructed below, and long before
+        // app.attachBaseContext(ctx) ever runs, which is the earliest point any guest code (or
+        // the framework's own SystemServiceRegistry, on this guest's behalf) could call
+        // getSystemService(ACCOUNT_SERVICE) and cache a real AccountManager/IAccountManager
+        // reference. The previous call site (CloneContext.getSystemService, still kept below as a
+        // harmless redundant no-op via patchedOnce) only fired reactively and could run AFTER
+        // that caching already happened — confirmed by log: the only transaction AccProxy's
+        // PassthroughBinder ever saw was an unrelated tx=46 with a UUID argument, never a
+        // getAccounts/getAccountsByType call, meaning whatever AccountManager instance Viber's
+        // Contacts code actually used was never routed through our ServiceManager.sCache
+        // replacement at all. Calling it here, before any of that can happen, is required for the
+        // ServiceManager-cache approach to actually intercept the call it's meant to.
+        AccProxy.patch(apkPath)
         ProcessClone.id = root.name.toIntOrNull() ?: -1
         ProcessClone.hostName = try {
             val tagDir = File(apkPath).parentFile
@@ -248,8 +315,30 @@ class HostInstrumentation(private val base: Instrumentation) : Instrumentation()
                             "Groups:\t10000\n"
                 )
 
+                // Fixed (2026-10-31, WebView SIGABRT): the old hand-written fake stat line below
+                // had only 24 fields; a real /proc/pid/stat has 50+, and bionic's
+                // pthread_getattr_np() -> __find_main_stack_limits() (called during WebView's
+                // native init, confirmed from a device tombstone: "Abort message: 'couldn't parse
+                // /proc/self/stat'") reads through to field 28 (startstack) to find the main
+                // thread's stack bounds. Missing that field made bionic treat the parse failure as
+                // fatal and abort the whole process. Fix: read the REAL /proc/self/stat (valid,
+                // correctly field-complete, read here before NativeBridge.InstallHooks below
+                // redirects that path) and only swap the "comm" field (the process name in
+                // parens) for the guest package name; every other field — including startstack —
+                // stays genuine, so any native code parsing it keeps working.
                 val statFile = File(root, "proc_stat.txt")
-                statFile.writeText("10000 ($guestPkg) S 1 10000 10000 0 -1 4194560 0 0 0 0 0 0 0 0 20 0 1 0 100 0 0\n")
+                val realStat = try { File("/proc/self/stat").readText() } catch (e: Throwable) { null }
+                if (realStat != null) {
+                    val open = realStat.indexOf('(')
+                    val close = realStat.lastIndexOf(')')
+                    val fixed = if (open >= 0 && close > open)
+                        realStat.substring(0, open) + "(" + guestPkg + ")" + realStat.substring(close + 1)
+                    else realStat
+                    statFile.writeText(fixed)
+                } else {
+                    FileLog.d("PROCSTAT: real /proc/self/stat unreadable, using minimal fallback (may abort native stack-limit parsers)")
+                    statFile.writeText("10000 ($guestPkg) S 1 10000 10000 0 -1 4194560 0 0 0 0 0 0 0 0 20 0 1 0 100 0 0\n")
+                }
 
                 NativeBridge.setVirtualUid(10000 + vuid)
                 NativeBridge.AddRule("/data/data/$guestPkg/", "${root.absolutePath}/")
@@ -575,7 +664,60 @@ class HostInstrumentation(private val base: Instrumentation) : Instrumentation()
         if (synchronized(seenLaunch) { seenLaunch.add(s) }) FileLog.d(s)
     }
 
-    private fun redirect(target: Activity?, intent: Intent?): Intent? {
+    private val seenSettingsFix = HashSet<String>()
+
+    // Added 2026-11-01 (Contacts "Allow access"/"syncing incomplete" investigation): confirmed
+    // via device log that Viber's own in-process checkSelfPermission(READ_CONTACTS/WRITE_CONTACTS)
+    // already returns GRANTED for this clone ("PERM android.permission.READ_CONTACTS -> 0") — so
+    // this was never a permission problem. A side-by-side comparison against a competing
+    // app-cloning app showed the real difference: tapping "Allow access" there opens THAT app's
+    // own settings screen and contacts sync immediately; in DualHost it opens the REAL,
+    // separately-installed Viber's system App Info page instead, which does nothing for this
+    // clone. The reason: that tap launches Settings.ACTION_APPLICATION_DETAILS_SETTINGS with
+    // data="package:com.viber.voip" — an IMPLICIT intent (action+data, no component), so
+    // redirect() below (which only acts on intent.component) never touches it, and it reaches
+    // the real system unmodified, resolving to the real, separately-installed app. Fix: rewrite
+    // just this one intent's data to point at HOST's own real, actually-granted package instead,
+    // so the user lands on a settings page that's real and already correctly permissioned.
+    private fun fixSettingsIntent(i: Intent?): Intent? {
+        if (i == null) return i
+        if (i.action != android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS) return i
+        val data = i.data ?: return i
+        if (data.scheme != "package") return i
+        val ssp = data.schemeSpecificPart ?: return i
+        val gp = PmProxy.guestApk?.let { File(it).parentFile?.parentFile?.name } ?: return i
+        if (ssp != gp && ssp != "com.ims134.dualhost") return i
+        if (ssp == "com.ims134.dualhost") return i
+        val n = Intent(i)
+        n.data = Uri.fromParts("package", "com.ims134.dualhost", null)
+        val key = "settingsfix|" + ssp
+        if (synchronized(seenSettingsFix) { seenSettingsFix.add(key) })
+            FileLog.d("SETTINGS redirected ACTION_APPLICATION_DETAILS_SETTINGS pkg=" + ssp + " -> com.ims134.dualhost")
+        return n
+    }
+
+    // Added 2026-11-03: implicit intents the guest addresses to its OWN package (action + package,
+    // no component — e.g. Viber's SYSTEM_DIALOG from "Contacts syncing incomplete / Retry") are
+    // resolved against the guest's own manifest (GuestIntentResolver) so redirect() below sees a
+    // component and routes them through the stub swap instead of letting them hit the real,
+    // separately-installed app (cross-uid SecurityException crash).
+    private fun resolveGuestImplicit(target: Activity?, intent: Intent?): Intent? {
+        if (intent == null || intent.component != null) return intent
+        val pkgName = intent.`package` ?: return intent
+        val action = intent.action ?: return intent
+        val apk = target?.intent?.getStringExtra("apkPath") ?: PmProxy.guestApk ?: return intent
+        val guestPkg = if (ProcessClone.realName == "com.viber.voip") "com.viber.voip"
+        else File(apk).parentFile?.parentFile?.name
+        if (pkgName != guestPkg) return intent
+        val cls = GuestIntentResolver.resolveActivity(hostApp(), apk, action) ?: return intent
+        val n = Intent(intent)
+        n.component = ComponentName(pkgName, cls)
+        FileLog.d("IMPLICIT resolved action=" + action + " pkg=" + pkgName + " -> " + cls)
+        return n
+    }
+
+    private fun redirect(target: Activity?, intent0: Intent?): Intent? {
+        val intent = try { resolveGuestImplicit(target, intent0) } catch (e: Throwable) { intent0 }
         val cn = intent?.component ?: return intent
         if (cn.className.startsWith("com.ims134.dualhost.")) return intent
 
@@ -697,7 +839,8 @@ class HostInstrumentation(private val base: Instrumentation) : Instrumentation()
         intent: Intent?, requestCode: Int, options: Bundle?
     ): ActivityResult? {
         val redirected = try { redirect(target, intent) } catch (e: Throwable) { intent }
-        val real = try { rewriteUris(redirected) } catch (e: Throwable) { redirected }
+        val settingsFixed = try { fixSettingsIntent(redirected) } catch (e: Throwable) { redirected }
+        val real = try { rewriteUris(settingsFixed) } catch (e: Throwable) { settingsFixed }
         logLaunch(real)
 
         // Restored (was missing per Handoff 13/14): when a guest launches an external sign-in
@@ -730,6 +873,42 @@ class HostInstrumentation(private val base: Instrumentation) : Instrumentation()
         }
     }
 
+    // Added (2026-10-30, Viber registration crash part 4): Context.startActivities(Intent[]) —
+    // used to launch an activity with a synthetic back stack (Viber's
+    // ActivationController.continueWelcomeFlowAfterRegistration does this to land on HomeActivity
+    // after registration finishes) — goes through this PLURAL Instrumentation method and
+    // IActivityTaskManager, a completely different path from the singular execStartActivity above
+    // that was never intercepted. The un-redirected explicit component (cmp=com.viber.voip/
+    // .HomeActivity) reached the real system and crashed with a SecurityException, cross-UID
+    // against the real, separately-installed Viber app's own HomeActivity — same family of bug as
+    // the earlier ContentProvider crashes, just through a launch path we hadn't covered yet. This
+    // directly answers the handoff's "does execStartActivity/redirects handle every kind of
+    // launch" question for this specific call: previously no, now routed through the exact same
+    // redirect()/rewriteUris() logic already proven for the singular path, per intent in the array.
+    fun execStartActivities(
+        who: Context?, contextThread: IBinder?, token: IBinder?, target: Activity?,
+        intents: Array<Intent>?, options: Bundle?
+    ) {
+        val fixed = intents?.map { i ->
+            val redirected = try { redirect(target, i) } catch (e: Throwable) { i }
+            val settingsFixed = try { fixSettingsIntent(redirected) } catch (e: Throwable) { redirected }
+            val real = try { rewriteUris(settingsFixed) } catch (e: Throwable) { settingsFixed }
+            logLaunch(real)
+            real
+        }?.toTypedArray()
+
+        val m = Instrumentation::class.java.getDeclaredMethod(
+            "execStartActivities", Context::class.java, IBinder::class.java, IBinder::class.java,
+            Activity::class.java, Array<Intent>::class.java, Bundle::class.java
+        )
+        m.isAccessible = true
+        try {
+            m.invoke(base, who, contextThread, token, target, fixed ?: intents, options)
+        } catch (e: InvocationTargetException) {
+            throw e.targetException
+        }
+    }
+
     private fun rootFor(dataDir: File, intent: Intent?, vuid: Int): File {
         val pkg = intent?.getStringExtra("guestPackage") ?: "unknown"
         val clone = intent?.getIntExtra("cloneId", vuid) ?: vuid
@@ -737,6 +916,10 @@ class HostInstrumentation(private val base: Instrumentation) : Instrumentation()
     }
 
     override fun newActivity(cl: ClassLoader?, className: String?, intent: Intent?): Activity {
+        FileLog.d("ENTER newActivity className=" + className + " hasIntent=" + (intent != null) +
+                " guestClass=" + intent?.getStringExtra("guestClass") +
+                " apkPath=" + intent?.getStringExtra("apkPath") +
+                " extrasKeys=" + intent?.extras?.keySet()?.joinToString())
         val guestClass = intent?.getStringExtra("guestClass")
         val apkPath = intent?.getStringExtra("apkPath")
         if (guestClass != null && apkPath != null) {
@@ -782,6 +965,7 @@ class HostInstrumentation(private val base: Instrumentation) : Instrumentation()
             }
             return activity
         }
+        FileLog.d("newActivity FALLTHROUGH to base (no guestClass/apkPath) for " + className)
         return base.newActivity(cl, className, intent)
     }
 

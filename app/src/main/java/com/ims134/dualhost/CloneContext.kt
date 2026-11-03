@@ -58,13 +58,47 @@ class CloneContext(
             s !is LoggingJobScheduler) {
             return LoggingJobScheduler(s, vuid, root.parentFile?.name ?: "")
         }
+        // Added 2026-11-01, rewritten same day: AccProxy no longer touches the AccountManager
+        // instance this returns at all (its old mService-field reflection is a confirmed dead
+        // end on this device — see AccProxy's file comment). It patches ServiceManager's own
+        // in-process service cache instead, so it only needs the guest's apk path, not this
+        // service object. Kept here (rather than only in HookInstaller) so it's also applied the
+        // first time anything asks for ACCOUNT_SERVICE through this context, same as before.
+        if (name == ACCOUNT_SERVICE && s != null) {
+            val apk = PmProxy.guestApk
+            if (apk != null) AccProxy.patch(apk)
+        }
         return s
     }
+
+    private val seenAppInfoCaller = HashSet<String>()
 
     override fun getApplicationInfo(): ApplicationInfo {
         val guestPkg = root.parentFile?.name
         val apk = PmProxy.guestApk
         if (guestPkg == null || apk == null) return super.getApplicationInfo()
+
+        // Diagnostic (2026-10-29, camera ANR): log the immediate caller the first time only,
+        // so a runaway per-frame polling loop (suspected after org.fossify.camera logged
+        // thousands of back-to-back getApplicationInfo() calls ~16ms apart with no other
+        // activity, consistent with a Choreographer-paced loop that never exits) shows up
+        // once in the log instead of being drowned by its own flood.
+        run {
+            val caller = Throwable().stackTrace.getOrNull(1)
+            val key = guestPkg + "|" + (caller?.className ?: "?") + "." + (caller?.methodName ?: "?")
+            if (synchronized(seenAppInfoCaller) { seenAppInfoCaller.add(key) }) {
+                FileLog.d("APPINFOCALLER guest=$guestPkg caller=${caller?.className}.${caller?.methodName}")
+            }
+        }
+
+        val cached = appInfoCache
+        if (cached != null && cached.first == apk) {
+            // No log here on purpose: if this really is a per-frame polling loop, logging every
+            // cache hit would flood files/dhlog just as badly as the uncached version did (and
+            // the disk I/O from FileLog itself would still help starve the main thread).
+            // APPINFOCALLER above already fires once and tells us who's calling.
+            return cached.second
+        }
 
         return try {
             val base = super.getApplicationInfo()
@@ -86,6 +120,12 @@ class CloneContext(
             out.flags = guestAi.flags
             out.targetSdkVersion = guestAi.targetSdkVersion
             out.minSdkVersion = guestAi.minSdkVersion
+            // Perf fix (2026-10-29): getPackageArchiveInfo() re-parses the whole APK manifest
+            // from disk every call. Cached because it's immutable per apkPath and this method
+            // can be hit at a high rate (see APPINFOCALLER diagnostic above) — parsing the
+            // manifest on every single call is expensive enough on its own to starve the main
+            // thread if anything calls this in a loop.
+            appInfoCache = Pair(apk, out)
             FileLog.d("DIAG getApplicationInfo() -> guest $guestPkg, meta=${out.metaData?.size() ?: 0} keys")
             out
         } catch (e: Throwable) {
@@ -93,6 +133,8 @@ class CloneContext(
             super.getApplicationInfo()
         }
     }
+
+    private var appInfoCache: Pair<String, ApplicationInfo>? = null
 
     private fun logSvc(what: String, i: Intent) {
         val cn = i.component
@@ -168,17 +210,38 @@ class CloneContext(
 
     private fun logPerm(p: String, r: Int) {
         val s = p + " -> " + r
-        //if (synchronized(seenPerm) { seenPerm.add(s) }) FileLog.d( "PERM " + s)
+        // Turned on 2026-11-01 (Contacts "Allow access"/"syncing incomplete" investigation):
+        // checkPermission, getPackageInfo, shouldShowRequestPermissionRationale and AppOps all
+        // now independently confirm READ_CONTACTS/WRITE_CONTACTS granted for HOST, yet Viber's
+        // own Contacts screen still shows the card — meaning whatever Viber is actually seeing
+        // in-process has never actually been observed. This was the one missing data point.
+        if (synchronized(seenPerm) { seenPerm.add(s) }) FileLog.d( "PERM " + s)
+    }
+
+    // Per-clone permission gate. The real OS grant (super.checkPermission/checkSelfPermission)
+    // is never touched or misrepresented to anyone outside this process — this only changes
+    // what CloneContext itself, which the guest already runs entirely inside of, answers when
+    // asked. Only takes effect if the real OS grant is already true (a clone can never appear
+    // MORE permitted than the real app actually is) and only for permissions in ClonePerms.GATED.
+    private fun gate(permission: String, osResult: Int): Int {
+        if (osResult != PackageManager.PERMISSION_GRANTED) return osResult
+        if (permission !in ClonePerms.GATED) return osResult
+        val pkg = root.parentFile?.name ?: return osResult
+        val cloneId = root.name.toIntOrNull() ?: return osResult
+        return if (ClonePerms.isAllowed(baseContext, pkg, cloneId, permission))
+            PackageManager.PERMISSION_GRANTED
+        else
+            PackageManager.PERMISSION_DENIED
     }
 
     override fun checkPermission(permission: String, pid: Int, uid: Int): Int {
-        val r = super.checkPermission(permission, pid, uid)
+        val r = gate(permission, super.checkPermission(permission, pid, uid))
         logPerm(permission, r)
         return r
     }
 
     override fun checkSelfPermission(permission: String): Int {
-        val r = super.checkSelfPermission(permission)
+        val r = gate(permission, super.checkSelfPermission(permission))
         logPerm(permission, r)
         return r
     }
@@ -221,6 +284,21 @@ class CloneContext(
                     FileLog.d( "PKGNAME gms.common stack, host name for " + c + "." + f.methodName)
                 return host
             }
+            // Reverted 2026-10-31 (§3 of the Contacts "Allow access" investigation): this branch
+            // briefly returned `guest` here on the theory that the permission-framework classes
+            // (PermissionManager, etc.) ask on behalf of the current context and so should see
+            // the guest's own identity. That theory turned out to be only half right and risks
+            // being actively wrong: it's PmProxy's checkPermission/getPackageInfo redirects (not
+            // this name-spoofing) that are responsible for making any package-name-keyed lookup
+            // that reaches the real system resolve to HOST's real grant state; this branch
+            // returning `guest` instead just reintroduces the original cross-UID problem for any
+            // permission-framework call this file's own redirects don't yet cover. Back to `host`,
+            // which is also consistent with every other non-"own app code" caller below.
+            if (c.startsWith("android.permission.")) {
+                if (synchronized(seenPkgAsk) { seenPkgAsk.add("permfw|" + c) })
+                    FileLog.d( "PKGNAME permission-framework caller gets host name: " + c)
+                return host
+            }
 
             if (rule != null) {
                 result = when (rule) {
@@ -246,6 +324,10 @@ class CloneContext(
     override fun getPackageManager(): PackageManager {
         val pm = super.getPackageManager()
         PmProxy.patch(pm)
+        // Added 2026-10-31: see PermProxy's file comment — a PackageManager created before
+        // PermProxy.install() ran (or whose PermissionManager was constructed independently of
+        // mPM) still holds the real IPermissionManager, same reason PmProxy.patch(pm) exists.
+        PermProxy.patch(this)
         return pm
     }
 
