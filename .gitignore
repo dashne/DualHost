@@ -13,3 +13,10 @@
 .externalNativeBuild
 .cxx
 local.properties
+# Debug captures and device dumps (kept local only)
+/dh.txt
+/full.txt
+/minimal_viber.apk
+/resources.arsc
+/tombstone_*
+/viber_*

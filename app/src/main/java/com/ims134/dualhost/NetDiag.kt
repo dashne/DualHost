@@ -194,10 +194,26 @@ object NetDiag {
                     }
                 }
 
+                // ---- Trigger Viber's contact sync adapter once (diagnostic) ----
+                try {
+                    Thread.sleep(5000) // let the engine finish connecting
+                    val acc = AccProxy.fakeAccount
+                    val auth = GuestSync.discover()?.authority
+                    FileLog.d("GSYNC trigger account=" + acc + " authority=" + auth)
+                    if (acc != null && auth != null) {
+                        val extras = android.os.Bundle().apply {
+                            putBoolean(android.content.ContentResolver.SYNC_EXTRAS_MANUAL, true)
+                            putBoolean(android.content.ContentResolver.SYNC_EXTRAS_EXPEDITED, true)
+                        }
+                        GuestSync.run(acc, auth, extras)
+                    }
+                } catch (e: Throwable) { FileLog.d("GSYNC trigger failed: " + e) }
+
                 // ---- Experiment: manually ask the engine to connect ----
                 try {
                     val eng = findEngine()
-                    if (eng != null) {
+                    if (eng != null)
+                    {
                         val cc = engCls.getMethod("getConnectionController").invoke(eng)
                         if (cc != null) {
                             val r = cc.javaClass.getMethod("connect").invoke(cc)
@@ -212,6 +228,24 @@ object NetDiag {
                         }
                     }
                 } catch (e: Throwable) { FileLog.d("VSTATE manual connect failed: " + (e.cause ?: e)) }
+
+                // ---- Address-book sync probe (diagnostic) ----
+                try {
+                    val eng = findEngine()
+                    if (eng != null) {
+                        val cc = engCls.getMethod("getConnectionController").invoke(eng)
+                        FileLog.d("ABOOK isConnected=" + cc?.javaClass?.getMethod("isConnected")?.invoke(cc) +
+                                " CID=" + cc?.javaClass?.getMethod("getMyCID")?.invoke(cc) +
+                                " state=" + engCls.getMethod("getServiceState").invoke(eng))
+                        val re = Regex("(?i)addressbook|contact|sync|share")
+                        listOf(engCls, Class.forName("com.viber.jni.NativeEngineBridge", false, ctx.classLoader)).forEach { c ->
+                            c.declaredMethods.filter { re.containsMatchIn(it.name) }.forEach { m ->
+                                FileLog.d("ABOOK " + c.simpleName + "." + m.name +
+                                        "(" + m.parameterTypes.joinToString(",") { it.simpleName } + ")")
+                            }
+                        }
+                    }
+                } catch (e: Throwable) { FileLog.d("ABOOK probe failed: " + (e.cause ?: e)) }
 
             } catch (e: Throwable) { FileLog.d("VSTATE dump failed: " + e) }
 
