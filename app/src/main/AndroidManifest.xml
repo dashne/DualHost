@@ -77,6 +77,10 @@
          process outright with no on-screen error dialog — just back to the chat list / app gone. -->
     <uses-permission android:name="android.permission.READ_SYNC_STATS" />
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+<!--    added by another Claude account-->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.READ_PHONE_NUMBERS" />
+
 
 
     <uses-feature android:name="android.hardware.camera" android:required="false" />

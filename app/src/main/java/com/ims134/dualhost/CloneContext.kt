@@ -278,6 +278,8 @@ class CloneContext(
                     FileLog.d( "PKGNAME gms module caller gets host name: " + c)
                 return host
             }
+
+
             // Step 272: a caller whose stack is inside the Play services client asks about our uid
             if (Throwable().stackTrace.take(6).any { it.className.startsWith("com.google.android.gms.common.") }) {
                 if (synchronized(seenPkgAsk) { seenPkgAsk.add("gmscommon|" + c) })

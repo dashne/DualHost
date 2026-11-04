@@ -292,6 +292,9 @@ class HostInstrumentation(private val base: Instrumentation) : Instrumentation()
         if (ai.theme != 0) th.applyStyle(ai.theme, true)
         ctx.guestTheme = th
 
+        //added by another Claude account
+        GuestSync.ctx = ctx
+
         // --- NATIVE ENGINE START ---
         if (ai.packageName in NATIVE_ENGINE_PACKAGES) {
             try {
@@ -490,6 +493,10 @@ class HostInstrumentation(private val base: Instrumentation) : Instrumentation()
 
         GuestReceivers.register(hostApp, apkPath, loader)
         FileLog.d("guest application ready: " + app.javaClass.name)
+        try { NetDiag.start(app) } catch (e: Throwable) { FileLog.d("NetDiag start failed: " + e) }
+        try { GuestSync.start(ctx) } catch (e: Throwable) { FileLog.d("GuestSync start failed: " + e) }
+
+
         val env = GuestEnv(loader, resources, app)
         guestEnvs[apkPath] = env
         GuestEnvs.map[apkPath] = env
@@ -713,6 +720,8 @@ class HostInstrumentation(private val base: Instrumentation) : Instrumentation()
         val n = Intent(intent)
         n.component = ComponentName(pkgName, cls)
         FileLog.d("IMPLICIT resolved action=" + action + " pkg=" + pkgName + " -> " + cls)
+
+        FileLog.d("IMPLICIT extras=" + intent.extras?.keySet()?.joinToString { k -> k + "=" + intent.extras?.get(k) })
         return n
     }
 

@@ -22,6 +22,27 @@ object PmProxy {
     }
 
     // Parse the guest manifest in-process (does not go through IPackageManager)
+    // 2026-11-04: Viber's Engine.getApplicationDataDir() asks the context for its package name
+    // (gets the guest name), then resolves it through PackageManager (getPackageInfo/getApplicationInfo),
+    // which we answer with HOST's record, so the native engine was handed HOST's data dir
+    // (/data/user/0/com.ims134.dualhost) and could not find Viber's own activation data
+    // (getMyCID=-1, never connects). Returns a copy whose dataDir is this clone's own virtual root.
+    private fun withGuestDataDir(ai: ApplicationInfo?): ApplicationInfo? {
+        if (ai == null) return null
+        try {
+            val gp = guestApk?.let { File(it).parentFile?.parentFile?.name } ?: return ai
+            if (gp !in NATIVE_ENGINE_PACKAGES) return ai
+            val id = ProcessClone.id
+            if (id < 0) return ai
+            val hostData = ai.dataDir ?: return ai
+            if (hostData.contains("/virtual/")) return ai
+            val out = ApplicationInfo(ai)
+            out.dataDir = File(hostData, "virtual/" + gp + "/" + id).absolutePath
+            logOnce("PM DATADIR " + hostData + " -> " + out.dataDir)
+            return out
+        } catch (e: Throwable) { logOnce("PM DATADIR failed: $e"); return ai }
+    }
+
     private fun guestInfo(flags: Int): PackageInfo? {
         val apk = guestApk ?: return null
         busy.set(true)
@@ -161,6 +182,20 @@ object PmProxy {
                     fixedArgs[0] = HOST
                     val r = if (fixedArgs.size >= 2) m.invoke(real, *fixedArgs) else m.invoke(real, fixedArgs[0])
                     if (r is PackageInfo) {
+                        // 2026-11-04: this branch RETURNS before the SIGSPOOF block further down
+                        // runs, so a guest asking for its OWN name (com.viber.voip) with signature
+                        // flags still got the host's certificate. Apply the same swap here.
+                        try {
+                            val sf = (args.getOrNull(1) as? Number)?.toLong() ?: 0L
+                            if ((sf and (PackageManager.GET_SIGNATURES or 0x08000000).toLong()) != 0L) {
+                                val sg = guestInfo(PackageManager.GET_SIGNATURES or 0x08000000)
+                                if (sg != null && (sg.signatures != null || sg.signingInfo != null)) {
+                                    r.signatures = sg.signatures
+                                    r.signingInfo = sg.signingInfo
+                                    logOnce("PM SIGSPOOF pkg=" + asked + " (guest-name path) -> guest apk signature")
+                                } else logOnce("PM SIGSPOOF (guest-name path) guest signature unavailable")
+                            }
+                        } catch (e: Throwable) { logOnce("PM SIGSPOOF (guest-name path) failed: $e") }
                         val flags = (args.getOrNull(1) as? Number)?.toInt() ?: 0
                         val guestPi = guestInfo(flags)
                         val guestReq = guestPi?.requestedPermissions
@@ -180,6 +215,7 @@ object PmProxy {
                                 it.packageName = gp
                                 it.uid = android.os.Process.myUid()
                             }
+                            r.applicationInfo = withGuestDataDir(r.applicationInfo)
                             r.requestedPermissions = guestReq
                             r.requestedPermissionsFlags = IntArray(guestReq.size) { i ->
                                 (hostMap[guestReq[i]] ?: 0) and PackageInfo.REQUESTED_PERMISSION_GRANTED
@@ -342,6 +378,47 @@ object PmProxy {
                     logOnce("PM packagesForUid added guest name " + gpkg)
                 }
             } catch (e: Throwable) { logOnce("PM packagesForUid failed: " + e) }
+        }
+
+        // 2026-11-04: guest data dir for HOST-/guest-name lookups (see withGuestDataDir).
+        if (guestApk != null && busy.get() != true && args != null && args.isNotEmpty() &&
+            args[0] is String) {
+            try {
+                val askedN = args[0] as String
+                val gpN = File(guestApk!!).parentFile?.parentFile?.name
+                if (askedN == HOST || askedN == gpN) {
+                    if (m.name == "getPackageInfo" && result is PackageInfo) {
+                        val pi = result as PackageInfo
+                        pi.applicationInfo = withGuestDataDir(pi.applicationInfo)
+                    } else if (m.name == "getApplicationInfo" && result is ApplicationInfo) {
+                        result = withGuestDataDir(result as ApplicationInfo)
+                    }
+                }
+            } catch (e: Throwable) { logOnce("PM DATADIR block failed: $e") }
+        }
+
+        // Firebase/GMS cert fix: guest process must present the GUEST apk's signing cert,
+        // otherwise API keys restricted to Viber's package+cert answer 403 API_KEY_ANDROID_APP_BLOCKED.
+        if (m.name == "getPackageInfo" && result is PackageInfo && guestApk != null &&
+            busy.get() != true && args != null && args.size >= 2) {
+            try {
+                val askedPkg = args[0] as? String
+                val flags = (args[1] as? Number)?.toLong() ?: 0L
+                val sigFlags = (PackageManager.GET_SIGNATURES or 0x08000000).toLong() // 0x08000000 = GET_SIGNING_CERTIFICATES
+                val gp = File(guestApk!!).parentFile?.parentFile?.name
+                if ((flags and sigFlags) != 0L && (askedPkg == HOST || askedPkg == gp)) {
+                    val g = guestInfo(PackageManager.GET_SIGNATURES or 0x08000000)
+                    if (g != null && (g.signatures != null || g.signingInfo != null)) {
+                        result.signatures = g.signatures
+                        result.signingInfo = g.signingInfo
+                        logOnce("PM SIGSPOOF pkg=" + askedPkg + " -> guest apk signature")
+                    } else {
+                        logOnce("PM SIGSPOOF guest signature unavailable")
+                    }
+                }
+            } catch (e: Throwable) {
+                logOnce("PM SIGSPOOF failed: $e")
+            }
         }
 
         // Step 270b (log only): what do guests ask for, and which certificate do they get?
