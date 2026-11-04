@@ -1,0 +1,1003 @@
+﻿--------- beginning of main
+11-04 13:37:18.708 D/DualHost(32664): CLONELAUNCH named id=10 com.viber.voip
+11-04 13:37:18.708 D/DualHost(32664): LAUNCH action=null comp=com.ims134.dualhost/.StubViber pkg=null
+11-04 13:37:19.042 E/DualHost( 1633): Hidden API bypass failed: java.lang.NoSuchMethodException: dalvik.system.VMRuntime.setHiddenApiExemptions [class [Ljava.lang.String;]
+11-04 13:37:19.051 D/DualHost( 1633): PROCNAME field readable, value=com.viber.voip
+11-04 13:37:19.052 D/DualHost( 1633): PROCNAME cmdline=com.viber.voip
+11-04 13:37:19.052 D/DualHost( 1633): WebView data dir suffix set: com.viber.voip
+11-04 13:37:19.057 D/DualHost( 1633): PmProxy installed
+11-04 13:37:19.057 D/DualHost( 1633): PermProxy: no non-null IPermissionManager field found on ActivityThread (either this API level keeps checkPermission on IPackageManager, in which case PmProxy's own interception already covers it, or the field isn't resolved yet in this process)
+11-04 13:37:19.060 D/DualHost( 1633): NmProxy installed
+11-04 13:37:19.065 D/DualHost( 1633): AmProxy installed
+11-04 13:37:19.067 D/DualHost( 1633): TmProxy installed
+11-04 13:37:19.069 D/DualHost( 1633): CsProxy installed
+11-04 13:37:19.069 D/DualHost( 1633): HookInstaller: installed in com.viber.voip
+11-04 13:37:19.071 D/DualHost( 1633): AMCALL getContentProvider
+11-04 13:37:19.077 D/DualHost( 1633): AMCALL setRenderThread
+11-04 13:37:19.086 D/DualHost( 1633): ENTER newActivity className=com.ims134.dualhost.StubViber hasIntent=true guestClass=com.viber.voip.HomeActivity apkPath=/data/user/0/com.ims134.dualhost/files/guest/com.viber.voip/1791891922708_162589001_1791891918982_0/base.apk extrasKeys=guestClass, apkPath, cloneNumber, vuid, cloneId, guestPackage
+11-04 13:37:19.088 D/DualHost( 1633): HOOK newActivity: swapping com.ims134.dualhost.StubViber -> com.viber.voip.HomeActivity
+11-04 13:37:19.105 D/DualHost( 1633): SYSLOADER fallback parent installed
+11-04 13:37:19.394 D/DualHost( 1633): ACC discovered accountType=com.viber.voip
+11-04 13:37:19.399 D/DualHost( 1633): AccProxy installed ServiceManager passthrough for "account" (accountType=com.viber.voip)
+11-04 13:37:19.400 D/DualHost( 1633): NAMEMODE com.viber.voip mode=own (override)
+11-04 13:37:19.401 D/DualHost( 1633): PROCNAME set to com.viber.voip, now reads com.viber.voip
+11-04 13:37:19.483 D/DualHost( 1633): Native engine configured for com.viber.voip (UID: 10000)
+11-04 13:37:19.486 D/DualHost( 1633): ASK prefs startup_debug_preferences
+11-04 13:37:19.488 D/DualHost( 1633): DIAG getSharedPreferences('startup_debug_preferences') -> 0 keys
+11-04 13:37:19.489 D/DualHost( 1633): DIAG getSharedPreferences('startup_debug_preferences') -> 0 keys
+11-04 13:37:19.492 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=com.viber.voip.ViberApplication.attachBaseContext returned=guest
+11-04 13:37:19.608 D/DualHost( 1633): VIBERSTATE[post-attachBaseContext] hai0.c=MAIN
+11-04 13:37:19.608 D/DualHost( 1633): VIBERSTATE[post-attachBaseContext] ViberEnv.sViberFactory (com.viber.voip.ViberFactory) = null
+11-04 13:37:19.670 D/DualHost( 1633): AMCALL getHistoricalProcessStartReasons
+11-04 13:37:19.671 D/DualHost( 1633): AM startReasons args=null, 1, 0
+11-04 13:37:19.672 D/DualHost( 1633): AM startReasons result=android.content.pm.ParceledListSlice
+11-04 13:37:19.672 D/DualHost( 1633): AM startReasons parcel count=1 bytes=532
+11-04 13:37:19.673 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=android.content.ComponentName.<init> returned=host
+11-04 13:37:19.718 D/DualHost( 1633): PM guest getProviderInfo served: androidx.startup.InitializationProvider
+11-04 13:37:19.737 D/DualHost( 1633): ASK prefs com.viber.voip.ViberPrefs
+11-04 13:37:19.740 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=rov0.<init> returned=guest
+11-04 13:37:19.741 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=kca0.c returned=guest
+11-04 13:37:19.742 D/DualHost( 1633): ASK prefs playcore_split_install_internal
+11-04 13:37:19.743 D/DualHost( 1633): AMCALL registerReceiverWithFeature
+11-04 13:37:19.762 D/DualHost( 1633): DIAG getSharedPreferences('com.viber.voip.ViberPrefs') -> 201 keys
+11-04 13:37:19.762 D/DualHost( 1633): DIAG getSharedPreferences('playcore_split_install_internal') -> 0 keys
+11-04 13:37:19.765 D/DualHost( 1633): AMCALL addPackageDependency
+11-04 13:37:19.772 D/DualHost( 1633): PMSIG getPackageInfo pkg=com.google.android.webview flags=0x24c0 result=PackageInfo sha1=1f387cb25e00
+11-04 13:37:19.782 D/DualHost( 1633): ASK prefs viber_app_preferences_state
+11-04 13:37:19.783 D/DualHost( 1633): DIAG getSharedPreferences('viber_app_preferences_state') -> 3 keys
+11-04 13:37:19.807 D/DualHost( 1633): ASK prefs com.voip.viber.contacts.vibersync
+11-04 13:37:19.808 D/DualHost( 1633): DIAG getSharedPreferences('com.voip.viber.contacts.vibersync') -> 0 keys
+11-04 13:37:19.811 D/DualHost( 1633): AMCALL checkPermissionForDevice
+11-04 13:37:19.811 D/DualHost( 1633): AMCALL getMyMemoryState
+11-04 13:37:19.812 D/DualHost( 1633): PERM android.permission.CAMERA -> 0
+11-04 13:37:19.813 D/DualHost( 1633): PKGNAME gms.common stack, host name for com.google.android.gms.common.api.GoogleApi.createClientSettingsBuilder
+11-04 13:37:19.813 D/DualHost( 1633): PMSIG getPackageInfo pkg=com.android.vending flags=0x0 result=PackageInfo
+11-04 13:37:19.814 D/DualHost( 1633): PKGNAME gms.common stack, host name for com.google.android.gms.common.GooglePlayServicesUtilLight.isGooglePlayServicesAvailable
+11-04 13:37:19.814 D/DualHost( 1633): PKGNAME gms.common stack, host name for com.google.android.gms.common.internal.zzae.zzc
+11-04 13:37:19.823 D/DualHost( 1633): PMSIG getPackageInfo pkg=com.android.vending flags=0x8002040 result=PackageInfo sha1=bd32424203e0
+11-04 13:37:19.837 D/DualHost( 1633): PMSIG getPackageInfo pkg=com.google.android.gms flags=0x8000040 result=PackageInfo sha1=2169eddb5fbb
+11-04 13:37:19.840 D/DualHost( 1633): AMCALL bindServiceInstance
+11-04 13:37:19.854 D/DualHost( 1633): PM guest getServiceInfo NOT found: android.webkit.MetaDataHolderService
+11-04 13:37:19.857 D/DualHost( 1633): PM DATADIR /data/user/0/com.ims134.dualhost -> /data/user/0/com.ims134.dualhost/virtual/com.viber.voip/10
+11-04 13:37:19.858 D/DualHost( 1633): PMSIG getPackageInfo pkg=com.ims134.dualhost flags=0x0 result=PackageInfo
+11-04 13:37:19.858 D/DualHost( 1633): PMSIG getInstallerPackageName pkg=com.ims134.dualhost flags=0x0 result=null
+11-04 13:37:19.860 D/DualHost( 1633): PM guest getServiceInfo served: com.google.firebase.components.ComponentDiscoveryService
+11-04 13:37:19.869 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=s6c.i returned=guest
+11-04 13:37:19.870 D/DualHost( 1633): APPINFOCALLER guest=com.viber.voip caller=android.content.ContextWrapper.getApplicationInfo
+11-04 13:37:19.872 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=d3w.i returned=guest
+11-04 13:37:19.873 D/DualHost( 1633): PMSIG getInstallerPackageName pkg=com.viber.voip flags=0x0 result=String
+11-04 13:37:19.885 D/DualHost( 1633): PMSIG getPackageInfo pkg=com.google.android.gms flags=0x0 result=PackageInfo
+11-04 13:37:19.886 D/DualHost( 1633): PMSIG getPackageInfo pkg=com.google.android.webview flags=0x2400 result=PackageInfo
+11-04 13:37:19.909 D/DualHost( 1633): AMCALL setProcessStateSummary
+11-04 13:37:19.912 D/DualHost( 1633): AMCALL getHistoricalProcessExitReasons
+11-04 13:37:19.919 D/DualHost( 1633): guest provider started: com.viber.provider.contacts.ViberContactsProvider authority=com.viber.voip.provider.vibercontacts
+11-04 13:37:19.920 D/DualHost( 1633): guest provider started: com.viber.provider.messages.ViberMessagesProvider authority=com.viber.voip.provider.vibermessages
+11-04 13:37:19.921 D/DualHost( 1633): guest provider started: com.vungle.ads.VungleProvider authority=com.viber.voip.vungle-provider
+11-04 13:37:19.921 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=com.google.android.gms.ads.internal.client.zzev.attachInfo returned=guest
+11-04 13:37:19.922 D/DualHost( 1633): PM DATADIR /data/user/0/com.viber.voip -> /data/user/0/com.viber.voip/virtual/com.viber.voip/10
+11-04 13:37:19.923 D/DualHost( 1633): guest provider started: com.google.android.gms.ads.MobileAdsInitProvider authority=com.viber.voip.mobileadsinitprovider
+11-04 13:37:19.955 D/DualHost( 1633): ASK prefs backup_migration_preferences
+11-04 13:37:19.959 D/DualHost( 1633): DIAG getSharedPreferences('backup_migration_preferences') -> 2 keys
+11-04 13:37:19.969 D/DualHost( 1633): PERM android.permission.READ_PHONE_STATE -> 0
+11-04 13:37:19.970 D/DualHost( 1633): DIAG getApplicationInfo() -> guest com.viber.voip, meta=33 keys
+11-04 13:37:19.971 D/DualHost( 1633): AMCALL getRunningAppProcesses
+11-04 13:37:19.972 D/DualHost( 1633): AM own process reported as com.viber.voip
+11-04 13:37:19.973 D/DualHost( 1633): ASK prefs com.google.firebase.crashlytics
+11-04 13:37:19.973 D/DualHost( 1633): AM getContentProvider: serving com.viber.voip.provider.vibercontacts locally (no slot, dedicated process)
+11-04 13:37:19.974 D/DualHost( 1633): DIAG getSharedPreferences('com.google.firebase.crashlytics') -> 4 keys
+11-04 13:37:19.977 D/DualHost( 1633): AM buildLocalHolder: noReleaseNeeded not set: java.lang.NoSuchFieldException: No field noReleaseNeeded in class Landroid/app/ContentProviderHolder; (declaration of 'android.app.ContentProviderHolder' appears in /system/framework/framework.jar)
+11-04 13:37:19.978 D/DualHost( 1633): AM getContentProvider: local in-process holder built for com.viber.voip.provider.vibercontacts
+11-04 13:37:19.980 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=bbf0.c returned=guest
+11-04 13:37:19.986 D/DualHost( 1633): PM resolveContentProvider authority=com.google.android.gms.chimera found=true
+11-04 13:37:19.986 D/DualHost( 1633): PM guest getServiceInfo served: com.google.mlkit.common.internal.MlKitComponentDiscoveryService
+11-04 13:37:19.988 D/DualHost( 1633): guest provider started: com.google.mlkit.common.internal.MlKitInitProvider authority=com.viber.voip.mlkitinitprovider
+11-04 13:37:19.989 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=tjt.d returned=guest
+11-04 13:37:19.991 D/DualHost( 1633): DIAG getSharedPreferences('com.google.firebase.crashlytics') -> 4 keys
+11-04 13:37:20.003 D/DualHost( 1633): DIAG getSharedPreferences('com.google.firebase.crashlytics') -> 4 keys
+11-04 13:37:20.006 D/DualHost( 1633): DIAG getApplicationInfo() -> guest com.viber.voip, meta=33 keys
+11-04 13:37:20.006 D/DualHost( 1633): AMCALL getMemoryInfo
+11-04 13:37:20.008 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=svw.<init> returned=guest
+11-04 13:37:20.010 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=us80.a returned=guest
+11-04 13:37:20.011 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=com.google.firebase.crashlytics.ndk.JniNativeApi.b returned=guest
+11-04 13:37:20.020 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=q9v.a returned=guest
+11-04 13:37:20.022 D/DualHost( 1633): JOB rewritten id=-327602621 com.google.android.datatransport.runtime.scheduling.jobscheduling.JobInfoSchedulerService -> HostJob0
+11-04 13:37:20.025 D/DualHost( 1633): ASK prefs FirebaseHeartBeatW0RFRkFVTFRd+MTo2MzEyNzIxOTA3NDM6YW5kcm9pZDo4ZGRhOGY3ZmNkN2MzOTRh
+11-04 13:37:20.026 D/DualHost( 1633): DIAG getSharedPreferences('FirebaseHeartBeatW0RFRkFVTFRd+MTo2MzEyNzIxOTA3NDM6YW5kcm9pZDo4ZGRhOGY3ZmNkN2MzOTRh') -> 0 keys
+11-04 13:37:20.027 D/DualHost( 1633): ASK prefs com.google.android.gms.appid
+11-04 13:37:20.029 D/DualHost( 1633): JOB rewritten id=1715413719 com.google.android.datatransport.runtime.scheduling.jobscheduling.JobInfoSchedulerService -> HostJob0
+11-04 13:37:20.029 D/DualHost( 1633): DIAG getSharedPreferences('com.google.android.gms.appid') -> 1 keys
+11-04 13:37:20.031 D/DualHost( 1633): ASK prefs com.google.firebase.messaging
+11-04 13:37:20.032 D/DualHost( 1633): DIAG getSharedPreferences('com.google.android.gms.appid') -> 1 keys
+11-04 13:37:20.032 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=cg0.invoke returned=guest
+11-04 13:37:20.034 D/DualHost( 1633): DIAG getSharedPreferences('com.google.firebase.messaging') -> 1 keys
+11-04 13:37:20.035 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=c9p.c returned=guest
+11-04 13:37:20.047 D/DualHost( 1633): DIAG getSharedPreferences('com.google.firebase.messaging') -> 1 keys
+11-04 13:37:20.048 D/DualHost( 1633): DIAG getSharedPreferences('com.google.firebase.messaging') -> 1 keys
+11-04 13:37:20.052 D/DualHost( 1633): DIAG getSharedPreferences('com.google.firebase.messaging') -> 1 keys
+11-04 13:37:20.055 D/DualHost( 1633): DIAG getSharedPreferences('com.google.firebase.messaging') -> 1 keys
+11-04 13:37:20.058 D/DualHost( 1633): guest provider started: androidx.startup.InitializationProvider authority=com.viber.voip.androidx-startup
+11-04 13:37:20.059 D/DualHost( 1633): PKGNAME gms module caller gets host name: m7.jp
+11-04 13:37:20.060 D/DualHost( 1633): guest provider started: androidx.core.content.FileProvider authority=com.viber.voip.provider.file
+11-04 13:37:20.060 D/DualHost( 1633): guest provider started: com.viber.voip.sound.RingtoneProvider authority=com.viber.voip.provider.ringtone
+11-04 13:37:20.063 D/DualHost( 1633): guest provider started: com.viber.voip.gallery.provider.GalleryContentProvider authority=com.viber.voip.provider.gallery
+11-04 13:37:20.064 D/DualHost( 1633): guest provider started: com.viber.voip.storage.provider.InternalFileProvider authority=com.viber.voip.provider.internal_files
+11-04 13:37:20.064 D/DualHost( 1633): guest provider started: com.viber.voip.storage.provider.ExternalFileProvider authority=com.viber.voip.provider.shareable_files
+11-04 13:37:20.065 D/DualHost( 1633): guest provider started: com.facebook.ads.AudienceNetworkContentProvider authority=com.viber.voip.AudienceNetworkContentProvider
+11-04 13:37:20.066 D/DualHost( 1633): guest provider started: com.snapchat.kit.sdk.SnapKitInitProvider authority=com.viber.voip.SnapKitInitProvider
+11-04 13:37:20.066 D/DualHost( 1633): guest provider started: com.adjust.sdk.SystemLifecycleContentProvider authority=com.viber.voip.adjust-lifecycle-provider
+11-04 13:37:20.066 D/DualHost( 1633): guest provider started: com.reactnativecommunity.webview.RNCWebViewFileProvider authority=com.viber.voip.fileprovider
+11-04 13:37:20.070 D/DualHost( 1633): ASK prefs com.facebook.ads.flash
+11-04 13:37:20.073 D/DualHost( 1633): PM ignored setComponentEnabledSetting for guest com.viber.service.contacts.authentication.AccountAuthenticatorService (IllegalArgumentException)
+11-04 13:37:20.074 D/DualHost( 1633): PM ignored setComponentEnabledSetting for guest com.viber.service.contacts.contactbook.AccountContactbookService (IllegalArgumentException)
+11-04 13:37:20.076 D/DualHost( 1633): DIAG getSharedPreferences('com.facebook.ads.flash') -> 0 keys
+11-04 13:37:20.077 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=android.app.InstrumentationStubImpl.callApplicationOnCreate returned=host
+11-04 13:37:20.078 D/DualHost( 1633): Pre-init ProcessLifecycleOwner succeeded
+11-04 13:37:20.078 D/DualHost( 1633): Pre-warmed id2.b() on main thread: id2@a10e2b1
+11-04 13:37:20.078 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=hqz.e returned=guest
+11-04 13:37:20.078 D/DualHost( 1633): VIBERSTATE[post-onCreate] hai0.c=MAIN
+11-04 13:37:20.079 D/DualHost( 1633): VIBERSTATE[post-onCreate] ViberEnv.sViberFactory (com.viber.voip.ViberFactory) = d
+11-04 13:37:20.086 D/DualHost( 1633): ASK prefs com.google.android.gms.measurement.prefs
+11-04 13:37:20.089 D/DualHost( 1633): DIAG getSharedPreferences('com.google.android.gms.measurement.prefs') -> 16 keys
+11-04 13:37:20.090 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=hf90.b returned=guest
+11-04 13:37:20.105 D/DualHost( 1633): ASK prefs viber_key_value_state
+11-04 13:37:20.106 D/DualHost( 1633): DIAG getSharedPreferences('viber_key_value_state') -> 2 keys
+11-04 13:37:20.149 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=n89.invoke returned=guest
+11-04 13:37:20.155 D/DualHost( 1633): GUESTRECV failed com.android.webview.chromium.SafeModeAppDoctorReceiver: java.lang.ClassNotFoundException: Didn't find class "com.android.webview.chromium.SafeModeAppDoctorReceiver" on path: DexPathList[[zip file "/data/user/0/com.ims134.dualhost/files/guest/com.viber.voip/1791891922708_162589001_1791891918982_0/base.apk"],nativeLibraryDirectories=[/data/user/0/com.ims134.dualhost/files/guest/com.viber.voip/1791891922708_162589001_1791891918982_0/lib, /system/lib64, /system_ext/lib64]]
+11-04 13:37:20.155 D/DualHost( 1633): GUESTRECV done, 0 receiver(s)
+11-04 13:37:20.156 D/DualHost( 1633): guest application ready: com.viber.voip.ManifestViberApplication
+11-04 13:37:20.160 D/DualHost( 1633): PM ignored setComponentEnabledSetting for guest androidx.work.impl.background.systemjob.SystemJobService (IllegalArgumentException)
+11-04 13:37:20.161 D/DualHost( 1633): GSYNC contacts observer registered
+11-04 13:37:20.164 D/DualHost( 1633): THEMERES preset 0x7f0a0009 for com.viber.voip.HomeActivity
+11-04 13:37:20.170 D/DualHost( 1633): NETDIAG activeNetwork=179 info=WIFI/CONNECTED connected=true metered=true
+11-04 13:37:20.171 D/DualHost( 1633): NETDIAG caps INTERNET=true VALIDATED=true NOT_SUSPENDED=true NOT_RESTRICTED=true wifi=true cell=false vpn=false
+11-04 13:37:20.180 D/DualHost( 1633): PERM android.permission.BLUETOOTH_CONNECT -> -1
+11-04 13:37:20.188 D/DualHost( 1633): ASK prefs com.ims134.dualhost_preferences
+11-04 13:37:20.205 D/DualHost( 1633): DIAG getSharedPreferences('com.ims134.dualhost_preferences') -> 0 keys
+11-04 13:37:20.208 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=com.facebook.ads.internal.util.process.ProcessUtils.getProcessSpecificName returned=guest
+11-04 13:37:20.208 D/DualHost( 1633): ASK prefs com.facebook.ads.FEATURE_CONFIG
+11-04 13:37:20.210 D/DualHost( 1633): DIAG getSharedPreferences('com.facebook.ads.FEATURE_CONFIG') -> 0 keys
+11-04 13:37:20.217 D/DualHost( 1633): AMCALL refContentProvider
+11-04 13:37:20.240 D/DualHost( 1633): PM guest getServiceInfo NOT found: androidx.appcompat.app.AppLocalesMetadataHolderService
+11-04 13:37:20.245 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=com.viber.jni.Engine.getApplicationDataDir returned=guest
+11-04 13:37:20.246 D/DualHost( 1633): HOOK callActivityOnCreate: com.viber.voip.HomeActivity
+11-04 13:37:20.246 D/DualHost( 1633): APPINFOCALLER guest=com.viber.voip caller=u9w.a
+11-04 13:37:20.253 D/DualHost( 1633): NETDIAG dns www.viber.com -> 184.30.213.251 in 81ms
+11-04 13:37:20.322 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=android.app.PendingIntent.getBroadcastAsUser returned=host
+11-04 13:37:20.322 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=android.app.PendingIntent.checkPendingIntent returned=host
+11-04 13:37:20.323 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=android.content.Intent.prepareToLeaveProcess returned=host
+11-04 13:37:20.323 D/DualHost( 1633): AM pending type=1 comp=androidx.work.impl.utils.ForceStopRunnable$BroadcastReceiver pkg=com.ims134.dualhost action=ACTION_FORCE_STOP_RESCHEDULE
+11-04 13:37:20.434 D/DualHost( 1633): JOB rewritten id=5 androidx.work.impl.background.systemjob.SystemJobService -> HostJob0
+11-04 13:37:20.443 D/DualHost( 1633): PM SIGSPOOF pkg=com.viber.voip (guest-name path) -> guest apk signature
+11-04 13:37:20.445 D/DualHost( 1633): JOB rewritten id=7 androidx.work.impl.background.systemjob.SystemJobService -> HostJob0
+11-04 13:37:20.454 D/DualHost( 1633): JOB rewritten id=8 androidx.work.impl.background.systemjob.SystemJobService -> HostJob0
+11-04 13:37:20.455 D/DualHost( 1633): THEME guest=com.viber.voip.HomeActivity actTheme=0x7f150796 appTheme=0x7f150761 effective=0x7f150796
+11-04 13:37:20.460 D/DualHost( 1633): NETDIAG tcp www.viber.com:443 connected in 207ms
+11-04 13:37:20.460 D/DualHost( 1633): APPINFOCALLER guest=com.viber.voip caller=android.content.ContextWrapper.getApplicationInfo
+11-04 13:37:20.467 D/DualHost( 1633): JOB rewritten id=9 androidx.work.impl.background.systemjob.SystemJobService -> HostJob0
+11-04 13:37:20.484 D/DualHost( 1633): JOB rewritten id=10 androidx.work.impl.background.systemjob.SystemJobService -> HostJob0
+11-04 13:37:20.494 D/DualHost( 1633): JOB rewritten id=11 androidx.work.impl.background.systemjob.SystemJobService -> HostJob0
+11-04 13:37:20.508 D/DualHost( 1633): JOB rewritten id=12 androidx.work.impl.background.systemjob.SystemJobService -> HostJob0
+11-04 13:37:20.509 D/DualHost( 1633): NETDIAG dns google.com -> 142.251.141.46 in 48ms
+11-04 13:37:20.519 D/DualHost( 1633): DIAG getApplicationInfo() -> guest com.viber.voip, meta=33 keys
+11-04 13:37:20.520 D/DualHost( 1633): THEME applied 0x7f150796 to com.viber.voip.HomeActivity (cleared=false)
+11-04 13:37:20.521 D/DualHost( 1633): THEME force-applied 0x7f150796 onto live theme
+11-04 13:37:20.525 D/DualHost( 1633): JOB rewritten id=13 androidx.work.impl.background.systemjob.SystemJobService -> HostJob0
+11-04 13:37:20.538 D/DualHost( 1633): JOB rewritten id=14 androidx.work.impl.background.systemjob.SystemJobService -> HostJob0
+11-04 13:37:20.551 D/DualHost( 1633): JOB rewritten id=16 androidx.work.impl.background.systemjob.SystemJobService -> HostJob0
+11-04 13:37:20.553 D/DualHost( 1633): THEMEDIAG name=com.viber.voip:style/Theme.Viber.Home attr=0x7f041152 activityTheme: bg=true/0x7f060575 abar=true freshGuestTheme: bg=true/0x7f060575 abar=true
+11-04 13:37:20.554 D/DualHost( 1633): guest ready: com.viber.voip.HomeActivity
+11-04 13:37:20.564 D/DualHost( 1633): JOB rewritten id=17 androidx.work.impl.background.systemjob.SystemJobService -> HostJob0
+11-04 13:37:20.564 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=android.content.ComponentName.<init> returned=host
+11-04 13:37:20.572 D/DualHost( 1633): JOB rewritten id=18 androidx.work.impl.background.systemjob.SystemJobService -> HostJob0
+11-04 13:37:20.584 D/DualHost( 1633): JOB rewritten id=19 androidx.work.impl.background.systemjob.SystemJobService -> HostJob0
+11-04 13:37:20.594 D/DualHost( 1633): PERM android.permission.SYSTEM_APPLICATION_OVERLAY -> -1
+11-04 13:37:20.595 D/DualHost( 1633): JOB rewritten id=20 androidx.work.impl.background.systemjob.SystemJobService -> HostJob0
+11-04 13:37:20.595 D/DualHost( 1633): PERM android.permission.READ_CALL_LOG -> -1
+11-04 13:37:20.597 D/DualHost( 1633): PM ignored setComponentEnabledSetting for guest com.viber.voip.feature.callerid.CallerIdCallScreeningService (IllegalArgumentException)
+11-04 13:37:20.604 D/DualHost( 1633): JOB rewritten id=23 androidx.work.impl.background.systemjob.SystemJobService -> HostJob0
+11-04 13:37:20.610 D/DualHost( 1633): NETDIAG tcp google.com:443 connected in 101ms
+11-04 13:37:20.617 D/DualHost( 1633): JOB rewritten id=24 androidx.work.impl.background.systemjob.SystemJobService -> HostJob0
+11-04 13:37:20.618 D/DualHost( 1633): PM SIGSPOOF pkg=com.ims134.dualhost -> guest apk signature
+11-04 13:37:20.622 D/DualHost( 1633): PMSIG getPackageInfo pkg=com.ims134.dualhost flags=0x40 result=PackageInfo sha1=f836a66f8779
+11-04 13:37:20.624 D/DualHost( 1633): PM guest getActivityInfo served: com.viber.voip.HomeActivity
+11-04 13:37:20.631 D/DualHost( 1633): PM ask getApplicationInfo meta=false resultNull=false
+11-04 13:37:20.633 D/DualHost( 1633): JOB rewritten id=25 androidx.work.impl.background.systemjob.SystemJobService -> HostJob0
+11-04 13:37:20.641 D/DualHost( 1633): JOB rewritten id=30 androidx.work.impl.background.systemjob.SystemJobService -> HostJob0
+11-04 13:37:20.649 D/DualHost( 1633): APPINFOCALLER guest=com.viber.voip caller=android.content.ContextWrapper.getApplicationInfo
+11-04 13:37:20.651 D/DualHost( 1633): JOB rewritten id=4 androidx.work.impl.background.systemjob.SystemJobService -> HostJob0
+11-04 13:37:20.661 D/DualHost( 1633): JOB rewritten id=15 androidx.work.impl.background.systemjob.SystemJobService -> HostJob0
+11-04 13:37:20.708 D/DualHost( 1633): DIAG getApplicationInfo() -> guest com.viber.voip, meta=33 keys
+11-04 13:37:20.713 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=com.android.internal.policy.PhoneWindowStubImpl.modifyNavigationBarColorIfNeeded returned=host
+11-04 13:37:20.793 D/DualHost( 1633): PERM android.permission.GET_ACCOUNTS -> 0
+11-04 13:37:20.794 D/DualHost( 1633): PERM android.permission.READ_CONTACTS -> 0
+11-04 13:37:20.794 D/DualHost( 1633): PERM android.permission.WRITE_CONTACTS -> 0
+11-04 13:37:20.798 D/DualHost( 1633): NETDIAG probe 44.192.201.196:4244 CONNECTED in 186ms
+11-04 13:37:20.826 D/DualHost( 1633): DIAG getSystemService('content_capture') = NULL
+11-04 13:37:20.832 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=nrv0.<init> returned=guest
+11-04 13:37:20.834 D/DualHost( 1633): PMSIG getPackageInfo pkg=com.android.vending flags=0x40 result=PackageInfo sha1=38918a453d07
+11-04 13:37:20.850 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=h5t.Ps returned=guest
+11-04 13:37:20.867 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=glv0.zza returned=guest
+11-04 13:37:20.868 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=omv0.zza returned=guest
+11-04 13:37:20.868 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=wrv0.<init> returned=guest
+11-04 13:37:20.930 E/DualHost( 3063): Hidden API bypass failed: java.lang.NoSuchMethodException: dalvik.system.VMRuntime.setHiddenApiExemptions [class [Ljava.lang.String;]
+11-04 13:37:20.940 D/DualHost( 3063): PROCNAME field readable, value=com.ims134.dualhost:p0
+11-04 13:37:20.943 D/DualHost( 3063): PROCNAME cmdline=com.ims134.dualhost:p0
+11-04 13:37:20.943 D/DualHost( 3063): WebView data dir suffix set: p0
+11-04 13:37:20.947 D/DualHost( 3063): PmProxy installed
+11-04 13:37:20.948 D/DualHost( 3063): PermProxy: no non-null IPermissionManager field found on ActivityThread (either this API level keeps checkPermission on IPackageManager, in which case PmProxy's own interception already covers it, or the field isn't resolved yet in this process)
+11-04 13:37:20.950 D/DualHost( 3063): NmProxy installed
+11-04 13:37:20.955 D/DualHost( 3063): AmProxy installed
+11-04 13:37:20.957 D/DualHost( 3063): TmProxy installed
+11-04 13:37:20.959 D/DualHost( 3063): CsProxy installed
+11-04 13:37:20.959 D/DualHost( 3063): HookInstaller: installed in com.ims134.dualhost:p0
+11-04 13:37:20.961 D/DualHost( 3063): AMCALL publishContentProviders
+11-04 13:37:20.965 D/DualHost( 3063): AMCALL getContentProvider
+11-04 13:37:20.975 D/DualHost( 3063): AMCALL serviceDoneExecuting
+11-04 13:37:20.977 D/DualHost( 3063): AMCALL publishService
+11-04 13:37:20.979 D/DualHost( 3063): HOSTJOB clone=10 androidx.work.impl.background.systemjob.SystemJobService
+11-04 13:37:20.990 D/DualHost( 3063): HOSTJOB building guest environment
+11-04 13:37:20.995 D/DualHost( 1633): NETDIAG probe 44.192.201.196:443 CONNECTED in 194ms
+11-04 13:37:20.995 D/DualHost( 1633): DATADIR ctx.class = com.viber.voip.ManifestViberApplication
+11-04 13:37:20.999 D/DualHost( 1633): DATADIR app.class = com.viber.voip.ManifestViberApplication
+11-04 13:37:21.000 D/DualHost( 1633): DATADIR app.baseContext.class = com.ims134.dualhost.CloneContext
+11-04 13:37:21.001 D/DualHost( 1633): DATADIR app.getDataDir = /data/user/0/com.ims134.dualhost/virtual/com.viber.voip/10
+11-04 13:37:21.003 D/DualHost( 1633): DATADIR app.applicationInfo.dataDir = /data/user/0/com.ims134.dualhost/virtual/com.viber.voip/10
+11-04 13:37:21.005 D/DualHost( 1633): DATADIR app.getFilesDir = /data/user/0/com.ims134.dualhost/virtual/com.viber.voip/10/files
+11-04 13:37:21.006 D/DualHost( 1633): DATADIR app.getFilesDir.parent = /data/user/0/com.ims134.dualhost/virtual/com.viber.voip/10
+11-04 13:37:21.007 D/DualHost( 1633): DATADIR app.getCacheDir = /data/user/0/com.ims134.dualhost/virtual/com.viber.voip/10/cache
+11-04 13:37:21.008 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=com.ims134.dualhost.NetDiag.start$lambda$22$lambda$11 returned=host
+11-04 13:37:21.009 D/DualHost( 1633): DATADIR app.getPackageName = com.ims134.dualhost
+11-04 13:37:21.011 D/DualHost( 1633): DATADIR app.getDatabasePath(x) = /data/data/com.viber.voip/databases/x
+11-04 13:37:21.012 D/DualHost( 1633): DATADIR app.getNoBackupFilesDir = /data/user/0/com.ims134.dualhost/virtual/com.viber.voip/10/no_backup
+11-04 13:37:21.012 D/DualHost( 1633): DATADIR Environment.getDataDirectory = /data
+11-04 13:37:21.013 D/DualHost( 1633): DATADIR ctx.createDeviceProtectedStorageContext.dataDir = /data/user_de/0/com.ims134.dualhost
+11-04 13:37:21.014 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=com.ims134.dualhost.NetDiag.start$lambda$22$lambda$16 returned=host
+11-04 13:37:21.024 D/DualHost( 1633): DATADIR ctx.createPackageContext(self).dataDir = /data/user/0/com.ims134.dualhost/virtual/com.viber.voip/10
+11-04 13:37:21.025 D/DualHost( 1633): DATADIR user.dir = /
+11-04 13:37:21.025 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=androidx.constraintlayout.widget.ConstraintHelper.findId returned=guest
+11-04 13:37:21.025 D/DualHost( 1633): DATADIR ActivityThread.currentApplication.dataDir = /data/user/0/com.ims134.dualhost/virtual/com.viber.voip/10
+11-04 13:37:21.041 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=com.mediatek.boostfwk.identify.scroll.ScrollIdentify.dispatchScenario returned=guest
+11-04 13:37:21.161 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=com.braze.support.PackageUtils.getResourcePackageName returned=guest
+11-04 13:37:21.168 D/DualHost( 1633): ASK prefs com.appboy.override.configuration.cache
+11-04 13:37:21.169 D/DualHost( 1633): DIAG getSharedPreferences('com.appboy.override.configuration.cache') -> 0 keys
+11-04 13:37:21.182 D/DualHost( 1633): ASK prefs persistent.com.braze.storage.delayed_initialization_cache
+11-04 13:37:21.184 D/DualHost( 1633): DIAG getSharedPreferences('persistent.com.braze.storage.delayed_initialization_cache') -> 0 keys
+11-04 13:37:21.223 D/DualHost( 1633): ASK prefs com.braze.storage.braze_push_delivery_storage.37a6259cc0c1dae299a7866489dff0bd.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6
+11-04 13:37:21.228 D/DualHost( 1633): DIAG getSharedPreferences('com.braze.storage.braze_push_delivery_storage.37a6259cc0c1dae299a7866489dff0bd.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6') -> 0 keys
+11-04 13:37:21.232 D/DualHost( 1633): ASK prefs com.braze.device_id.37a6259cc0c1dae299a7866489dff0bd.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6
+11-04 13:37:21.234 D/DualHost( 1633): DIAG getSharedPreferences('com.braze.device_id.37a6259cc0c1dae299a7866489dff0bd.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6') -> 2 keys
+11-04 13:37:21.244 D/DualHost( 1633): PMSIG getPackageInfo pkg=com.google.android.gsf flags=0x0 result=PackageInfo
+11-04 13:37:21.252 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=com.braze.managers.x.j returned=guest
+11-04 13:37:21.252 D/DualHost( 1633): ASK prefs com.appboy.managers.device_data_provider
+11-04 13:37:21.253 D/DualHost( 1633): DIAG getSharedPreferences('com.appboy.managers.device_data_provider') -> 0 keys
+11-04 13:37:21.256 D/DualHost( 1633): ASK prefs com.appboy.offline.storagemap
+11-04 13:37:21.257 D/DualHost( 1633): DIAG getSharedPreferences('com.appboy.offline.storagemap') -> 0 keys
+11-04 13:37:21.258 D/DualHost( 1633): ASK prefs persistent.com.braze.requests.metadata.last_req_at
+11-04 13:37:21.259 D/DualHost( 1633): DIAG getSharedPreferences('persistent.com.braze.requests.metadata.last_req_at') -> 8 keys
+11-04 13:37:21.272 D/DualHost( 1633): ASK prefs com.braze.storage.server_config.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6
+11-04 13:37:21.273 D/DualHost( 1633): DIAG getSharedPreferences('com.braze.storage.server_config.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6') -> 0 keys
+11-04 13:37:21.274 D/DualHost( 1633): DIAG getSharedPreferences('com.braze.storage.server_config.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6') -> 0 keys
+11-04 13:37:21.308 D/DualHost( 3063): ACC discovered accountType=com.viber.voip
+11-04 13:37:21.311 D/DualHost( 3063): AccProxy installed ServiceManager passthrough for "account" (accountType=com.viber.voip)
+11-04 13:37:21.312 D/DualHost( 3063): NAMEMODE com.viber.voip mode=own (override)
+11-04 13:37:21.312 D/DualHost( 3063): PROCNAME set to com.viber.voip, now reads com.viber.voip
+11-04 13:37:21.325 D/DualHost( 3063): SYSLOADER fallback parent installed
+11-04 13:37:21.341 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=com.braze.managers.w.<init> returned=guest
+11-04 13:37:21.347 D/DualHost( 1633): ASK prefs com.appboy.support.stringutils.cachefilesuffix
+11-04 13:37:21.348 D/DualHost( 1633): DIAG getSharedPreferences('com.appboy.support.stringutils.cachefilesuffix') -> 0 keys
+11-04 13:37:21.354 D/DualHost( 1633): ASK prefs com.braze.storage.braze_push_max_storage.3963b5b6c1be1432878b0fdee61febec.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6
+11-04 13:37:21.354 D/DualHost( 1633): DIAG getSharedPreferences('com.braze.storage.braze_push_max_storage.3963b5b6c1be1432878b0fdee61febec.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6') -> 0 keys
+11-04 13:37:21.364 D/DualHost( 1633): ASK prefs com.braze.storage.push_identifier_storage.3963b5b6c1be1432878b0fdee61febec.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6
+11-04 13:37:21.365 D/DualHost( 1633): DIAG getSharedPreferences('com.braze.storage.push_identifier_storage.3963b5b6c1be1432878b0fdee61febec.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6') -> 0 keys
+11-04 13:37:21.371 D/DualHost( 1633): ASK prefs com.appboy.storage.event_data_validator.3963b5b6c1be1432878b0fdee61febec.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6
+11-04 13:37:21.373 D/DualHost( 1633): DIAG getSharedPreferences('com.appboy.storage.event_data_validator.3963b5b6c1be1432878b0fdee61febec.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6') -> 0 keys
+11-04 13:37:21.379 D/DualHost( 1633): ASK prefs com.appboy.managers.geofences.eligibility.global.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6
+11-04 13:37:21.380 D/DualHost( 1633): DIAG getSharedPreferences('com.appboy.managers.geofences.eligibility.global.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6') -> 0 keys
+11-04 13:37:21.380 D/DualHost( 1633): ASK prefs com.appboy.managers.geofences.eligibility.individual.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6
+11-04 13:37:21.381 D/DualHost( 1633): DIAG getSharedPreferences('com.appboy.managers.geofences.eligibility.individual.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6') -> 0 keys
+11-04 13:37:21.381 D/DualHost( 1633): ASK prefs com.appboy.managers.geofences.storage.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6
+11-04 13:37:21.382 D/DualHost( 1633): DIAG getSharedPreferences('com.appboy.managers.geofences.storage.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6') -> 0 keys
+11-04 13:37:21.382 D/DualHost( 1633): ASK prefs com.appboy.support.geofences
+11-04 13:37:21.383 D/DualHost( 1633): DIAG getSharedPreferences('com.appboy.support.geofences') -> 0 keys
+11-04 13:37:21.384 D/DualHost( 1633): PM guest getServiceInfo served: com.google.android.datatransport.runtime.backends.TransportBackendDiscovery
+11-04 13:37:21.387 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=a98.a returned=guest
+11-04 13:37:21.393 D/DualHost( 1633): ASK prefs com.braze.managers.featureflags.eligibility.3963b5b6c1be1432878b0fdee61febec.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6
+11-04 13:37:21.394 D/DualHost( 1633): JOB rewritten id=-1621938309 com.google.android.datatransport.runtime.scheduling.jobscheduling.JobInfoSchedulerService -> HostJob0
+11-04 13:37:21.394 D/DualHost( 1633): DIAG getSharedPreferences('com.braze.managers.featureflags.eligibility.3963b5b6c1be1432878b0fdee61febec.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6') -> 0 keys
+11-04 13:37:21.395 D/DualHost( 1633): ASK prefs com.braze.managers.featureflags.storage.3963b5b6c1be1432878b0fdee61febec.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6
+11-04 13:37:21.395 D/DualHost( 1633): DIAG getSharedPreferences('com.braze.managers.featureflags.storage.3963b5b6c1be1432878b0fdee61febec.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6') -> 0 keys
+11-04 13:37:21.396 D/DualHost( 1633): ASK prefs com.braze.managers.featureflags.impressions.3963b5b6c1be1432878b0fdee61febec.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6
+11-04 13:37:21.396 D/DualHost( 1633): DIAG getSharedPreferences('com.braze.managers.featureflags.impressions.3963b5b6c1be1432878b0fdee61febec.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6') -> 0 keys
+11-04 13:37:21.402 D/DualHost( 1633): ASK prefs com.braze.managers.banners.storage.3963b5b6c1be1432878b0fdee61febec.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6
+11-04 13:37:21.402 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=d4o.get returned=guest
+11-04 13:37:21.402 D/DualHost( 1633): DIAG getSharedPreferences('com.braze.managers.banners.storage.3963b5b6c1be1432878b0fdee61febec.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6') -> 0 keys
+11-04 13:37:21.403 D/DualHost( 1633): ASK prefs com.braze.managers.banners.impressions.3963b5b6c1be1432878b0fdee61febec.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6
+11-04 13:37:21.404 D/DualHost( 1633): DIAG getSharedPreferences('com.braze.managers.banners.impressions.3963b5b6c1be1432878b0fdee61febec.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6') -> 0 keys
+11-04 13:37:21.410 D/DualHost( 1633): ASK prefs com.appboy.storage.content_cards_storage_provider.cards.3963b5b6c1be1432878b0fdee61febec.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6
+11-04 13:37:21.411 D/DualHost( 1633): DIAG getSharedPreferences('com.appboy.storage.content_cards_storage_provider.cards.3963b5b6c1be1432878b0fdee61febec.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6') -> 0 keys
+11-04 13:37:21.411 D/DualHost( 1633): ASK prefs com.braze.storage.content_cards_storage_provider.metadata.3963b5b6c1be1432878b0fdee61febec.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6
+11-04 13:37:21.412 D/DualHost( 1633): DIAG getSharedPreferences('com.braze.storage.content_cards_storage_provider.metadata.3963b5b6c1be1432878b0fdee61febec.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6') -> 0 keys
+11-04 13:37:21.420 D/DualHost( 1633): ASK prefs com.braze.requestframework.tokenbucket..3963b5b6c1be1432878b0fdee61febec.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6
+11-04 13:37:21.421 D/DualHost( 1633): DIAG getSharedPreferences('com.braze.requestframework.tokenbucket..3963b5b6c1be1432878b0fdee61febec.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6') -> 2 keys
+11-04 13:37:21.424 D/DualHost( 1633): ASK prefs com.appboy.storage.triggers.local_assets.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6
+11-04 13:37:21.425 D/DualHost( 1633): DIAG getSharedPreferences('com.appboy.storage.triggers.local_assets.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6') -> 0 keys
+11-04 13:37:21.429 D/DualHost( 1633): ASK prefs com.appboy.storage.triggers.actions.3963b5b6c1be1432878b0fdee61febec.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6
+11-04 13:37:21.430 D/DualHost( 1633): DIAG getSharedPreferences('com.appboy.storage.triggers.actions.3963b5b6c1be1432878b0fdee61febec.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6') -> 0 keys
+11-04 13:37:21.431 D/DualHost( 1633): ASK prefs com.appboy.storage.triggers.re_eligibility.3963b5b6c1be1432878b0fdee61febec.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6
+11-04 13:37:21.431 D/DualHost( 1633): DIAG getSharedPreferences('com.appboy.storage.triggers.re_eligibility.3963b5b6c1be1432878b0fdee61febec.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6') -> 0 keys
+11-04 13:37:21.435 D/DualHost( 1633): ASK prefs com.appboy.storage.user_cache.v3.3963b5b6c1be1432878b0fdee61febec.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6
+11-04 13:37:21.436 D/DualHost( 1633): DIAG getSharedPreferences('com.appboy.storage.user_cache.v3.3963b5b6c1be1432878b0fdee61febec.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6') -> 0 keys
+11-04 13:37:21.437 D/DualHost( 1633): ASK prefs com.braze.storage.user_cache.push_token_store.3963b5b6c1be1432878b0fdee61febec.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6
+11-04 13:37:21.438 D/DualHost( 1633): DIAG getSharedPreferences('com.braze.storage.user_cache.push_token_store.3963b5b6c1be1432878b0fdee61febec.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6') -> 0 keys
+11-04 13:37:21.441 D/DualHost( 1633): ASK prefs com.appboy.storage.device_cache.v3.3963b5b6c1be1432878b0fdee61febec.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6
+11-04 13:37:21.442 D/DualHost( 1633): DIAG getSharedPreferences('com.appboy.storage.device_cache.v3.3963b5b6c1be1432878b0fdee61febec.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6') -> 1 keys
+11-04 13:37:21.444 D/DualHost( 1633): ASK prefs com.braze.storage.device_cache.metadata.3963b5b6c1be1432878b0fdee61febec.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6
+11-04 13:37:21.445 D/DualHost( 1633): DIAG getSharedPreferences('com.braze.storage.device_cache.metadata.3963b5b6c1be1432878b0fdee61febec.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6') -> 2 keys
+11-04 13:37:21.453 D/DualHost( 3063): Native engine configured for com.viber.voip (UID: 10000)
+11-04 13:37:21.454 D/DualHost( 3063): HAI0 before=null
+11-04 13:37:21.454 D/DualHost( 3063): HAI0 after=MAIN
+11-04 13:37:21.455 D/DualHost( 3063): ARGV0 before=com.ims134.dualhost:p0
+11-04 13:37:21.456 D/DualHost( 3063): ARGV0 native result=false now=com.ims134.dualhost:p0
+11-04 13:37:21.459 D/DualHost( 3063): ASK prefs startup_debug_preferences
+11-04 13:37:21.459 D/DualHost( 1633): ASK prefs com.appboy.storage.appboy_event_storage.3963b5b6c1be1432878b0fdee61febec.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6
+11-04 13:37:21.460 D/DualHost( 1633): DIAG getSharedPreferences('com.appboy.storage.appboy_event_storage.3963b5b6c1be1432878b0fdee61febec.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6') -> 0 keys
+11-04 13:37:21.460 D/DualHost( 3063): DIAG getSharedPreferences('startup_debug_preferences') -> 0 keys
+11-04 13:37:21.460 D/DualHost( 3063): DIAG getSharedPreferences('startup_debug_preferences') -> 0 keys
+11-04 13:37:21.463 D/DualHost( 3063): PKGSURVEY guest=com.viber.voip caller=com.viber.voip.ViberApplication.attachBaseContext returned=guest
+11-04 13:37:21.503 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=android.view.autofill.AutofillManager.<init> returned=host
+11-04 13:37:21.504 D/DualHost( 1633): ACC PassthroughBinder resolved 0 transaction code(s)
+11-04 13:37:21.504 D/DualHost( 1633): DIAG getSystemService('content_capture') = NULL
+11-04 13:37:21.504 D/DualHost( 1633): ACC OBSERVE tx=6 firstArg=com.google
+11-04 13:37:21.505 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=com.xiaomi.aiinput.AIInputTextManager.isAIInputEnable returned=guest
+11-04 13:37:21.506 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=com.xiaomi.aiinput.AIInputTextManager.isAIInputEnable returned=guest
+11-04 13:37:21.507 D/DualHost( 1633): ACC OBSERVE tx=46 firstArg=8e154d92-80a8-4514-bf64-003739c6919e
+11-04 13:37:21.508 D/DualHost( 1633): PERM android.permission.ACCESS_COARSE_LOCATION -> 0
+11-04 13:37:21.509 D/DualHost( 1633): PERM android.permission.ACCESS_FINE_LOCATION -> 0
+11-04 13:37:21.509 D/DualHost( 1633): PERM android.permission.RECORD_AUDIO -> 0
+11-04 13:37:21.509 D/DualHost( 1633): PERM android.permission.READ_MEDIA_IMAGES -> 0
+11-04 13:37:21.510 D/DualHost( 1633): PERM android.permission.READ_MEDIA_VIDEO -> 0
+11-04 13:37:21.515 D/DualHost( 1633): PERM android.permission.POST_NOTIFICATIONS -> 0
+11-04 13:37:21.517 D/DualHost( 1633): PERM android.permission.READ_MEDIA_VISUAL_USER_SELECTED -> 0
+11-04 13:37:21.520 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=com.mediatek.boostfwk.info.ActivityInfo.initialBasicInfo returned=guest
+11-04 13:37:21.521 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=android.view.WindowManagerGlobal.addView returned=host
+11-04 13:37:21.522 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=android.view.Window.adjustLayoutParamsForSubWindow returned=host
+11-04 13:37:21.524 D/DualHost( 1633): AM refContentProvider skipped (no connection)
+11-04 13:37:21.524 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=androidx.preference.PreferenceManager.getDefaultSharedPreferencesName returned=guest
+11-04 13:37:21.526 D/DualHost( 1633): ASK prefs com.viber.voip_preferences
+11-04 13:37:21.527 D/DualHost( 1633): DIAG getSharedPreferences('com.viber.voip_preferences') -> 1 keys
+11-04 13:37:21.527 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=android.view.ForceDarkHelperStubImpl.registerAppDarkModeObserver returned=host
+11-04 13:37:21.530 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=android.view.PreRenderScrollOptimizerImpl.initialize returned=host
+11-04 13:37:21.537 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=android.view.ViewRootImplStubImpl.enableFirstFrameSpeedUp returned=host
+11-04 13:37:21.545 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=miui.scenariorecognition.appscrollflingscenario.MotionTrackUtils.resolvePackageName returned=guest
+11-04 13:37:21.552 D/DualHost( 3063): VIBERSTATE[post-attachBaseContext] hai0.c=UNKNOWN
+11-04 13:37:21.552 D/DualHost( 3063): VIBERSTATE[post-attachBaseContext] ViberEnv.sViberFactory (com.viber.voip.ViberFactory) = null
+11-04 13:37:21.578 D/DualHost( 3063): OKD returned uad
+11-04 13:37:21.578 D/DualHost( 3063): HAI0 before=UNKNOWN
+11-04 13:37:21.578 D/DualHost( 3063): HAI0 after=MAIN
+11-04 13:37:21.579 D/DualHost( 3063): VIBERSTATE[post-hai0] hai0.c=MAIN
+11-04 13:37:21.579 D/DualHost( 3063): VIBERSTATE[post-hai0] ViberEnv.sViberFactory (com.viber.voip.ViberFactory) = null
+11-04 13:37:21.580 D/DualHost( 3063): DAI0 f.a=0
+11-04 13:37:21.580 D/DualHost( 3063): DAI0 f.b=null
+11-04 13:37:21.581 D/DualHost( 3063): DAI0 f.c=null
+11-04 13:37:21.581 D/DualHost( 3063): DAI0 f.d=null
+11-04 13:37:21.581 D/DualHost( 3063): DAI0 f.e=null
+11-04 13:37:21.582 D/DualHost( 3063): ASK prefs com.viber.voip_preferences
+11-04 13:37:21.583 D/DualHost( 3063): DIAG getSharedPreferences('com.viber.voip_preferences') -> 1 keys
+11-04 13:37:21.584 D/DualHost( 3063): DAI0 after: f.d=uvw
+11-04 13:37:21.584 D/DualHost( 3063): PNAME2 begin
+11-04 13:37:21.585 D/DualHost( 3063): PNAME2 Process.myProcessName=com.ims134.dualhost:p0
+11-04 13:37:21.585 D/DualHost( 3063): PNAME2 Application.getProcessName=com.viber.voip
+11-04 13:37:21.585 D/DualHost( 3063): PNAME2 ActivityThread.currentProcessName=com.viber.voip
+11-04 13:37:21.586 D/DualHost( 3063): PNAME2 mBoundApplication.processName=com.viber.voip
+11-04 13:37:21.587 D/DualHost( 3063): CONT built rpf0(spf0,ContinuationImpl)
+11-04 13:37:21.587 D/DualHost( 3063): CONT set kotlin.coroutines.jvm.internal.ContinuationImpl._context = EmptyCoroutineContext
+11-04 13:37:21.588 D/DualHost( 3063): CONT getContext() = kotlin.coroutines.EmptyCoroutineContext
+11-04 13:37:21.589 D/DualHost( 3063): DIRECT hsv.d[empty] threw: java.util.NoSuchElementException: Collection contains no element matching the predicate.
+11-04 13:37:21.590 D/DualHost( 3063): DIRECT hsv.d[with-x3x] threw: java.lang.ClassCastException: java.lang.Class cannot be cast to xja0
+11-04 13:37:21.590 D/DualHost( 3063): SPF0 direct outcome=error
+11-04 13:37:21.591 D/DualHost( 3063): CONT built rpf0(spf0,ContinuationImpl)
+11-04 13:37:21.591 D/DualHost( 3063): CONT set kotlin.coroutines.jvm.internal.ContinuationImpl._context = EmptyCoroutineContext
+11-04 13:37:21.591 D/DualHost( 3063): CONT getContext() = kotlin.coroutines.EmptyCoroutineContext
+11-04 13:37:21.592 D/DualHost( 3063): SPF0 failed: java.util.NoSuchElementException: Collection contains no element matching the predicate.
+11-04 13:37:21.599 D/DualHost( 3063): SPF0 stack: java.util.NoSuchElementException: Collection contains no element matching the predicate.
+11-04 13:37:21.599 D/DualHost( 3063): 	at com.adjust.sdk.sig.r3.e(SourceFile:1)
+11-04 13:37:21.599 D/DualHost( 3063): 	at hsv.d(SourceFile:39)
+11-04 13:37:21.599 D/DualHost( 3063): 	at spf0.a(SourceFile:78)
+11-04 13:37:21.599 D/DualHost( 3063): 	at java.lang.reflect.Method.invoke(Native Method)
+11-04 13:37:21.599 D/DualHost( 3063): 	at com.ims134.dualhost.ViberHacks.trySpf0Real(ViberHacks.kt:162)
+11-04 13:37:21.599 D/DualHost( 3063): 	at com.ims134.dualhost.ViberHacks.setFactory(ViberHacks.kt:16)
+11-04 13:37:21.599 D/DualHost( 3063): 	at com.ims134.dualhost.HostInstrumentation.getGuestEnv(HostInstrumentation.kt:438)
+11-04 13:37:21.599 D/DualHost( 3063): 	at com.ims134.dualhost.HostInstrumentation.ensureEnv(HostInstrumentation.kt:55)
+11-04 13:37:21.599 D/DualHost( 3063): 	at com.ims134.dualhost.BaseHostJob.onStartJob(HostJobs.kt:37)
+11-04 13:37:21.599 D/DualHost( 3063): 	at android.app.job.JobService$1.onStartJob(JobService.java:118)
+11-04 13:37:21.599 D/DualHost( 3063): 	at android.app.job.JobServiceEngine$JobHandler.handleMessage(JobServiceEngine.java:190)
+11-04 13:37:21.599 D/DualHost( 3063): 	at android.os.Handler.dispatchMessageImpl(Handler.java:146)
+11-04 13:37:21.599 D/DualHost( 3063): 	at android.os.Handler.dispatchMessage(Handler.java:129)
+11-04 13:37:21.599 D/DualHost( 3063): 	at android.os.Looper.loopOnce(Looper.java:315)
+11-04 13:37:21.599 D/DualHost( 3063): 	at android.os.Looper.loop(Looper.java:419)
+11-04 13:37:21.599 D/DualHost( 3063): 	at android.app.ActivityThread.main(ActivityThread.java:10847)
+11-04 13:37:21.599 D/DualHost( 3063): 	at java.lang.reflect.Method.invoke(Native Method)
+11-04 13:37:21.599 D/DualHost( 3063): 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:598)
+11-04 13:37:21.599 D/DualHost( 3063): 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1150)
+11-04 13:37:21.599 D/DualHost( 3063): SPF0 outcome=error
+11-04 13:37:21.600 D/DualHost( 3063): VFACTORY after spf0: sViberFactory = null
+11-04 13:37:21.600 D/DualHost( 3063): VFACTORY fake fallback
+11-04 13:37:21.601 D/DualHost( 3063): VFACTORY fake ViberEnv.init called with com.viber.voip.d
+11-04 13:37:21.603 D/DualHost( 3063): PKGNAME gms.common stack, host name for com.google.android.gms.common.GooglePlayServicesUtilLight.isGooglePlayServicesAvailable
+11-04 13:37:21.604 D/DualHost( 3063): PKGNAME gms.common stack, host name for com.google.android.gms.common.internal.zzae.zzc
+11-04 13:37:21.611 D/DualHost( 3063): PMSIG getPackageInfo pkg=com.android.vending flags=0x8002040 result=PackageInfo sha1=bd32424203e0
+11-04 13:37:21.615 D/DualHost( 3063): PMSIG getPackageInfo pkg=com.google.android.gms flags=0x8000040 result=PackageInfo sha1=2169eddb5fbb
+11-04 13:37:21.617 D/DualHost( 3063): VFACTORY gmv0.j() returned: jb30@abc0aba
+11-04 13:37:21.617 D/DualHost( 3063): VFACTORY final sViberFactory = com.viber.voip.d
+11-04 13:37:21.643 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=android.view.ViewRootImplStubImpl.isPreAllocateAllowed returned=host
+11-04 13:37:21.678 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=android.view.ViewRootImpl.performDraw returned=host
+11-04 13:37:21.703 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=android.view.ViewRootImpl.reportDrawFinished returned=host
+11-04 13:37:21.712 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=com.google.android.gms.cloudmessaging.zzj.run returned=guest
+11-04 13:37:21.726 D/DualHost( 1633): PKGNAME gms.common stack, host name for com.google.android.gms.common.internal.BaseGmsClient.getRemoteService
+11-04 13:37:21.733 D/DualHost( 1633): CS CALL getSyncAdapterTypes()
+11-04 13:37:21.733 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=c4t.run returned=guest
+11-04 13:37:21.734 D/DualHost( 1633): CS RESULT getSyncAdapterTypes -> SyncAdapterType[]
+11-04 13:37:21.735 D/DualHost( 1633): CS CALL getIsSyncable(Account(fun3dmaya@gmail.com,com.google), com.google.android.gms.people)
+11-04 13:37:21.738 D/DualHost( 1633): AMCALL removeContentProvider
+11-04 13:37:21.739 D/DualHost( 1633): CS RESULT getIsSyncable -> 1
+11-04 13:37:21.740 D/DualHost( 1633): CS isSyncActive answered false locally (no real call made)
+11-04 13:37:21.740 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(fun3dmaya@gmail.com,com.google), com.google.android.gms.people, null, 0)
+11-04 13:37:21.742 D/DualHost( 1633): CS RESULT isSyncPendingAsUser -> false
+11-04 13:37:21.743 D/DualHost( 1633): CS CALL getIsSyncable(Account(eng.ims134@gmail.com,com.google), com.google.android.gms.people)
+11-04 13:37:21.744 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(eng.ims134@gmail.com,com.google), com.google.android.gms.people, null, 0)
+11-04 13:37:21.745 D/DualHost( 1633): CS CALL getIsSyncable(Account(mywhatsupp134@gmail.com,com.google), com.google.android.gms.people)
+11-04 13:37:21.746 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(mywhatsupp134@gmail.com,com.google), com.google.android.gms.people, null, 0)
+11-04 13:37:21.747 D/DualHost( 3063): AMCALL getHistoricalProcessStartReasons
+11-04 13:37:21.747 D/DualHost( 1633): CS CALL getIsSyncable(Account(rms.way.2014@gmail.com,com.google), com.google.android.gms.people)
+11-04 13:37:21.748 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(rms.way.2014@gmail.com,com.google), com.google.android.gms.people, null, 0)
+11-04 13:37:21.749 D/DualHost( 1633): CS CALL getIsSyncable(Account(developer.ims134@gmail.com,com.google), com.google.android.gms.people)
+11-04 13:37:21.750 D/DualHost( 3063): AM startReasons args=null, 1, 0
+11-04 13:37:21.750 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(developer.ims134@gmail.com,com.google), com.google.android.gms.people, null, 0)
+11-04 13:37:21.750 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=nrv0.a returned=guest
+11-04 13:37:21.751 D/DualHost( 1633): CS CALL getIsSyncable(Account(designerdashne@gmail.com,com.google), com.google.android.gms.people)
+11-04 13:37:21.751 D/DualHost( 3063): AM startReasons result=android.content.pm.ParceledListSlice
+11-04 13:37:21.753 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(designerdashne@gmail.com,com.google), com.google.android.gms.people, null, 0)
+11-04 13:37:21.753 D/DualHost( 1633): CS CALL getIsSyncable(Account(tube.user134@gmail.com,com.google), com.google.android.gms.people)
+11-04 13:37:21.755 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(tube.user134@gmail.com,com.google), com.google.android.gms.people, null, 0)
+11-04 13:37:21.756 D/DualHost( 3063): AM startReasons parcel count=1 bytes=516
+11-04 13:37:21.757 D/DualHost( 1633): CS CALL getIsSyncable(Account(fun3dmaya@gmail.com,com.google), com.google.android.apps.docs.editors.kix)
+11-04 13:37:21.758 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(fun3dmaya@gmail.com,com.google), com.google.android.apps.docs.editors.kix, null, 0)
+11-04 13:37:21.759 D/DualHost( 1633): CS CALL getIsSyncable(Account(eng.ims134@gmail.com,com.google), com.google.android.apps.docs.editors.kix)
+11-04 13:37:21.760 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(eng.ims134@gmail.com,com.google), com.google.android.apps.docs.editors.kix, null, 0)
+11-04 13:37:21.761 D/DualHost( 1633): CS CALL getIsSyncable(Account(mywhatsupp134@gmail.com,com.google), com.google.android.apps.docs.editors.kix)
+11-04 13:37:21.762 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(mywhatsupp134@gmail.com,com.google), com.google.android.apps.docs.editors.kix, null, 0)
+11-04 13:37:21.764 D/DualHost( 1633): CS CALL getIsSyncable(Account(rms.way.2014@gmail.com,com.google), com.google.android.apps.docs.editors.kix)
+11-04 13:37:21.765 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(rms.way.2014@gmail.com,com.google), com.google.android.apps.docs.editors.kix, null, 0)
+11-04 13:37:21.766 D/DualHost( 3063): PKGSURVEY guest=com.viber.voip caller=android.content.ComponentName.<init> returned=host
+11-04 13:37:21.767 D/DualHost( 1633): CS CALL getIsSyncable(Account(developer.ims134@gmail.com,com.google), com.google.android.apps.docs.editors.kix)
+11-04 13:37:21.770 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(developer.ims134@gmail.com,com.google), com.google.android.apps.docs.editors.kix, null, 0)
+11-04 13:37:21.771 D/DualHost( 1633): CS CALL getIsSyncable(Account(designerdashne@gmail.com,com.google), com.google.android.apps.docs.editors.kix)
+11-04 13:37:21.771 D/DualHost( 1633): AMCALL unbindService
+11-04 13:37:21.772 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(designerdashne@gmail.com,com.google), com.google.android.apps.docs.editors.kix, null, 0)
+11-04 13:37:21.773 D/DualHost( 1633): CS CALL getIsSyncable(Account(tube.user134@gmail.com,com.google), com.google.android.apps.docs.editors.kix)
+11-04 13:37:21.774 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(tube.user134@gmail.com,com.google), com.google.android.apps.docs.editors.kix, null, 0)
+11-04 13:37:21.775 D/DualHost( 1633): ACC AUTO-LEARNED tx=6 (firstArg matched accountType=com.viber.voip) -> fake account from now on
+11-04 13:37:21.776 D/DualHost( 1633): CS CALL getIsSyncable(Account(Me,com.viber.voip), com.android.contacts)
+11-04 13:37:21.777 D/DualHost( 1633): CS RESULT getIsSyncable -> -1
+11-04 13:37:21.777 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(Me,com.viber.voip), com.android.contacts, null, 0)
+11-04 13:37:21.778 D/DualHost( 1633): CS CALL getIsSyncable(Account(fun3dmaya@gmail.com,com.google), com.android.contacts)
+11-04 13:37:21.779 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(fun3dmaya@gmail.com,com.google), com.android.contacts, null, 0)
+11-04 13:37:21.780 D/DualHost( 1633): CS CALL getIsSyncable(Account(eng.ims134@gmail.com,com.google), com.android.contacts)
+11-04 13:37:21.782 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(eng.ims134@gmail.com,com.google), com.android.contacts, null, 0)
+11-04 13:37:21.785 D/DualHost( 1633): CS CALL getIsSyncable(Account(mywhatsupp134@gmail.com,com.google), com.android.contacts)
+11-04 13:37:21.787 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(mywhatsupp134@gmail.com,com.google), com.android.contacts, null, 0)
+11-04 13:37:21.788 D/DualHost( 1633): CS CALL getIsSyncable(Account(rms.way.2014@gmail.com,com.google), com.android.contacts)
+11-04 13:37:21.792 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(rms.way.2014@gmail.com,com.google), com.android.contacts, null, 0)
+11-04 13:37:21.793 D/DualHost( 1633): CS CALL getIsSyncable(Account(developer.ims134@gmail.com,com.google), com.android.contacts)
+11-04 13:37:21.794 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(developer.ims134@gmail.com,com.google), com.android.contacts, null, 0)
+11-04 13:37:21.795 D/DualHost( 1633): CS CALL getIsSyncable(Account(designerdashne@gmail.com,com.google), com.android.contacts)
+11-04 13:37:21.796 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(designerdashne@gmail.com,com.google), com.android.contacts, null, 0)
+11-04 13:37:21.798 D/DualHost( 1633): CS CALL getIsSyncable(Account(tube.user134@gmail.com,com.google), com.android.contacts)
+11-04 13:37:21.801 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(tube.user134@gmail.com,com.google), com.android.contacts, null, 0)
+11-04 13:37:21.803 D/DualHost( 1633): CS CALL getIsSyncable(Account(fun3dmaya@gmail.com,com.google), com.google.android.gms.games.background)
+11-04 13:37:21.804 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(fun3dmaya@gmail.com,com.google), com.google.android.gms.games.background, null, 0)
+11-04 13:37:21.807 D/DualHost( 1633): CS CALL getIsSyncable(Account(eng.ims134@gmail.com,com.google), com.google.android.gms.games.background)
+11-04 13:37:21.808 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(eng.ims134@gmail.com,com.google), com.google.android.gms.games.background, null, 0)
+11-04 13:37:21.809 D/DualHost( 1633): CS CALL getIsSyncable(Account(mywhatsupp134@gmail.com,com.google), com.google.android.gms.games.background)
+11-04 13:37:21.810 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(mywhatsupp134@gmail.com,com.google), com.google.android.gms.games.background, null, 0)
+11-04 13:37:21.811 D/DualHost( 1633): CS CALL getIsSyncable(Account(rms.way.2014@gmail.com,com.google), com.google.android.gms.games.background)
+11-04 13:37:21.812 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(rms.way.2014@gmail.com,com.google), com.google.android.gms.games.background, null, 0)
+11-04 13:37:21.813 D/DualHost( 1633): CS CALL getIsSyncable(Account(developer.ims134@gmail.com,com.google), com.google.android.gms.games.background)
+11-04 13:37:21.814 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(developer.ims134@gmail.com,com.google), com.google.android.gms.games.background, null, 0)
+11-04 13:37:21.815 D/DualHost( 1633): CS CALL getIsSyncable(Account(designerdashne@gmail.com,com.google), com.google.android.gms.games.background)
+11-04 13:37:21.816 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(designerdashne@gmail.com,com.google), com.google.android.gms.games.background, null, 0)
+11-04 13:37:21.817 D/DualHost( 1633): CS CALL getIsSyncable(Account(tube.user134@gmail.com,com.google), com.google.android.gms.games.background)
+11-04 13:37:21.818 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(tube.user134@gmail.com,com.google), com.google.android.gms.games.background, null, 0)
+11-04 13:37:21.820 D/DualHost( 1633): CS CALL getIsSyncable(Account(fun3dmaya@gmail.com,com.google), subscribedfeeds)
+11-04 13:37:21.822 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(fun3dmaya@gmail.com,com.google), subscribedfeeds, null, 0)
+11-04 13:37:21.823 D/DualHost( 1633): CS CALL getIsSyncable(Account(eng.ims134@gmail.com,com.google), subscribedfeeds)
+11-04 13:37:21.824 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(eng.ims134@gmail.com,com.google), subscribedfeeds, null, 0)
+11-04 13:37:21.825 D/DualHost( 1633): CS CALL getIsSyncable(Account(mywhatsupp134@gmail.com,com.google), subscribedfeeds)
+11-04 13:37:21.826 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(mywhatsupp134@gmail.com,com.google), subscribedfeeds, null, 0)
+11-04 13:37:21.827 D/DualHost( 1633): CS CALL getIsSyncable(Account(rms.way.2014@gmail.com,com.google), subscribedfeeds)
+11-04 13:37:21.828 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(rms.way.2014@gmail.com,com.google), subscribedfeeds, null, 0)
+11-04 13:37:21.828 D/DualHost( 1633): CS CALL getIsSyncable(Account(developer.ims134@gmail.com,com.google), subscribedfeeds)
+11-04 13:37:21.829 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(developer.ims134@gmail.com,com.google), subscribedfeeds, null, 0)
+11-04 13:37:21.830 D/DualHost( 1633): CS CALL getIsSyncable(Account(designerdashne@gmail.com,com.google), subscribedfeeds)
+11-04 13:37:21.834 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(designerdashne@gmail.com,com.google), subscribedfeeds, null, 0)
+11-04 13:37:21.835 D/DualHost( 1633): CS CALL getIsSyncable(Account(tube.user134@gmail.com,com.google), subscribedfeeds)
+11-04 13:37:21.836 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(tube.user134@gmail.com,com.google), subscribedfeeds, null, 0)
+11-04 13:37:21.838 D/DualHost( 1633): CS CALL getIsSyncable(Account(1819312453,org.telegram.messenger), com.android.contacts)
+11-04 13:37:21.840 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(1819312453,org.telegram.messenger), com.android.contacts, null, 0)
+11-04 13:37:21.845 D/DualHost( 1633): CS CALL getIsSyncable(Account(Meet,com.google.android.apps.tachyon), com.android.contacts)
+11-04 13:37:21.847 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(Meet,com.google.android.apps.tachyon), com.android.contacts, null, 0)
+11-04 13:37:21.851 D/DualHost( 1633): CS CALL getIsSyncable(Account(fun3dmaya@gmail.com,com.google), com.google.android.location.reporting)
+11-04 13:37:21.853 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(fun3dmaya@gmail.com,com.google), com.google.android.location.reporting, null, 0)
+11-04 13:37:21.853 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=android.widget.Editor$ProcessTextIntentActionsHandler.<init> returned=host
+11-04 13:37:21.856 D/DualHost( 1633): CS CALL getIsSyncable(Account(eng.ims134@gmail.com,com.google), com.google.android.location.reporting)
+11-04 13:37:21.860 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(eng.ims134@gmail.com,com.google), com.google.android.location.reporting, null, 0)
+11-04 13:37:21.862 D/DualHost( 1633): CS CALL getIsSyncable(Account(mywhatsupp134@gmail.com,com.google), com.google.android.location.reporting)
+11-04 13:37:21.864 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(mywhatsupp134@gmail.com,com.google), com.google.android.location.reporting, null, 0)
+11-04 13:37:21.865 D/DualHost( 1633): CS CALL getIsSyncable(Account(rms.way.2014@gmail.com,com.google), com.google.android.location.reporting)
+11-04 13:37:21.866 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(rms.way.2014@gmail.com,com.google), com.google.android.location.reporting, null, 0)
+11-04 13:37:21.867 D/DualHost( 1633): CS CALL getIsSyncable(Account(developer.ims134@gmail.com,com.google), com.google.android.location.reporting)
+11-04 13:37:21.868 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(developer.ims134@gmail.com,com.google), com.google.android.location.reporting, null, 0)
+11-04 13:37:21.869 D/DualHost( 1633): CS CALL getIsSyncable(Account(designerdashne@gmail.com,com.google), com.google.android.location.reporting)
+11-04 13:37:21.871 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(designerdashne@gmail.com,com.google), com.google.android.location.reporting, null, 0)
+11-04 13:37:21.872 D/DualHost( 1633): CS CALL getIsSyncable(Account(tube.user134@gmail.com,com.google), com.google.android.location.reporting)
+11-04 13:37:21.874 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(tube.user134@gmail.com,com.google), com.google.android.location.reporting, null, 0)
+11-04 13:37:21.878 D/DualHost( 1633): CS CALL getIsSyncable(Account(WhatsApp,com.whatsapp), com.android.contacts)
+11-04 13:37:21.880 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(WhatsApp,com.whatsapp), com.android.contacts, null, 0)
+11-04 13:37:21.884 D/DualHost( 1633): CS CALL getIsSyncable(Account(fun3dmaya@gmail.com,com.google), com.google.android.gms.subscribedfeeds)
+11-04 13:37:21.895 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(fun3dmaya@gmail.com,com.google), com.google.android.gms.subscribedfeeds, null, 0)
+11-04 13:37:21.897 D/DualHost( 1633): CS CALL getIsSyncable(Account(eng.ims134@gmail.com,com.google), com.google.android.gms.subscribedfeeds)
+11-04 13:37:21.898 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(eng.ims134@gmail.com,com.google), com.google.android.gms.subscribedfeeds, null, 0)
+11-04 13:37:21.901 D/DualHost( 1633): CS CALL getIsSyncable(Account(mywhatsupp134@gmail.com,com.google), com.google.android.gms.subscribedfeeds)
+11-04 13:37:21.903 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(mywhatsupp134@gmail.com,com.google), com.google.android.gms.subscribedfeeds, null, 0)
+11-04 13:37:21.905 D/DualHost( 1633): AMCALL reportStartInfoViewTimestamps
+11-04 13:37:21.917 D/DualHost( 1633): CS CALL getIsSyncable(Account(rms.way.2014@gmail.com,com.google), com.google.android.gms.subscribedfeeds)
+11-04 13:37:21.920 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(rms.way.2014@gmail.com,com.google), com.google.android.gms.subscribedfeeds, null, 0)
+11-04 13:37:21.922 D/DualHost( 1633): CS CALL getIsSyncable(Account(developer.ims134@gmail.com,com.google), com.google.android.gms.subscribedfeeds)
+11-04 13:37:21.924 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(developer.ims134@gmail.com,com.google), com.google.android.gms.subscribedfeeds, null, 0)
+11-04 13:37:21.926 D/DualHost( 1633): CS CALL getIsSyncable(Account(designerdashne@gmail.com,com.google), com.google.android.gms.subscribedfeeds)
+11-04 13:37:21.928 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(designerdashne@gmail.com,com.google), com.google.android.gms.subscribedfeeds, null, 0)
+11-04 13:37:21.929 D/DualHost( 1633): CS CALL getIsSyncable(Account(tube.user134@gmail.com,com.google), com.google.android.gms.subscribedfeeds)
+11-04 13:37:21.930 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(tube.user134@gmail.com,com.google), com.google.android.gms.subscribedfeeds, null, 0)
+11-04 13:37:21.933 D/DualHost( 1633): CS CALL getIsSyncable(Account(Messenger,com.facebook.messenger), com.android.contacts)
+11-04 13:37:21.936 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(Messenger,com.facebook.messenger), com.android.contacts, null, 0)
+11-04 13:37:21.938 D/DualHost( 1633): CS CALL getIsSyncable(Account(fun3dmaya@gmail.com,com.google), com.google.android.apps.docs)
+11-04 13:37:21.939 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(fun3dmaya@gmail.com,com.google), com.google.android.apps.docs, null, 0)
+11-04 13:37:21.943 D/DualHost( 1633): CS CALL getIsSyncable(Account(eng.ims134@gmail.com,com.google), com.google.android.apps.docs)
+11-04 13:37:21.949 D/DualHost( 3063): PM guest getProviderInfo served: androidx.startup.InitializationProvider
+11-04 13:37:21.952 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(eng.ims134@gmail.com,com.google), com.google.android.apps.docs, null, 0)
+11-04 13:37:21.953 D/DualHost( 1633): CS CALL getIsSyncable(Account(mywhatsupp134@gmail.com,com.google), com.google.android.apps.docs)
+11-04 13:37:21.954 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(mywhatsupp134@gmail.com,com.google), com.google.android.apps.docs, null, 0)
+11-04 13:37:21.955 D/DualHost( 1633): CS CALL getIsSyncable(Account(rms.way.2014@gmail.com,com.google), com.google.android.apps.docs)
+11-04 13:37:21.958 D/DualHost( 3063): AM startReasons parcel count=1 bytes=540
+11-04 13:37:21.960 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(rms.way.2014@gmail.com,com.google), com.google.android.apps.docs, null, 0)
+11-04 13:37:21.961 D/DualHost( 3063): guest provider started: com.viber.provider.contacts.ViberContactsProvider authority=com.viber.voip.provider.vibercontacts
+11-04 13:37:21.962 D/DualHost( 3063): guest provider started: com.viber.provider.messages.ViberMessagesProvider authority=com.viber.voip.provider.vibermessages
+11-04 13:37:21.963 D/DualHost( 3063): guest provider started: com.vungle.ads.VungleProvider authority=com.viber.voip.vungle-provider
+11-04 13:37:21.964 D/DualHost( 1633): CS CALL getIsSyncable(Account(developer.ims134@gmail.com,com.google), com.google.android.apps.docs)
+11-04 13:37:21.964 D/DualHost( 3063): PKGSURVEY guest=com.viber.voip caller=com.google.android.gms.ads.internal.client.zzev.attachInfo returned=guest
+11-04 13:37:21.965 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(developer.ims134@gmail.com,com.google), com.google.android.apps.docs, null, 0)
+11-04 13:37:21.966 D/DualHost( 1633): CS CALL getIsSyncable(Account(designerdashne@gmail.com,com.google), com.google.android.apps.docs)
+11-04 13:37:21.972 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(designerdashne@gmail.com,com.google), com.google.android.apps.docs, null, 0)
+11-04 13:37:21.973 D/DualHost( 3063): PM DATADIR /data/user/0/com.viber.voip -> /data/user/0/com.viber.voip/virtual/com.viber.voip/10
+11-04 13:37:21.975 D/DualHost( 1633): CS CALL getIsSyncable(Account(tube.user134@gmail.com,com.google), com.google.android.apps.docs)
+11-04 13:37:21.975 D/DualHost( 3063): guest provider started: com.google.android.gms.ads.MobileAdsInitProvider authority=com.viber.voip.mobileadsinitprovider
+11-04 13:37:21.983 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(tube.user134@gmail.com,com.google), com.google.android.apps.docs, null, 0)
+11-04 13:37:21.987 D/DualHost( 1633): CS CALL getIsSyncable(Account(fun3dmaya@gmail.com,com.google), com.google.android.gms.reminders)
+11-04 13:37:21.988 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(fun3dmaya@gmail.com,com.google), com.google.android.gms.reminders, null, 0)
+11-04 13:37:21.991 D/DualHost( 1633): CS RESULT isSyncPendingAsUser -> true
+11-04 13:37:21.997 D/DualHost( 1633): CS CALL getIsSyncable(Account(eng.ims134@gmail.com,com.google), com.google.android.gms.reminders)
+11-04 13:37:22.000 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(eng.ims134@gmail.com,com.google), com.google.android.gms.reminders, null, 0)
+11-04 13:37:22.008 D/DualHost( 1633): CS CALL getIsSyncable(Account(mywhatsupp134@gmail.com,com.google), com.google.android.gms.reminders)
+11-04 13:37:22.010 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(mywhatsupp134@gmail.com,com.google), com.google.android.gms.reminders, null, 0)
+11-04 13:37:22.016 D/DualHost( 1633): CS CALL getIsSyncable(Account(rms.way.2014@gmail.com,com.google), com.google.android.gms.reminders)
+11-04 13:37:22.018 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(rms.way.2014@gmail.com,com.google), com.google.android.gms.reminders, null, 0)
+11-04 13:37:22.020 D/DualHost( 1633): CS CALL getIsSyncable(Account(developer.ims134@gmail.com,com.google), com.google.android.gms.reminders)
+11-04 13:37:22.022 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(developer.ims134@gmail.com,com.google), com.google.android.gms.reminders, null, 0)
+11-04 13:37:22.024 D/DualHost( 1633): CS CALL getIsSyncable(Account(designerdashne@gmail.com,com.google), com.google.android.gms.reminders)
+11-04 13:37:22.026 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(designerdashne@gmail.com,com.google), com.google.android.gms.reminders, null, 0)
+11-04 13:37:22.028 D/DualHost( 1633): CS CALL getIsSyncable(Account(tube.user134@gmail.com,com.google), com.google.android.gms.reminders)
+11-04 13:37:22.031 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(tube.user134@gmail.com,com.google), com.google.android.gms.reminders, null, 0)
+11-04 13:37:22.035 D/DualHost( 1633): CS CALL getIsSyncable(Account(fun3dmaya@gmail.com,com.google), com.google.android.gms.fitness)
+11-04 13:37:22.037 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(fun3dmaya@gmail.com,com.google), com.google.android.gms.fitness, null, 0)
+11-04 13:37:22.038 D/DualHost( 1633): CS CALL getIsSyncable(Account(eng.ims134@gmail.com,com.google), com.google.android.gms.fitness)
+11-04 13:37:22.039 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(eng.ims134@gmail.com,com.google), com.google.android.gms.fitness, null, 0)
+11-04 13:37:22.040 D/DualHost( 1633): CS CALL getIsSyncable(Account(mywhatsupp134@gmail.com,com.google), com.google.android.gms.fitness)
+11-04 13:37:22.041 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(mywhatsupp134@gmail.com,com.google), com.google.android.gms.fitness, null, 0)
+11-04 13:37:22.042 D/DualHost( 1633): CS CALL getIsSyncable(Account(rms.way.2014@gmail.com,com.google), com.google.android.gms.fitness)
+11-04 13:37:22.043 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(rms.way.2014@gmail.com,com.google), com.google.android.gms.fitness, null, 0)
+11-04 13:37:22.044 D/DualHost( 1633): CS CALL getIsSyncable(Account(developer.ims134@gmail.com,com.google), com.google.android.gms.fitness)
+11-04 13:37:22.045 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(developer.ims134@gmail.com,com.google), com.google.android.gms.fitness, null, 0)
+11-04 13:37:22.046 D/DualHost( 1633): CS CALL getIsSyncable(Account(designerdashne@gmail.com,com.google), com.google.android.gms.fitness)
+11-04 13:37:22.047 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(designerdashne@gmail.com,com.google), com.google.android.gms.fitness, null, 0)
+11-04 13:37:22.047 D/DualHost( 1633): CS CALL getIsSyncable(Account(tube.user134@gmail.com,com.google), com.google.android.gms.fitness)
+11-04 13:37:22.048 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(tube.user134@gmail.com,com.google), com.google.android.gms.fitness, null, 0)
+11-04 13:37:22.050 D/DualHost( 1633): CS CALL getIsSyncable(Account(fun3dmaya@gmail.com,com.google), com.google.android.gms.chromesync)
+11-04 13:37:22.051 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(fun3dmaya@gmail.com,com.google), com.google.android.gms.chromesync, null, 0)
+11-04 13:37:22.052 D/DualHost( 1633): CS CALL getIsSyncable(Account(eng.ims134@gmail.com,com.google), com.google.android.gms.chromesync)
+11-04 13:37:22.053 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(eng.ims134@gmail.com,com.google), com.google.android.gms.chromesync, null, 0)
+11-04 13:37:22.054 D/DualHost( 1633): CS CALL getIsSyncable(Account(mywhatsupp134@gmail.com,com.google), com.google.android.gms.chromesync)
+11-04 13:37:22.055 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(mywhatsupp134@gmail.com,com.google), com.google.android.gms.chromesync, null, 0)
+11-04 13:37:22.056 D/DualHost( 1633): CS CALL getIsSyncable(Account(rms.way.2014@gmail.com,com.google), com.google.android.gms.chromesync)
+11-04 13:37:22.057 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(rms.way.2014@gmail.com,com.google), com.google.android.gms.chromesync, null, 0)
+11-04 13:37:22.058 D/DualHost( 1633): CS CALL getIsSyncable(Account(developer.ims134@gmail.com,com.google), com.google.android.gms.chromesync)
+11-04 13:37:22.059 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(developer.ims134@gmail.com,com.google), com.google.android.gms.chromesync, null, 0)
+11-04 13:37:22.059 D/DualHost( 1633): CS CALL getIsSyncable(Account(designerdashne@gmail.com,com.google), com.google.android.gms.chromesync)
+11-04 13:37:22.060 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(designerdashne@gmail.com,com.google), com.google.android.gms.chromesync, null, 0)
+11-04 13:37:22.061 D/DualHost( 1633): CS CALL getIsSyncable(Account(tube.user134@gmail.com,com.google), com.google.android.gms.chromesync)
+11-04 13:37:22.062 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(tube.user134@gmail.com,com.google), com.google.android.gms.chromesync, null, 0)
+11-04 13:37:22.064 D/DualHost( 1633): CS CALL getIsSyncable(Account(fun3dmaya@gmail.com,com.google), com.google.android.gms.games)
+11-04 13:37:22.065 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(fun3dmaya@gmail.com,com.google), com.google.android.gms.games, null, 0)
+11-04 13:37:22.066 D/DualHost( 1633): CS CALL getIsSyncable(Account(eng.ims134@gmail.com,com.google), com.google.android.gms.games)
+11-04 13:37:22.067 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(eng.ims134@gmail.com,com.google), com.google.android.gms.games, null, 0)
+11-04 13:37:22.068 D/DualHost( 1633): CS CALL getIsSyncable(Account(mywhatsupp134@gmail.com,com.google), com.google.android.gms.games)
+11-04 13:37:22.069 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(mywhatsupp134@gmail.com,com.google), com.google.android.gms.games, null, 0)
+11-04 13:37:22.070 D/DualHost( 1633): CS CALL getIsSyncable(Account(rms.way.2014@gmail.com,com.google), com.google.android.gms.games)
+11-04 13:37:22.071 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(rms.way.2014@gmail.com,com.google), com.google.android.gms.games, null, 0)
+11-04 13:37:22.072 D/DualHost( 1633): CS CALL getIsSyncable(Account(developer.ims134@gmail.com,com.google), com.google.android.gms.games)
+11-04 13:37:22.073 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(developer.ims134@gmail.com,com.google), com.google.android.gms.games, null, 0)
+11-04 13:37:22.074 D/DualHost( 1633): CS CALL getIsSyncable(Account(designerdashne@gmail.com,com.google), com.google.android.gms.games)
+11-04 13:37:22.075 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(designerdashne@gmail.com,com.google), com.google.android.gms.games, null, 0)
+11-04 13:37:22.081 D/DualHost( 1633): CS CALL getIsSyncable(Account(tube.user134@gmail.com,com.google), com.google.android.gms.games)
+11-04 13:37:22.086 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(tube.user134@gmail.com,com.google), com.google.android.gms.games, null, 0)
+11-04 13:37:22.088 D/DualHost( 1633): CS CALL getIsSyncable(Account(fun3dmaya@gmail.com,com.google), gmail-ls)
+11-04 13:37:22.089 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(fun3dmaya@gmail.com,com.google), gmail-ls, null, 0)
+11-04 13:37:22.090 D/DualHost( 1633): CS CALL getIsSyncable(Account(eng.ims134@gmail.com,com.google), gmail-ls)
+11-04 13:37:22.091 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(eng.ims134@gmail.com,com.google), gmail-ls, null, 0)
+11-04 13:37:22.092 D/DualHost( 1633): CS CALL getIsSyncable(Account(mywhatsupp134@gmail.com,com.google), gmail-ls)
+11-04 13:37:22.095 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(mywhatsupp134@gmail.com,com.google), gmail-ls, null, 0)
+11-04 13:37:22.097 D/DualHost( 1633): CS CALL getIsSyncable(Account(rms.way.2014@gmail.com,com.google), gmail-ls)
+11-04 13:37:22.100 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(rms.way.2014@gmail.com,com.google), gmail-ls, null, 0)
+11-04 13:37:22.102 D/DualHost( 1633): CS CALL getIsSyncable(Account(developer.ims134@gmail.com,com.google), gmail-ls)
+11-04 13:37:22.103 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(developer.ims134@gmail.com,com.google), gmail-ls, null, 0)
+11-04 13:37:22.104 D/DualHost( 1633): CS CALL getIsSyncable(Account(designerdashne@gmail.com,com.google), gmail-ls)
+11-04 13:37:22.108 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(designerdashne@gmail.com,com.google), gmail-ls, null, 0)
+11-04 13:37:22.109 D/DualHost( 1633): CS CALL getIsSyncable(Account(tube.user134@gmail.com,com.google), gmail-ls)
+11-04 13:37:22.110 D/DualHost( 1633): CS CALL isSyncPendingAsUser(Account(tube.user134@gmail.com,com.google), gmail-ls, null, 0)
+11-04 13:37:22.117 D/DualHost( 3063): PM guest getServiceInfo served: com.google.mlkit.common.internal.MlKitComponentDiscoveryService
+11-04 13:37:22.122 D/DualHost( 3063): guest provider started: com.google.mlkit.common.internal.MlKitInitProvider authority=com.viber.voip.mlkitinitprovider
+11-04 13:37:22.247 D/DualHost( 3063): guest provider started: androidx.startup.InitializationProvider authority=com.viber.voip.androidx-startup
+11-04 13:37:22.248 D/DualHost( 3063): guest provider started: androidx.core.content.FileProvider authority=com.viber.voip.provider.file
+11-04 13:37:22.249 D/DualHost( 3063): guest provider started: com.viber.voip.sound.RingtoneProvider authority=com.viber.voip.provider.ringtone
+11-04 13:37:22.259 D/DualHost( 3063): guest provider started: com.viber.voip.gallery.provider.GalleryContentProvider authority=com.viber.voip.provider.gallery
+11-04 13:37:22.261 D/DualHost( 3063): guest provider started: com.viber.voip.storage.provider.InternalFileProvider authority=com.viber.voip.provider.internal_files
+11-04 13:37:22.262 D/DualHost( 3063): guest provider started: com.viber.voip.storage.provider.ExternalFileProvider authority=com.viber.voip.provider.shareable_files
+11-04 13:37:22.263 D/DualHost( 3063): guest provider started: com.facebook.ads.AudienceNetworkContentProvider authority=com.viber.voip.AudienceNetworkContentProvider
+11-04 13:37:22.263 D/DualHost( 3063): ASK prefs com.facebook.ads.flash
+11-04 13:37:22.264 D/DualHost( 3063): guest provider started: com.snapchat.kit.sdk.SnapKitInitProvider authority=com.viber.voip.SnapKitInitProvider
+11-04 13:37:22.273 D/DualHost( 3063): guest provider started: com.adjust.sdk.SystemLifecycleContentProvider authority=com.viber.voip.adjust-lifecycle-provider
+11-04 13:37:22.274 D/DualHost( 3063): guest provider started: com.reactnativecommunity.webview.RNCWebViewFileProvider authority=com.viber.voip.fileprovider
+11-04 13:37:22.275 D/DualHost( 3063): APPINFOCALLER guest=com.viber.voip caller=android.content.ContextWrapper.getApplicationInfo
+11-04 13:37:22.276 D/DualHost( 1633): AM getContentProvider: serving com.viber.voip.provider.internal_files locally (no slot, dedicated process)
+11-04 13:37:22.277 D/DualHost( 3063): DIAG getSharedPreferences('com.facebook.ads.flash') -> 0 keys
+11-04 13:37:22.277 D/DualHost( 1633): AM getContentProvider: local in-process holder built for com.viber.voip.provider.internal_files
+11-04 13:37:22.430 D/DualHost( 3063): PKGSURVEY guest=com.viber.voip caller=com.facebook.ads.internal.util.process.ProcessUtils.getProcessSpecificName returned=guest
+11-04 13:37:22.430 D/DualHost( 3063): DIAG getApplicationInfo() -> guest com.viber.voip, meta=33 keys
+11-04 13:37:22.433 D/DualHost( 3063): ASK prefs com.facebook.ads.FEATURE_CONFIG
+11-04 13:37:22.434 D/DualHost( 3063): PKGSURVEY guest=com.viber.voip caller=android.app.InstrumentationStubImpl.callApplicationOnCreate returned=host
+11-04 13:37:22.436 D/DualHost( 3063): Pre-init ProcessLifecycleOwner succeeded
+11-04 13:37:22.436 D/DualHost( 3063): DIAG getSharedPreferences('com.facebook.ads.FEATURE_CONFIG') -> 0 keys
+11-04 13:37:22.438 D/DualHost( 3063): Pre-warmed id2.b() on main thread: id2@b6c14b6
+11-04 13:37:22.439 D/DualHost( 3063): VIBERSTATE[post-onCreate] hai0.c=MAIN
+11-04 13:37:22.439 D/DualHost( 3063): VIBERSTATE[post-onCreate] ViberEnv.sViberFactory (com.viber.voip.ViberFactory) = d
+11-04 13:37:22.585 D/DualHost( 3063): AMCALL registerReceiverWithFeature
+11-04 13:37:22.587 D/DualHost( 3063): GUESTRECV registered com.viber.voip.receiver.SDCardBroadcastReceiver filters=1 exported=false
+11-04 13:37:22.589 D/DualHost( 3063): GUESTRECV registered com.viber.voip.messages.conversation.reminder.TimeZoneChangedReceiver filters=1 exported=true
+11-04 13:37:22.590 D/DualHost( 3063): GUESTRECV registered com.viber.voip.receiver.PackageReplacedReceiver filters=1 exported=false
+11-04 13:37:22.597 D/DualHost( 3063): GUESTRECV registered com.viber.voip.notif.receivers.NotificationsBroadcastReceiver filters=8 exported=false
+11-04 13:37:22.599 D/DualHost( 3063): GUESTRECV registered com.viber.voip.receiver.ReminderPermissionChangeReceiver filters=1 exported=false
+11-04 13:37:22.600 D/DualHost( 3063): GUESTRECV registered com.viber.voip.viberpay.notifications.VpNotificationDismissReceiver filters=1 exported=false
+11-04 13:37:22.600 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=ilc.<init> returned=guest
+11-04 13:37:22.602 D/DualHost( 3063): GUESTRECV registered com.viber.service.ServiceAutoLauncher filters=1 exported=false
+11-04 13:37:22.603 D/DualHost( 3063): GUESTRECV registered com.viber.voip.feature.image.remix.presentation.notification.ImageRemixNotificationDismissReceiver filters=1 exported=false
+11-04 13:37:22.605 D/DualHost( 3063): GUESTRECV registered com.viber.voip.feature.dating.data.common.datetime.receiver.DatingDateTimeChangedReceiver filters=1 exported=false
+11-04 13:37:22.606 D/DualHost( 3063): GUESTRECV registered com.viber.voip.feature.re.engage.notification.ReEngageNotificationBroadcastReceiver filters=1 exported=false
+11-04 13:37:22.608 D/DualHost( 3063): GUESTRECV registered com.viber.voip.feature.callerid.CallBroadcastReceiver filters=1 exported=true
+11-04 13:37:22.609 D/DualHost( 3063): GUESTRECV registered com.viber.voip.core.notif.receivers.PendingIntentBroadcastReceiver filters=1 exported=false
+11-04 13:37:22.611 D/DualHost( 3063): GUESTRECV registered com.google.firebase.iid.FirebaseInstanceIdReceiver filters=1 exported=true
+11-04 13:37:22.613 D/DualHost( 3063): GUESTRECV registered androidx.work.impl.diagnostics.DiagnosticsReceiver filters=1 exported=true
+11-04 13:37:22.614 D/DualHost( 3063): GUESTRECV registered com.braze.BrazeFlushPushDeliveryReceiver filters=1 exported=false
+11-04 13:37:22.618 D/DualHost( 3063): GUESTRECV registered androidx.profileinstaller.ProfileInstallReceiver filters=4 exported=true
+11-04 13:37:22.619 D/DualHost( 3063): GUESTRECV done, 16 receiver(s)
+11-04 13:37:22.619 D/DualHost( 3063): guest application ready: com.viber.voip.ManifestViberApplication
+11-04 13:37:22.636 D/DualHost( 3063): NETDIAG activeNetwork=179 info=WIFI/CONNECTED connected=true metered=true
+11-04 13:37:22.638 D/DualHost( 3063): NETDIAG caps INTERNET=true VALIDATED=true NOT_SUSPENDED=true NOT_RESTRICTED=true wifi=true cell=false vpn=false
+11-04 13:37:22.645 D/DualHost( 3063): NETDIAG dns www.viber.com -> 184.30.213.251 in 5ms
+11-04 13:37:22.687 D/DualHost( 3063): ASK prefs viber_app_preferences_state
+11-04 13:37:22.689 D/DualHost( 3063): DIAG getSharedPreferences('viber_app_preferences_state') -> 3 keys
+11-04 13:37:22.747 D/DualHost( 3063): PM ignored setComponentEnabledSetting for guest androidx.work.impl.background.systemjob.SystemJobService (IllegalArgumentException)
+11-04 13:37:22.751 D/DualHost( 3063): HOSTJOB guest androidx.work.impl.background.systemjob.SystemJobService onStartJob returned true
+11-04 13:37:22.771 D/DualHost( 3063): HOSTJOB clone=10 androidx.work.impl.background.systemjob.SystemJobService
+11-04 13:37:22.772 D/DualHost( 3063): HOSTJOB guest androidx.work.impl.background.systemjob.SystemJobService onStartJob returned true
+11-04 13:37:22.773 D/DualHost( 3063): HOSTJOB clone=10 androidx.work.impl.background.systemjob.SystemJobService
+11-04 13:37:22.774 D/DualHost( 3063): HOSTJOB guest androidx.work.impl.background.systemjob.SystemJobService onStartJob returned true
+11-04 13:37:22.775 D/DualHost( 3063): HOSTJOB clone=10 androidx.work.impl.background.systemjob.SystemJobService
+11-04 13:37:22.776 D/DualHost( 3063): HOSTJOB guest androidx.work.impl.background.systemjob.SystemJobService onStartJob returned true
+11-04 13:37:22.777 D/DualHost( 3063): HOSTJOB clone=10 androidx.work.impl.background.systemjob.SystemJobService
+11-04 13:37:22.778 D/DualHost( 3063): HOSTJOB guest androidx.work.impl.background.systemjob.SystemJobService onStartJob returned true
+11-04 13:37:22.779 D/DualHost( 3063): HOSTJOB clone=10 androidx.work.impl.background.systemjob.SystemJobService
+11-04 13:37:22.780 D/DualHost( 3063): HOSTJOB guest androidx.work.impl.background.systemjob.SystemJobService onStartJob returned true
+11-04 13:37:22.781 D/DualHost( 3063): HOSTJOB clone=10 androidx.work.impl.background.systemjob.SystemJobService
+11-04 13:37:22.782 D/DualHost( 3063): HOSTJOB guest androidx.work.impl.background.systemjob.SystemJobService onStartJob returned true
+11-04 13:37:22.787 D/DualHost( 3063): HOSTJOB clone=10 com.google.android.datatransport.runtime.scheduling.jobscheduling.JobInfoSchedulerService
+11-04 13:37:22.787 D/DualHost( 3063): NETDIAG tcp www.viber.com:443 connected in 143ms
+11-04 13:37:22.794 D/DualHost( 3063): HOSTJOB guest com.google.android.datatransport.runtime.scheduling.jobscheduling.JobInfoSchedulerService onStartJob returned true
+11-04 13:37:22.797 D/DualHost( 3063): NETDIAG dns google.com -> 142.251.141.46 in 4ms
+11-04 13:37:22.803 D/DualHost( 3063): PKGSURVEY guest=com.viber.voip caller=q9v.a returned=guest
+11-04 13:37:22.817 D/DualHost( 3063): PKGSURVEY guest=com.viber.voip caller=android.app.PendingIntent.getBroadcastAsUser returned=host
+11-04 13:37:22.819 D/DualHost( 3063): PKGSURVEY guest=com.viber.voip caller=android.app.PendingIntent.checkPendingIntent returned=host
+11-04 13:37:22.820 D/DualHost( 3063): PKGSURVEY guest=com.viber.voip caller=android.content.Intent.prepareToLeaveProcess returned=host
+11-04 13:37:22.821 D/DualHost( 3063): AM pending type=1 comp=androidx.work.impl.utils.ForceStopRunnable$BroadcastReceiver pkg=com.ims134.dualhost action=ACTION_FORCE_STOP_RESCHEDULE
+11-04 13:37:22.822 D/DualHost( 3063): AM pending broadcast redirected androidx.work.impl.utils.ForceStopRunnable$BroadcastReceiver -> HostReceiver0
+11-04 13:37:22.823 D/DualHost( 3063): AMCALL getHistoricalProcessExitReasons
+11-04 13:37:22.871 D/DualHost( 3063): JOB rewritten id=5 androidx.work.impl.background.systemjob.SystemJobService -> HostJob0
+11-04 13:37:22.881 D/DualHost( 3063): JOB rewritten id=7 androidx.work.impl.background.systemjob.SystemJobService -> HostJob0
+11-04 13:37:22.885 D/DualHost( 3063): HOSTJOB onStopJob id=7
+11-04 13:37:22.889 D/DualHost( 3063): HOSTJOB clone=10 androidx.work.impl.background.systemjob.SystemJobService
+11-04 13:37:22.890 D/DualHost( 3063): HOSTJOB guest androidx.work.impl.background.systemjob.SystemJobService onStartJob returned true
+11-04 13:37:22.891 D/DualHost( 3063): JOB rewritten id=8 androidx.work.impl.background.systemjob.SystemJobService -> HostJob0
+11-04 13:37:22.901 D/DualHost( 3063): JOB rewritten id=9 androidx.work.impl.background.systemjob.SystemJobService -> HostJob0
+11-04 13:37:22.909 D/DualHost( 3063): HOSTJOB onStopJob id=9
+11-04 13:37:22.912 D/DualHost( 3063): HOSTJOB clone=10 androidx.work.impl.background.systemjob.SystemJobService
+11-04 13:37:22.913 D/DualHost( 3063): HOSTJOB guest androidx.work.impl.background.systemjob.SystemJobService onStartJob returned true
+11-04 13:37:22.914 D/DualHost( 3063): NETDIAG tcp google.com:443 connected in 117ms
+11-04 13:37:22.918 D/DualHost( 3063): JOB rewritten id=10 androidx.work.impl.background.systemjob.SystemJobService -> HostJob0
+11-04 13:37:22.927 D/DualHost( 3063): JOB rewritten id=11 androidx.work.impl.background.systemjob.SystemJobService -> HostJob0
+11-04 13:37:22.931 D/DualHost( 3063): HOSTJOB onStopJob id=11
+11-04 13:37:22.936 D/DualHost( 3063): HOSTJOB clone=10 androidx.work.impl.background.systemjob.SystemJobService
+11-04 13:37:22.939 D/DualHost( 3063): HOSTJOB guest androidx.work.impl.background.systemjob.SystemJobService onStartJob returned true
+11-04 13:37:22.941 D/DualHost( 3063): JOB rewritten id=12 androidx.work.impl.background.systemjob.SystemJobService -> HostJob0
+11-04 13:37:22.951 D/DualHost( 3063): JOB rewritten id=13 androidx.work.impl.background.systemjob.SystemJobService -> HostJob0
+11-04 13:37:22.953 D/DualHost( 1633): PMSIG getPackageInfo pkg=com.google.android.gms flags=0x40 result=PackageInfo sha1=38918a453d07
+11-04 13:37:22.954 D/DualHost( 3063): PM guest getServiceInfo served: com.google.android.datatransport.runtime.backends.TransportBackendDiscovery
+11-04 13:37:22.964 D/DualHost( 3063): JOB rewritten id=14 androidx.work.impl.background.systemjob.SystemJobService -> HostJob0
+11-04 13:37:22.969 D/DualHost( 3063): PKGSURVEY guest=com.viber.voip caller=d4o.get returned=guest
+11-04 13:37:22.973 D/DualHost( 3063): JOB rewritten id=16 androidx.work.impl.background.systemjob.SystemJobService -> HostJob0
+11-04 13:37:22.978 D/DualHost( 3063): PKGSURVEY guest=com.viber.voip caller=a98.a returned=guest
+11-04 13:37:22.979 D/DualHost( 1633): DIAG getPackageInfo('com.google.android.wearable.app.cn') = NULL
+11-04 13:37:22.979 D/DualHost( 1633): PMSIG getPackageInfo pkg=com.google.android.wearable.app.cn flags=0x40 result=null
+11-04 13:37:22.982 D/DualHost( 3063): JOB rewritten id=17 androidx.work.impl.background.systemjob.SystemJobService -> HostJob0
+11-04 13:37:22.988 D/DualHost( 3063): HOSTJOB onStopJob id=17
+11-04 13:37:22.991 D/DualHost( 3063): HOSTJOB clone=10 androidx.work.impl.background.systemjob.SystemJobService
+11-04 13:37:22.992 D/DualHost( 3063): HOSTJOB guest androidx.work.impl.background.systemjob.SystemJobService onStartJob returned true
+11-04 13:37:22.995 D/DualHost( 3063): JOB rewritten id=18 androidx.work.impl.background.systemjob.SystemJobService -> HostJob0
+11-04 13:37:22.999 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=com.google.android.gms.internal.ads.zzbio.zza returned=guest
+11-04 13:37:23.002 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=r9k.<init> returned=guest
+11-04 13:37:23.003 D/DualHost( 3063): JOB rewritten id=19 androidx.work.impl.background.systemjob.SystemJobService -> HostJob0
+11-04 13:37:23.005 D/DualHost( 3063): HOSTJOB onStopJob id=19
+11-04 13:37:23.009 D/DualHost( 3063): HOSTJOB clone=10 androidx.work.impl.background.systemjob.SystemJobService
+11-04 13:37:23.013 D/DualHost( 3063): HOSTJOB guest androidx.work.impl.background.systemjob.SystemJobService onStartJob returned true
+11-04 13:37:23.013 D/DualHost( 3063): JOB rewritten id=20 androidx.work.impl.background.systemjob.SystemJobService -> HostJob0
+11-04 13:37:23.018 D/DualHost( 1633): AM pending type=1 comp=com.viber.voip.feature.chatsummary.presentation.alarm.nudge.ChatSummaryNudgeAlarmReceiver pkg=com.ims134.dualhost action=com.viber.voip.action.CHAT_SUMMARY_NUDGE
+11-04 13:37:23.024 D/DualHost( 3063): JOB rewritten id=23 androidx.work.impl.background.systemjob.SystemJobService -> HostJob0
+11-04 13:37:23.029 D/DualHost( 3063): HOSTJOB onStopJob id=23
+11-04 13:37:23.033 D/DualHost( 3063): JOB rewritten id=24 androidx.work.impl.background.systemjob.SystemJobService -> HostJob0
+11-04 13:37:23.033 D/DualHost( 3063): HOSTJOB clone=10 androidx.work.impl.background.systemjob.SystemJobService
+11-04 13:37:23.034 D/DualHost( 3063): HOSTJOB guest androidx.work.impl.background.systemjob.SystemJobService onStartJob returned true
+11-04 13:37:23.035 D/DualHost( 1633): PMSIG getPackageInfo pkg=com.android.vending flags=0x1 result=PackageInfo
+11-04 13:37:23.039 D/DualHost( 3063): JOB rewritten id=25 androidx.work.impl.background.systemjob.SystemJobService -> HostJob0
+11-04 13:37:23.041 D/DualHost( 3063): HOSTJOB onStopJob id=25
+11-04 13:37:23.047 D/DualHost( 3063): HOSTJOB clone=10 androidx.work.impl.background.systemjob.SystemJobService
+11-04 13:37:23.048 D/DualHost( 3063): HOSTJOB guest androidx.work.impl.background.systemjob.SystemJobService onStartJob returned true
+11-04 13:37:23.049 D/DualHost( 3063): JOB rewritten id=30 androidx.work.impl.background.systemjob.SystemJobService -> HostJob0
+11-04 13:37:23.054 D/DualHost( 3063): JOB rewritten id=4 androidx.work.impl.background.systemjob.SystemJobService -> HostJob0
+11-04 13:37:23.060 D/DualHost( 3063): JOB rewritten id=15 androidx.work.impl.background.systemjob.SystemJobService -> HostJob0
+11-04 13:37:23.074 D/DualHost( 1633): AM pending type=1 comp=com.viber.voip.feature.ai.astro.notification.AiAstroReminderBroadcastReceiver pkg=com.ims134.dualhost action=null
+11-04 13:37:23.099 D/DualHost( 1633): ASK prefs com.braze.endpointqueue.tokenbucket.1527130339.3963b5b6c1be1432878b0fdee61febec.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6
+11-04 13:37:23.102 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=we4.a returned=guest
+11-04 13:37:23.115 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=com.android.billingclient.api.a.<init> returned=host
+11-04 13:37:23.124 D/DualHost( 1633): DIAG getSharedPreferences('com.braze.endpointqueue.tokenbucket.1527130339.3963b5b6c1be1432878b0fdee61febec.8ec43b0e-ee94-472d-8cf5-4fbe3ddc8fa6') -> 2 keys
+11-04 13:37:23.128 D/DualHost( 3063): NETDIAG probe 44.192.201.196:4244 CONNECTED in 212ms
+11-04 13:37:23.166 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=pmv0.call returned=guest
+11-04 13:37:23.250 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=s46.<init> returned=guest
+11-04 13:37:23.274 D/DualHost( 1633): ASK prefs admob
+11-04 13:37:23.284 D/DualHost( 1633): DIAG getSharedPreferences('admob') -> 8 keys
+11-04 13:37:23.306 D/DualHost( 1633): DIAG getSharedPreferences('admob') -> 8 keys
+11-04 13:37:23.318 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=android.preference.PreferenceManager.getDefaultSharedPreferencesName returned=host
+11-04 13:37:23.321 D/DualHost( 1633): DIAG getSharedPreferences('com.ims134.dualhost_preferences') -> 0 keys
+11-04 13:37:23.325 D/DualHost( 1633): DIAG getSharedPreferences('com.ims134.dualhost_preferences') -> 0 keys
+11-04 13:37:23.325 D/DualHost( 1633): ASK prefs mobileads_consent
+11-04 13:37:23.332 D/DualHost( 3063): NETDIAG probe 44.192.201.196:443 CONNECTED in 203ms
+11-04 13:37:23.333 D/DualHost( 3063): DATADIR ctx.class = com.viber.voip.ManifestViberApplication
+11-04 13:37:23.333 D/DualHost( 3063): DATADIR app.class = com.viber.voip.ManifestViberApplication
+11-04 13:37:23.334 D/DualHost( 3063): DATADIR app.baseContext.class = com.ims134.dualhost.CloneContext
+11-04 13:37:23.335 D/DualHost( 3063): DATADIR app.getDataDir = /data/user/0/com.ims134.dualhost/virtual/com.viber.voip/10
+11-04 13:37:23.335 D/DualHost( 3063): DATADIR app.applicationInfo.dataDir = /data/user/0/com.ims134.dualhost/virtual/com.viber.voip/10
+11-04 13:37:23.337 D/DualHost( 3063): DATADIR app.getFilesDir = /data/user/0/com.ims134.dualhost/virtual/com.viber.voip/10/files
+11-04 13:37:23.338 D/DualHost( 3063): DATADIR app.getFilesDir.parent = /data/user/0/com.ims134.dualhost/virtual/com.viber.voip/10
+11-04 13:37:23.338 D/DualHost( 3063): DATADIR app.getCacheDir = /data/user/0/com.ims134.dualhost/virtual/com.viber.voip/10/cache
+11-04 13:37:23.339 D/DualHost( 3063): PKGSURVEY guest=com.viber.voip caller=com.ims134.dualhost.NetDiag.start$lambda$22$lambda$11 returned=host
+11-04 13:37:23.339 D/DualHost( 3063): DATADIR app.getPackageName = com.ims134.dualhost
+11-04 13:37:23.343 D/DualHost( 1633): DIAG getSharedPreferences('mobileads_consent') -> 0 keys
+11-04 13:37:23.344 D/DualHost( 3063): DATADIR app.getDatabasePath(x) = /data/data/com.viber.voip/databases/x
+11-04 13:37:23.348 D/DualHost( 3063): DATADIR app.getNoBackupFilesDir = /data/user/0/com.ims134.dualhost/virtual/com.viber.voip/10/no_backup
+11-04 13:37:23.349 D/DualHost( 3063): DATADIR Environment.getDataDirectory = /data
+11-04 13:37:23.349 D/DualHost( 3063): DATADIR ctx.createDeviceProtectedStorageContext.dataDir = /data/user_de/0/com.ims134.dualhost
+11-04 13:37:23.350 D/DualHost( 3063): PKGSURVEY guest=com.viber.voip caller=com.ims134.dualhost.NetDiag.start$lambda$22$lambda$16 returned=host
+11-04 13:37:23.359 D/DualHost( 3063): PM DATADIR /data/user/0/com.ims134.dualhost -> /data/user/0/com.ims134.dualhost/virtual/com.viber.voip/10
+11-04 13:37:23.360 D/DualHost( 3063): PM ask getApplicationInfo meta=false resultNull=false
+11-04 13:37:23.361 D/DualHost( 3063): DATADIR ctx.createPackageContext(self).dataDir = /data/user/0/com.ims134.dualhost/virtual/com.viber.voip/10
+11-04 13:37:23.362 D/DualHost( 3063): DATADIR user.dir = /
+11-04 13:37:23.363 D/DualHost( 3063): DATADIR ActivityThread.currentApplication.dataDir = /data/user/0/com.ims134.dualhost/virtual/com.viber.voip/10
+11-04 13:37:23.407 D/DualHost( 1633): AM pending type=1 comp=com.viber.voip.feature.ai.news.brief.notification.AiNewsBriefReminderBroadcastReceiver pkg=com.ims134.dualhost action=null
+11-04 13:37:23.448 D/DualHost( 1633): ASK prefs app_set_id_storage
+11-04 13:37:23.454 D/DualHost( 1633): DIAG getSharedPreferences('app_set_id_storage') -> 0 keys
+11-04 13:37:23.473 D/DualHost( 1633): PM resolveContentProvider authority=com.google.android.gms.fonts found=true
+11-04 13:37:23.525 D/DualHost( 1633): PM getPackageInfo guest-permissions redirected for com.viber.voip (hostGrantedCount=33, guestAskedCount=89)
+11-04 13:37:23.894 D/DualHost( 3063): JOB rewritten id=21 androidx.work.impl.background.systemjob.SystemJobService -> HostJob0
+11-04 13:37:23.903 D/DualHost( 3063): JOB rewritten id=22 androidx.work.impl.background.systemjob.SystemJobService -> HostJob0
+11-04 13:37:23.913 D/DualHost( 3063): JOB rewritten id=26 androidx.work.impl.background.systemjob.SystemJobService -> HostJob0
+11-04 13:37:23.928 D/DualHost( 3063): JOB rewritten id=28 androidx.work.impl.background.systemjob.SystemJobService -> HostJob0
+11-04 13:37:23.933 D/DualHost( 3063): JOB rewritten id=2 androidx.work.impl.background.systemjob.SystemJobService -> HostJob0
+11-04 13:37:23.941 D/DualHost( 3063): JOB rewritten id=32 androidx.work.impl.background.systemjob.SystemJobService -> HostJob0
+11-04 13:37:23.946 D/DualHost( 3063): JOB rewritten id=3 androidx.work.impl.background.systemjob.SystemJobService -> HostJob0
+11-04 13:37:24.040 D/DualHost( 3063): AMCALL checkPermissionForDevice
+11-04 13:37:24.058 D/DualHost( 3063): PERM android.permission.CAMERA -> 0
+11-04 13:37:24.184 D/DualHost( 3063): ASK prefs viber_key_value_state
+11-04 13:37:24.186 D/DualHost( 3063): DIAG getSharedPreferences('viber_key_value_state') -> 2 keys
+11-04 13:37:24.193 D/DualHost( 3063): PERM android.permission.READ_PHONE_STATE -> 0
+11-04 13:37:24.321 D/DualHost( 3063): PMSIG getPackageInfo pkg=com.android.vending flags=0x1 result=PackageInfo
+11-04 13:37:24.336 D/DualHost( 3063): PKGSURVEY guest=com.viber.voip caller=we4.a returned=guest
+11-04 13:37:24.338 D/DualHost( 3063): PKGSURVEY guest=com.viber.voip caller=com.android.billingclient.api.a.<init> returned=host
+11-04 13:37:24.349 D/DualHost( 3063): PMSIG getPackageInfo pkg=com.ims134.dualhost flags=0x0 result=PackageInfo
+11-04 13:37:24.357 D/DualHost( 3063): AMCALL bindServiceInstance
+11-04 13:37:24.363 D/DualHost( 3063): PKGSURVEY guest=com.viber.voip caller=pmv0.call returned=guest
+11-04 13:37:24.409 D/DualHost( 3063): ASK prefs com.voip.viber.contacts.vibersync
+11-04 13:37:24.410 D/DualHost( 3063): DIAG getSharedPreferences('com.voip.viber.contacts.vibersync') -> 0 keys
+11-04 13:37:25.066 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=com.snapchat.kit.sdk.a.<init> returned=guest
+11-04 13:37:25.071 D/DualHost( 1633): ASK prefs com.snapchat.connect.sdk.sharedPreferences
+11-04 13:37:25.073 D/DualHost( 1633): DIAG getSharedPreferences('com.snapchat.connect.sdk.sharedPreferences') -> 8 keys
+11-04 13:37:25.073 D/DualHost( 1633): ASK prefs com.snapchat.connect.sdk.secureSharedPreferences
+11-04 13:37:25.074 D/DualHost( 1633): DIAG getSharedPreferences('com.snapchat.connect.sdk.secureSharedPreferences') -> 0 keys
+11-04 13:37:25.347 D/DualHost( 1633): AM removeContentProvider skipped (no connection)
+11-04 13:37:25.460 D/DualHost( 3063): PERM android.permission.ACCESS_COARSE_LOCATION -> 0
+11-04 13:37:25.462 D/DualHost( 3063): PERM android.permission.ACCESS_FINE_LOCATION -> 0
+11-04 13:37:25.470 D/DualHost( 3063): PKGSURVEY guest=com.viber.voip caller=ilc.<init> returned=guest
+11-04 13:37:26.016 D/DualHost( 1633): PMSIG getPackageInfo pkg=com.xiaomi.mirror flags=0x0 result=PackageInfo
+11-04 13:37:27.266 D/DualHost( 3063): PKGSURVEY guest=com.viber.voip caller=com.snapchat.kit.sdk.a.<init> returned=guest
+11-04 13:37:27.269 D/DualHost( 1633): ACC intercepted tx=6 type=com.viber.voip -> fake account
+11-04 13:37:27.271 D/DualHost( 3063): ASK prefs com.snapchat.connect.sdk.sharedPreferences
+11-04 13:37:27.274 D/DualHost( 3063): DIAG getSharedPreferences('com.snapchat.connect.sdk.sharedPreferences') -> 8 keys
+11-04 13:37:27.275 D/DualHost( 3063): ASK prefs com.snapchat.connect.sdk.secureSharedPreferences
+11-04 13:37:27.277 D/DualHost( 3063): DIAG getSharedPreferences('com.snapchat.connect.sdk.secureSharedPreferences') -> 0 keys
+11-04 13:37:27.315 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=androidx.profileinstaller.ProfileInstaller.writeProfile returned=guest
+11-04 13:37:27.317 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=androidx.profileinstaller.ProfileVerifier.writeProfileVerification returned=guest
+11-04 13:37:27.317 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=androidx.profileinstaller.ProfileVerifier$Api33Impl.getPackageInfo returned=guest
+11-04 13:37:27.677 D/DualHost( 1633): PKGSURVEY guest=com.viber.voip caller=android.widget.AbsListViewStubImpl.fetchOptEnableStateFromHelper returned=host
+11-04 13:37:27.678 D/DualHost( 1633): PMSIG getPackageInfo pkg=com.ims134.dualhost flags=0x4000 result=PackageInfo
+11-04 13:37:27.843 D/DualHost( 1633): PKGNAME gms.common stack, host name for com.google.android.gms.common.GooglePlayServicesUtilLight.isGooglePlayServicesAvailable
+11-04 13:37:28.176 D/DualHost( 3063): PKGSURVEY guest=com.viber.voip caller=androidx.profileinstaller.ProfileInstaller.writeProfile returned=guest
+11-04 13:37:28.179 D/DualHost( 3063): PKGSURVEY guest=com.viber.voip caller=androidx.profileinstaller.ProfileVerifier.writeProfileVerification returned=guest
+11-04 13:37:28.182 D/DualHost( 3063): PKGSURVEY guest=com.viber.voip caller=androidx.profileinstaller.ProfileVerifier$Api33Impl.getPackageInfo returned=guest
+11-04 13:37:29.455 D/DualHost( 3063): PKGSURVEY guest=com.viber.voip caller=com.mixpanel.android.mpmetrics.MixpanelAPI.getInstance returned=guest
+11-04 13:37:29.456 D/DualHost( 3063): ASK prefs com.mixpanel.android.mpmetrics.ReferralInfo
+11-04 13:37:29.460 D/DualHost( 3063): DIAG getSharedPreferences('com.mixpanel.android.mpmetrics.ReferralInfo') -> 0 keys
+11-04 13:37:29.461 D/DualHost( 3063): PKGSURVEY guest=com.viber.voip caller=bbx.b returned=guest
+11-04 13:37:29.465 D/DualHost( 3063): PKGSURVEY guest=com.viber.voip caller=com.mixpanel.android.mpmetrics.MixpanelAPI.<init> returned=guest
+11-04 13:37:29.469 D/DualHost( 3063): PKGSURVEY guest=com.viber.voip caller=gbc0.<init> returned=guest
+11-04 13:37:29.474 D/DualHost( 3063): ASK prefs com.mixpanel.android.mpmetrics.MixpanelAPI_legacy
+11-04 13:37:29.477 D/DualHost( 3063): DIAG getSharedPreferences('com.mixpanel.android.mpmetrics.MixpanelAPI_legacy') -> 6 keys
+11-04 13:37:29.478 D/DualHost( 3063): ASK prefs com.mixpanel.android.mpmetrics.MixpanelAPI.TimeEvents_legacy
+11-04 13:37:29.480 D/DualHost( 3063): DIAG getSharedPreferences('com.mixpanel.android.mpmetrics.MixpanelAPI.TimeEvents_legacy') -> 0 keys
+11-04 13:37:29.482 D/DualHost( 3063): ASK prefs com.mixpanel.android.mpmetrics.Mixpanel
+11-04 13:37:29.484 D/DualHost( 3063): DIAG getSharedPreferences('com.mixpanel.android.mpmetrics.Mixpanel') -> 2 keys
+11-04 13:37:29.494 D/DualHost( 3063): ASK prefs com.mixpanel.android.mpmetrics.MixpanelAPI_proxy
+11-04 13:37:29.497 D/DualHost( 3063): DIAG getSharedPreferences('com.mixpanel.android.mpmetrics.MixpanelAPI_proxy') -> 6 keys
+11-04 13:37:29.498 D/DualHost( 3063): ASK prefs com.mixpanel.android.mpmetrics.MixpanelAPI.TimeEvents_proxy
+11-04 13:37:29.500 D/DualHost( 3063): DIAG getSharedPreferences('com.mixpanel.android.mpmetrics.MixpanelAPI.TimeEvents_proxy') -> 0 keys
+11-04 13:37:29.502 D/DualHost( 3063): DIAG getSharedPreferences('com.mixpanel.android.mpmetrics.Mixpanel') -> 2 keys
+11-04 13:37:29.829 D/DualHost( 3063): ASK prefs com.mixpanel.android.mpmetrics.MixpanelAPI_direct
+11-04 13:37:29.833 D/DualHost( 3063): DIAG getSharedPreferences('com.mixpanel.android.mpmetrics.MixpanelAPI_direct') -> 6 keys
+11-04 13:37:29.834 D/DualHost( 3063): ASK prefs com.mixpanel.android.mpmetrics.MixpanelAPI.TimeEvents_direct
+11-04 13:37:29.836 D/DualHost( 3063): DIAG getSharedPreferences('com.mixpanel.android.mpmetrics.MixpanelAPI.TimeEvents_direct') -> 0 keys
+11-04 13:37:29.838 D/DualHost( 3063): DIAG getSharedPreferences('com.mixpanel.android.mpmetrics.Mixpanel') -> 2 keys
+11-04 13:37:29.867 D/DualHost( 3063): PM resolveContentProvider authority=com.google.android.gms.chimera found=true
+11-04 13:37:29.876 D/DualHost( 3063): ASK prefs adjust_preferences
+11-04 13:37:29.882 D/DualHost( 3063): DIAG getSharedPreferences('adjust_preferences') -> 1 keys
+11-04 13:37:29.896 D/DualHost( 3063): PKGSURVEY guest=com.viber.voip caller=com.adjust.sdk.DeviceInfo.getPackageInfo returned=guest
+11-04 13:37:29.971 D/DualHost( 3063): PMSIG getPackageInfo pkg=com.google.android.gms flags=0x0 result=PackageInfo
+11-04 13:37:29.981 D/DualHost( 3063): PKGNAME gms module caller gets host name: m7.jp
+11-04 13:37:29.990 D/DualHost( 3063): AMCALL getMyMemoryState
+11-04 13:37:29.998 D/DualHost( 3063): ASK prefs com.google.android.gms.measurement.prefs
+11-04 13:37:30.001 D/DualHost( 3063): DIAG getSharedPreferences('com.google.android.gms.measurement.prefs') -> 16 keys
+11-04 13:37:30.037 D/DualHost( 3063): PMSIG getInstallerPackageName pkg=com.ims134.dualhost flags=0x0 result=null
+11-04 13:37:30.055 D/DualHost( 3063): ASK prefs com.ims134.dualhost_preferences
+11-04 13:37:30.056 D/DualHost( 3063): DIAG getSharedPreferences('com.ims134.dualhost_preferences') -> 0 keys
+11-04 13:37:30.066 D/DualHost( 3063): PM getPackageInfo guest-permissions redirected for com.viber.voip (hostGrantedCount=33, guestAskedCount=89)
+11-04 13:37:30.069 D/DualHost( 3063): PKGSURVEY guest=com.viber.voip caller=com.adjust.sdk.DeviceInfo.getPackageName returned=guest
+11-04 13:37:30.073 D/DualHost( 3063): PMSIG getPackageInfo pkg=com.facebook.katana flags=0x8000000 result=PackageInfo sha1=cc69ef02cc1d
+11-04 13:37:30.082 D/DualHost( 3063): ASK prefs app_set_id_storage
+11-04 13:37:30.084 D/DualHost( 3063): DIAG getSharedPreferences('app_set_id_storage') -> 0 keys
+11-04 13:37:30.087 D/DualHost( 3063): PKGNAME gms.common stack, host name for com.google.android.gms.common.api.GoogleApi.createClientSettingsBuilder
+11-04 13:37:30.100 D/DualHost( 3063): PKGNAME gms.common stack, host name for com.google.android.gms.common.internal.BaseGmsClient.getRemoteService
+11-04 13:37:30.109 D/DualHost( 3063): PKGSURVEY guest=com.viber.voip caller=com.adjust.sdk.StoreInfoUtil.getStoreInfoFromClient returned=guest
+11-04 13:37:30.110 D/DualHost( 3063): PKGSURVEY guest=com.viber.voip caller=com.adjust.sdk.StoreInfoUtil.getStoreIdFromSystem returned=guest
+11-04 13:37:30.114 D/DualHost( 3063): PMSIG getInstallSourceInfo pkg=com.viber.voip flags=0x0 result=InstallSourceInfo
+11-04 13:37:30.115 D/DualHost( 3063): PKGSURVEY guest=com.viber.voip caller=com.adjust.sdk.StoreInfoUtil.getInitiatingPackageName returned=guest
+11-04 13:37:30.118 D/DualHost( 3063): PKGSURVEY guest=com.viber.voip caller=com.adjust.sdk.StoreInfoUtil.getOriginatingPackageName returned=guest
+11-04 13:37:30.120 D/DualHost( 3063): PKGSURVEY guest=com.viber.voip caller=com.adjust.sdk.StoreInfoUtil.getIsSystemApp returned=guest
+11-04 13:37:30.122 D/DualHost( 3063): PKGSURVEY guest=com.viber.voip caller=com.adjust.sdk.StoreInfoUtil.getIsUpdatedSystemApp returned=guest
+11-04 13:37:30.124 D/DualHost( 3063): PMSIG getPackageInfo pkg=com.android.vending flags=0x0 result=PackageInfo
+11-04 13:37:30.131 D/DualHost( 3063): AMCALL unbindService
+11-04 13:37:30.490 D/DualHost( 3063): PM SIGSPOOF pkg=com.ims134.dualhost -> guest apk signature
+11-04 13:37:30.492 D/DualHost( 3063): PMSIG getPackageInfo pkg=com.ims134.dualhost flags=0x40 result=PackageInfo sha1=f836a66f8779
+11-04 13:37:31.094 D/DualHost( 3063): AMCALL removeContentProvider
+11-04 13:37:33.027 D/DualHost( 1633): VSTATE t+12s engine=com.viber.jni.Engine
+11-04 13:37:33.028 D/DualHost( 1633): VSTATE Engine.getApplicationDataDir=/data/user/0/com.ims134.dualhost
+11-04 13:37:33.029 D/DualHost( 1633): VSTATE Engine.getServiceState=SERVICE_CONNECTED
+11-04 13:37:33.033 D/DualHost( 1633): VSTATE Engine.isGSMCallActive=false
+11-04 13:37:33.034 D/DualHost( 1633): VSTATE Engine.isInitialized=true
+11-04 13:37:33.034 D/DualHost( 1633): VSTATE Engine.isNativeLoaded=true
+11-04 13:37:33.037 D/DualHost( 1633): VSTATE ConnCtl class=com.viber.jni.NativeEngineBridge methods=canonizePhoneNumber/1,canonizePhoneNumberForCountryCode/2,changePhoneNumberInfo/3,changeUDID/1,check/0,connect/0,connectivityTest/1,convertClientToServerTime/1,crashLibrary/0,deleteAllSecurityInfo/0,disconnect/0,done/0,encodeCurrency/2,generateSequence/0,getBICC/1,getBreachedPeersList/0,getCountryCode/1,getCountryName/1,getDefaultProtocolVersion/0,getDownloadURL/3,getExternalAppPhone/1,getFileOwnerUid/1,getHashForReRegister/2,getMyCID/0,getMyVersion/0,getPGDownloadURL/4,getPhoneProvider/1,getPhoneState/0,getPhoneType/0,getPhotoDownloadURL/3,getSecureKeyforQR/0,getTrustedPeersList/0,handleAddToConferenceCall/1,handleAnswer/1,handleAppModeChanged/1,handleAuthenticateApp/5,handleBannerOrSplashAck/2,handleBlockApp/4,handleBlockGroupInvite/3,handleCallStarted/0,handleCallStats/1,handleChangeConversationSettings/2,handleChangeGroup/5,handleChangeGroupAdditionalOption/4,handleChangeGroupSettings/2,handleChangeLastOnlineSettings/1,handleChangePublicAccount/18,handleChangeReadNotificationsSettings/1,handleChangeUserActivitySettings/1,handleClearSecureCallStorage/0,handleClose/0,handleCommError/1,handleConnectReject/2,handleConnectivityChange/1,handleCreateGroup/6,handleCreateGroup2/5,handleCreatePublicAccount/15,handleCryptBufferFinish/2,handleCryptBufferSeek/2,handleCryptBufferUpdate/5,handleDataInterruption/1,handleDecline/0,handleDecodeBase85/1,handleDeleteGroupMessage/3,handleDeleteMessage/4,handleDeletedMessageAck/1,handleDialConference/2,handleDialogReply/2,handleGSMStateChange/1,handleGeneralPGWSFormattedRequest/5,handleGetAppDetails/2,handleGetBillingToken/0,handleGetCallToken/0,handleGetChannelTags/2,handleGetConnectivityDetails/0,handleGetGroupInfo/2,handleGetGroupMessageStatus/3,handleGetLastOnline/2,handleGetMD5CryptedFile/1,handleGetMD5CryptedFileDescriptor/1,handleGetMySignature/0,handleGetPersonalProfile/0,handleGetPublicAccountCategoryItem/2,handleGetPublicAccountInfoAccountId/5,handleGetPublicAccountInfoChatId/5,handleGetPublicAccountInfoChatUri/2,handleGetPublicAccountSubscribersCount/2,handleGetPublicAccountsMetaData/2,handleGetPublicGroupLikes/5,handleGetPublicGroupMessages/4,handleGetSecondaryDeviceDetails/0,handleGetSecureSessionInfo/1,handleGetUserApps/2,handleGetWalletSecureToken/10,handleGroupAddMember/3,handleGroupAddMembers/5,handleGroupAssignRole/4,handleGroupMessageLikeAck/1,handleGroupRemoveMembers/3,handleHangup/0,handleHangupReply/3,handleInitDecryptionContext/1,handleInitEncryptionContext/0,handleInitiateSecureSyncWithPrimary/0,handleIsOnline/1,handleJoinPublicGroup/4,handleLocalBlockList/2,handleLocalHold/0,handleLocalUnhold/0,handleMute/0,handleNetworkError/2,handleOnClick/4,handleRecanonizeAck/1,handleRecoverGroupChats/0,handleRecoverPublicAccounts/0,handleRefreshPublicAccountToken/2,handleReportBannerStatistics/3,handleReportCdr/1,handleReportForwardPublicGroupContentStatistics/7,handleReportGenericPushStatistics/4,handleReportPublicGroupStatistics/6,handleReportPurchaseErrorStatistics/2,handleReportSO/1,handleReportWatchActivationStatistics/4,handleReportWatchDailyStatistics/5,handleSearchPublicAccountsByParams/5,handleSearchPublicGroupsForCountry/3,handleSecondaryDevicePush/0,handleSecondaryQRPhotographed/4,handleSecondaryRegisteredAck/1,handleSecureCallVerified/2,handleSecureTokenRequest/1,handleSendContactSavedNotification/2,handleSendConversationStatus/10,handleSendGroupChangedAck/2,handleSendIM2Message/1,handleSendIceCandidates/1,handleSendMessageDeliveredAck/1,handleSendMessageReplyAck/1,handleSendMissedCallsAck/3,handleSendPublicGroupInvite/4,handleSendPublicGroupInviteToGroup/4,handleSendPublicGroupsUpdatedAck/1,handleSendQueryDestOperationSupport/3,handleSendSdpAnswer/2,handleSendSdpOffer/2,handleSendSdpOfferToHs/1,handleSendSyncConversationAck/3,handleSendSyncGroupAck/3,handleSendSyncMessageLikeAck/1,handleSendSyncMessagesAck/2,handleSendUpdateSelfUserDetailsAck/1,handleSendUpdateUnsavedContactDetailsAck/1,handleSendViberOutBalanceChangeAck/1,handleSendWebNotificationAck/1,handleSetC
+11-04 13:37:33.038 D/DualHost( 1633): VSTATE ConnCtl.getDefaultProtocolVersion=51
+11-04 13:37:33.039 D/DualHost( 1633): VSTATE ConnCtl.getMyCID=172507596
+11-04 13:37:33.039 D/DualHost( 1633): VSTATE ConnCtl.getMyVersion=51
+11-04 13:37:33.040 D/DualHost( 1633): VSTATE ConnCtl.getPhoneState=0
+11-04 13:37:33.040 D/DualHost( 1633): VSTATE ConnCtl.getPhoneType=4096
+11-04 13:37:33.043 D/DualHost( 1633): VSTATE ConnCtl.getSecureKeyforQR=BPTqyTrS89MIWXXNgcQE8OLhsBb0LdVniYDu6EhzNgI.
+11-04 13:37:33.044 D/DualHost( 1633): VSTATE ConnCtl.isConnected=true
+11-04 13:37:33.045 D/DualHost( 1633): VSTATE ConnCtl.isDeviceKeyTemporary=false
+11-04 13:37:33.045 D/DualHost( 1633): VSTATE ConnCtl.isSecondaryRegistrationInProgress=false
+11-04 13:37:33.046 D/DualHost( 1633): VSTATE ConnCtl.isVideoSupported=true
+11-04 13:37:35.366 D/DualHost( 3063): VSTATE t+12s engine=com.viber.jni.Engine
+11-04 13:37:35.368 D/DualHost( 3063): PKGSURVEY guest=com.viber.voip caller=com.viber.jni.Engine.getApplicationDataDir returned=guest
+11-04 13:37:35.369 D/DualHost( 3063): VSTATE Engine.getApplicationDataDir=/data/user/0/com.ims134.dualhost
+11-04 13:37:35.370 D/DualHost( 3063): VSTATE Engine.getServiceState=SERVICE_NOT_CONNECTED
+11-04 13:37:35.374 D/DualHost( 3063): VSTATE Engine.isGSMCallActive=false
+11-04 13:37:35.375 D/DualHost( 3063): VSTATE Engine.isInitialized=false
+11-04 13:37:35.375 D/DualHost( 3063): VSTATE Engine.isNativeLoaded=false
+11-04 13:37:35.381 D/DualHost( 3063): VSTATE ConnCtl class=com.viber.jni.NativeEngineBridge methods=canonizePhoneNumber/1,canonizePhoneNumberForCountryCode/2,changePhoneNumberInfo/3,changeUDID/1,check/0,connect/0,connectivityTest/1,convertClientToServerTime/1,crashLibrary/0,deleteAllSecurityInfo/0,disconnect/0,done/0,encodeCurrency/2,generateSequence/0,getBICC/1,getBreachedPeersList/0,getCountryCode/1,getCountryName/1,getDefaultProtocolVersion/0,getDownloadURL/3,getExternalAppPhone/1,getFileOwnerUid/1,getHashForReRegister/2,getMyCID/0,getMyVersion/0,getPGDownloadURL/4,getPhoneProvider/1,getPhoneState/0,getPhoneType/0,getPhotoDownloadURL/3,getSecureKeyforQR/0,getTrustedPeersList/0,handleAddToConferenceCall/1,handleAnswer/1,handleAppModeChanged/1,handleAuthenticateApp/5,handleBannerOrSplashAck/2,handleBlockApp/4,handleBlockGroupInvite/3,handleCallStarted/0,handleCallStats/1,handleChangeConversationSettings/2,handleChangeGroup/5,handleChangeGroupAdditionalOption/4,handleChangeGroupSettings/2,handleChangeLastOnlineSettings/1,handleChangePublicAccount/18,handleChangeReadNotificationsSettings/1,handleChangeUserActivitySettings/1,handleClearSecureCallStorage/0,handleClose/0,handleCommError/1,handleConnectReject/2,handleConnectivityChange/1,handleCreateGroup/6,handleCreateGroup2/5,handleCreatePublicAccount/15,handleCryptBufferFinish/2,handleCryptBufferSeek/2,handleCryptBufferUpdate/5,handleDataInterruption/1,handleDecline/0,handleDecodeBase85/1,handleDeleteGroupMessage/3,handleDeleteMessage/4,handleDeletedMessageAck/1,handleDialConference/2,handleDialogReply/2,handleGSMStateChange/1,handleGeneralPGWSFormattedRequest/5,handleGetAppDetails/2,handleGetBillingToken/0,handleGetCallToken/0,handleGetChannelTags/2,handleGetConnectivityDetails/0,handleGetGroupInfo/2,handleGetGroupMessageStatus/3,handleGetLastOnline/2,handleGetMD5CryptedFile/1,handleGetMD5CryptedFileDescriptor/1,handleGetMySignature/0,handleGetPersonalProfile/0,handleGetPublicAccountCategoryItem/2,handleGetPublicAccountInfoAccountId/5,handleGetPublicAccountInfoChatId/5,handleGetPublicAccountInfoChatUri/2,handleGetPublicAccountSubscribersCount/2,handleGetPublicAccountsMetaData/2,handleGetPublicGroupLikes/5,handleGetPublicGroupMessages/4,handleGetSecondaryDeviceDetails/0,handleGetSecureSessionInfo/1,handleGetUserApps/2,handleGetWalletSecureToken/10,handleGroupAddMember/3,handleGroupAddMembers/5,handleGroupAssignRole/4,handleGroupMessageLikeAck/1,handleGroupRemoveMembers/3,handleHangup/0,handleHangupReply/3,handleInitDecryptionContext/1,handleInitEncryptionContext/0,handleInitiateSecureSyncWithPrimary/0,handleIsOnline/1,handleJoinPublicGroup/4,handleLocalBlockList/2,handleLocalHold/0,handleLocalUnhold/0,handleMute/0,handleNetworkError/2,handleOnClick/4,handleRecanonizeAck/1,handleRecoverGroupChats/0,handleRecoverPublicAccounts/0,handleRefreshPublicAccountToken/2,handleReportBannerStatistics/3,handleReportCdr/1,handleReportForwardPublicGroupContentStatistics/7,handleReportGenericPushStatistics/4,handleReportPublicGroupStatistics/6,handleReportPurchaseErrorStatistics/2,handleReportSO/1,handleReportWatchActivationStatistics/4,handleReportWatchDailyStatistics/5,handleSearchPublicAccountsByParams/5,handleSearchPublicGroupsForCountry/3,handleSecondaryDevicePush/0,handleSecondaryQRPhotographed/4,handleSecondaryRegisteredAck/1,handleSecureCallVerified/2,handleSecureTokenRequest/1,handleSendContactSavedNotification/2,handleSendConversationStatus/10,handleSendGroupChangedAck/2,handleSendIM2Message/1,handleSendIceCandidates/1,handleSendMessageDeliveredAck/1,handleSendMessageReplyAck/1,handleSendMissedCallsAck/3,handleSendPublicGroupInvite/4,handleSendPublicGroupInviteToGroup/4,handleSendPublicGroupsUpdatedAck/1,handleSendQueryDestOperationSupport/3,handleSendSdpAnswer/2,handleSendSdpOffer/2,handleSendSdpOfferToHs/1,handleSendSyncConversationAck/3,handleSendSyncGroupAck/3,handleSendSyncMessageLikeAck/1,handleSendSyncMessagesAck/2,handleSendUpdateSelfUserDetailsAck/1,handleSendUpdateUnsavedContactDetailsAck/1,handleSendViberOutBalanceChangeAck/1,handleSendWebNotificationAck/1,handleSetC
+11-04 13:37:35.423 D/DualHost( 3063): VSTATE ConnCtl.getDefaultProtocolVersion=51
+11-04 13:37:35.424 D/DualHost( 3063): VSTATE ConnCtl.getMyCID=-1
+11-04 13:37:35.425 D/DualHost( 3063): VSTATE ConnCtl.getMyVersion=-1
+11-04 13:37:35.426 D/DualHost( 3063): VSTATE ConnCtl.getPhoneState=0
+11-04 13:37:35.427 D/DualHost( 3063): VSTATE ConnCtl.getPhoneType=-1
+11-04 13:37:35.428 D/DualHost( 3063): VSTATE ConnCtl.getSecureKeyforQR=null
+11-04 13:37:35.429 D/DualHost( 3063): VSTATE ConnCtl.isConnected=false
+11-04 13:37:35.430 D/DualHost( 3063): VSTATE ConnCtl.isDeviceKeyTemporary=false
+11-04 13:37:35.431 D/DualHost( 3063): VSTATE ConnCtl.isSecondaryRegistrationInProgress=false
+11-04 13:37:35.431 D/DualHost( 3063): VSTATE ConnCtl.isVideoSupported=false
+11-04 13:37:35.440 D/DualHost( 3063): PERM android.permission.BLUETOOTH_CONNECT -> -1
+11-04 13:37:40.056 D/DualHost( 1633): ACC OBSERVE tx=11 firstArg=null
+11-04 13:37:40.243 D/DualHost( 1633): GSYNC discovered service=com.viber.service.contacts.contactbook.AccountContactbookService authority=com.android.contacts accountType=com.viber.voip
+11-04 13:37:40.243 D/DualHost( 1633): GSYNC trigger: startup +20s
+11-04 13:37:40.254 D/DualHost( 1633): GSYNC adapter=n5 threadsAtStart=168
+11-04 13:37:40.255 D/DualHost( 1633): GSYNC onPerformSync START account=Me/com.viber.voip authority=com.android.contacts
+11-04 13:37:40.269 D/DualHost( 1633): GSYNC threadsAfter=168 newThreads=FAN:ASYNC #1, CrAsyncTask #2, TM:COMMON_CONTACTS_DB, AsyncTask #1, CrAsyncTask #3, CrAsyncTask #4, CrAsyncTask #1, TM:CONTACTS, EngagementSuggestedContactsThread, SurfaceSyncGroupTimer
+11-04 13:37:40.270 D/DualHost( 1633): GSYNC onPerformSync DONE hasError=false stats= stats []
+11-04 13:37:58.049 D/DualHost( 1633): VSTATE t+25s engine=com.viber.jni.Engine
+11-04 13:37:58.051 D/DualHost( 1633): VSTATE Engine.getApplicationDataDir=/data/user/0/com.ims134.dualhost
+11-04 13:37:58.052 D/DualHost( 1633): VSTATE Engine.getServiceState=SERVICE_CONNECTED
+11-04 13:37:58.055 D/DualHost( 1633): VSTATE Engine.isGSMCallActive=false
+11-04 13:37:58.056 D/DualHost( 1633): VSTATE Engine.isInitialized=true
+11-04 13:37:58.057 D/DualHost( 1633): VSTATE Engine.isNativeLoaded=true
+11-04 13:37:58.059 D/DualHost( 1633): VSTATE ConnCtl class=com.viber.jni.NativeEngineBridge methods=canonizePhoneNumber/1,canonizePhoneNumberForCountryCode/2,changePhoneNumberInfo/3,changeUDID/1,check/0,connect/0,connectivityTest/1,convertClientToServerTime/1,crashLibrary/0,deleteAllSecurityInfo/0,disconnect/0,done/0,encodeCurrency/2,generateSequence/0,getBICC/1,getBreachedPeersList/0,getCountryCode/1,getCountryName/1,getDefaultProtocolVersion/0,getDownloadURL/3,getExternalAppPhone/1,getFileOwnerUid/1,getHashForReRegister/2,getMyCID/0,getMyVersion/0,getPGDownloadURL/4,getPhoneProvider/1,getPhoneState/0,getPhoneType/0,getPhotoDownloadURL/3,getSecureKeyforQR/0,getTrustedPeersList/0,handleAddToConferenceCall/1,handleAnswer/1,handleAppModeChanged/1,handleAuthenticateApp/5,handleBannerOrSplashAck/2,handleBlockApp/4,handleBlockGroupInvite/3,handleCallStarted/0,handleCallStats/1,handleChangeConversationSettings/2,handleChangeGroup/5,handleChangeGroupAdditionalOption/4,handleChangeGroupSettings/2,handleChangeLastOnlineSettings/1,handleChangePublicAccount/18,handleChangeReadNotificationsSettings/1,handleChangeUserActivitySettings/1,handleClearSecureCallStorage/0,handleClose/0,handleCommError/1,handleConnectReject/2,handleConnectivityChange/1,handleCreateGroup/6,handleCreateGroup2/5,handleCreatePublicAccount/15,handleCryptBufferFinish/2,handleCryptBufferSeek/2,handleCryptBufferUpdate/5,handleDataInterruption/1,handleDecline/0,handleDecodeBase85/1,handleDeleteGroupMessage/3,handleDeleteMessage/4,handleDeletedMessageAck/1,handleDialConference/2,handleDialogReply/2,handleGSMStateChange/1,handleGeneralPGWSFormattedRequest/5,handleGetAppDetails/2,handleGetBillingToken/0,handleGetCallToken/0,handleGetChannelTags/2,handleGetConnectivityDetails/0,handleGetGroupInfo/2,handleGetGroupMessageStatus/3,handleGetLastOnline/2,handleGetMD5CryptedFile/1,handleGetMD5CryptedFileDescriptor/1,handleGetMySignature/0,handleGetPersonalProfile/0,handleGetPublicAccountCategoryItem/2,handleGetPublicAccountInfoAccountId/5,handleGetPublicAccountInfoChatId/5,handleGetPublicAccountInfoChatUri/2,handleGetPublicAccountSubscribersCount/2,handleGetPublicAccountsMetaData/2,handleGetPublicGroupLikes/5,handleGetPublicGroupMessages/4,handleGetSecondaryDeviceDetails/0,handleGetSecureSessionInfo/1,handleGetUserApps/2,handleGetWalletSecureToken/10,handleGroupAddMember/3,handleGroupAddMembers/5,handleGroupAssignRole/4,handleGroupMessageLikeAck/1,handleGroupRemoveMembers/3,handleHangup/0,handleHangupReply/3,handleInitDecryptionContext/1,handleInitEncryptionContext/0,handleInitiateSecureSyncWithPrimary/0,handleIsOnline/1,handleJoinPublicGroup/4,handleLocalBlockList/2,handleLocalHold/0,handleLocalUnhold/0,handleMute/0,handleNetworkError/2,handleOnClick/4,handleRecanonizeAck/1,handleRecoverGroupChats/0,handleRecoverPublicAccounts/0,handleRefreshPublicAccountToken/2,handleReportBannerStatistics/3,handleReportCdr/1,handleReportForwardPublicGroupContentStatistics/7,handleReportGenericPushStatistics/4,handleReportPublicGroupStatistics/6,handleReportPurchaseErrorStatistics/2,handleReportSO/1,handleReportWatchActivationStatistics/4,handleReportWatchDailyStatistics/5,handleSearchPublicAccountsByParams/5,handleSearchPublicGroupsForCountry/3,handleSecondaryDevicePush/0,handleSecondaryQRPhotographed/4,handleSecondaryRegisteredAck/1,handleSecureCallVerified/2,handleSecureTokenRequest/1,handleSendContactSavedNotification/2,handleSendConversationStatus/10,handleSendGroupChangedAck/2,handleSendIM2Message/1,handleSendIceCandidates/1,handleSendMessageDeliveredAck/1,handleSendMessageReplyAck/1,handleSendMissedCallsAck/3,handleSendPublicGroupInvite/4,handleSendPublicGroupInviteToGroup/4,handleSendPublicGroupsUpdatedAck/1,handleSendQueryDestOperationSupport/3,handleSendSdpAnswer/2,handleSendSdpOffer/2,handleSendSdpOfferToHs/1,handleSendSyncConversationAck/3,handleSendSyncGroupAck/3,handleSendSyncMessageLikeAck/1,handleSendSyncMessagesAck/2,handleSendUpdateSelfUserDetailsAck/1,handleSendUpdateUnsavedContactDetailsAck/1,handleSendViberOutBalanceChangeAck/1,handleSendWebNotificationAck/1,handleSetC
+11-04 13:37:58.060 D/DualHost( 1633): VSTATE ConnCtl.getDefaultProtocolVersion=51
+11-04 13:37:58.061 D/DualHost( 1633): VSTATE ConnCtl.getMyCID=172507596
+11-04 13:37:58.062 D/DualHost( 1633): VSTATE ConnCtl.getMyVersion=51
+11-04 13:37:58.062 D/DualHost( 1633): VSTATE ConnCtl.getPhoneState=0
+11-04 13:37:58.063 D/DualHost( 1633): VSTATE ConnCtl.getPhoneType=4096
+11-04 13:37:58.069 D/DualHost( 1633): VSTATE ConnCtl.getSecureKeyforQR=PbUrvjskoHzWZWr3YEOMQMg81oWOKLJ77TtsR_U-cxc.
+11-04 13:37:58.070 D/DualHost( 1633): VSTATE ConnCtl.isConnected=true
+11-04 13:37:58.070 D/DualHost( 1633): VSTATE ConnCtl.isDeviceKeyTemporary=false
+11-04 13:37:58.071 D/DualHost( 1633): VSTATE ConnCtl.isSecondaryRegistrationInProgress=false
+11-04 13:37:58.071 D/DualHost( 1633): VSTATE ConnCtl.isVideoSupported=true
+11-04 13:37:58.074 D/DualHost( 1633): VSTATE manual connect() returned null
+11-04 13:38:00.434 D/DualHost( 3063): VSTATE t+25s engine=com.viber.jni.Engine
+11-04 13:38:00.437 D/DualHost( 3063): VSTATE Engine.getApplicationDataDir=/data/user/0/com.ims134.dualhost
+11-04 13:38:00.438 D/DualHost( 3063): VSTATE Engine.getServiceState=SERVICE_NOT_CONNECTED
+11-04 13:38:00.442 D/DualHost( 3063): VSTATE Engine.isGSMCallActive=false
+11-04 13:38:00.444 D/DualHost( 3063): VSTATE Engine.isInitialized=false
+11-04 13:38:00.445 D/DualHost( 3063): VSTATE Engine.isNativeLoaded=true
+11-04 13:38:00.449 D/DualHost( 3063): VSTATE ConnCtl class=com.viber.jni.NativeEngineBridge methods=canonizePhoneNumber/1,canonizePhoneNumberForCountryCode/2,changePhoneNumberInfo/3,changeUDID/1,check/0,connect/0,connectivityTest/1,convertClientToServerTime/1,crashLibrary/0,deleteAllSecurityInfo/0,disconnect/0,done/0,encodeCurrency/2,generateSequence/0,getBICC/1,getBreachedPeersList/0,getCountryCode/1,getCountryName/1,getDefaultProtocolVersion/0,getDownloadURL/3,getExternalAppPhone/1,getFileOwnerUid/1,getHashForReRegister/2,getMyCID/0,getMyVersion/0,getPGDownloadURL/4,getPhoneProvider/1,getPhoneState/0,getPhoneType/0,getPhotoDownloadURL/3,getSecureKeyforQR/0,getTrustedPeersList/0,handleAddToConferenceCall/1,handleAnswer/1,handleAppModeChanged/1,handleAuthenticateApp/5,handleBannerOrSplashAck/2,handleBlockApp/4,handleBlockGroupInvite/3,handleCallStarted/0,handleCallStats/1,handleChangeConversationSettings/2,handleChangeGroup/5,handleChangeGroupAdditionalOption/4,handleChangeGroupSettings/2,handleChangeLastOnlineSettings/1,handleChangePublicAccount/18,handleChangeReadNotificationsSettings/1,handleChangeUserActivitySettings/1,handleClearSecureCallStorage/0,handleClose/0,handleCommError/1,handleConnectReject/2,handleConnectivityChange/1,handleCreateGroup/6,handleCreateGroup2/5,handleCreatePublicAccount/15,handleCryptBufferFinish/2,handleCryptBufferSeek/2,handleCryptBufferUpdate/5,handleDataInterruption/1,handleDecline/0,handleDecodeBase85/1,handleDeleteGroupMessage/3,handleDeleteMessage/4,handleDeletedMessageAck/1,handleDialConference/2,handleDialogReply/2,handleGSMStateChange/1,handleGeneralPGWSFormattedRequest/5,handleGetAppDetails/2,handleGetBillingToken/0,handleGetCallToken/0,handleGetChannelTags/2,handleGetConnectivityDetails/0,handleGetGroupInfo/2,handleGetGroupMessageStatus/3,handleGetLastOnline/2,handleGetMD5CryptedFile/1,handleGetMD5CryptedFileDescriptor/1,handleGetMySignature/0,handleGetPersonalProfile/0,handleGetPublicAccountCategoryItem/2,handleGetPublicAccountInfoAccountId/5,handleGetPublicAccountInfoChatId/5,handleGetPublicAccountInfoChatUri/2,handleGetPublicAccountSubscribersCount/2,handleGetPublicAccountsMetaData/2,handleGetPublicGroupLikes/5,handleGetPublicGroupMessages/4,handleGetSecondaryDeviceDetails/0,handleGetSecureSessionInfo/1,handleGetUserApps/2,handleGetWalletSecureToken/10,handleGroupAddMember/3,handleGroupAddMembers/5,handleGroupAssignRole/4,handleGroupMessageLikeAck/1,handleGroupRemoveMembers/3,handleHangup/0,handleHangupReply/3,handleInitDecryptionContext/1,handleInitEncryptionContext/0,handleInitiateSecureSyncWithPrimary/0,handleIsOnline/1,handleJoinPublicGroup/4,handleLocalBlockList/2,handleLocalHold/0,handleLocalUnhold/0,handleMute/0,handleNetworkError/2,handleOnClick/4,handleRecanonizeAck/1,handleRecoverGroupChats/0,handleRecoverPublicAccounts/0,handleRefreshPublicAccountToken/2,handleReportBannerStatistics/3,handleReportCdr/1,handleReportForwardPublicGroupContentStatistics/7,handleReportGenericPushStatistics/4,handleReportPublicGroupStatistics/6,handleReportPurchaseErrorStatistics/2,handleReportSO/1,handleReportWatchActivationStatistics/4,handleReportWatchDailyStatistics/5,handleSearchPublicAccountsByParams/5,handleSearchPublicGroupsForCountry/3,handleSecondaryDevicePush/0,handleSecondaryQRPhotographed/4,handleSecondaryRegisteredAck/1,handleSecureCallVerified/2,handleSecureTokenRequest/1,handleSendContactSavedNotification/2,handleSendConversationStatus/10,handleSendGroupChangedAck/2,handleSendIM2Message/1,handleSendIceCandidates/1,handleSendMessageDeliveredAck/1,handleSendMessageReplyAck/1,handleSendMissedCallsAck/3,handleSendPublicGroupInvite/4,handleSendPublicGroupInviteToGroup/4,handleSendPublicGroupsUpdatedAck/1,handleSendQueryDestOperationSupport/3,handleSendSdpAnswer/2,handleSendSdpOffer/2,handleSendSdpOfferToHs/1,handleSendSyncConversationAck/3,handleSendSyncGroupAck/3,handleSendSyncMessageLikeAck/1,handleSendSyncMessagesAck/2,handleSendUpdateSelfUserDetailsAck/1,handleSendUpdateUnsavedContactDetailsAck/1,handleSendViberOutBalanceChangeAck/1,handleSendWebNotificationAck/1,handleSetC
+11-04 13:38:00.450 D/DualHost( 3063): VSTATE ConnCtl.getDefaultProtocolVersion=51
+11-04 13:38:00.452 D/DualHost( 3063): VSTATE ConnCtl.getMyCID=-1
+11-04 13:38:00.453 D/DualHost( 3063): VSTATE ConnCtl.getMyVersion=-1
+11-04 13:38:00.454 D/DualHost( 3063): VSTATE ConnCtl.getPhoneState=0
+11-04 13:38:00.455 D/DualHost( 3063): VSTATE ConnCtl.getPhoneType=-1
+11-04 13:38:00.456 D/DualHost( 3063): VSTATE ConnCtl.getSecureKeyforQR=null
+11-04 13:38:00.458 D/DualHost( 3063): VSTATE ConnCtl.isConnected=false
+11-04 13:38:00.459 D/DualHost( 3063): VSTATE ConnCtl.isDeviceKeyTemporary=false
+11-04 13:38:00.460 D/DualHost( 3063): VSTATE ConnCtl.isSecondaryRegistrationInProgress=false
+11-04 13:38:00.461 D/DualHost( 3063): VSTATE ConnCtl.isVideoSupported=false
+11-04 13:38:00.463 D/DualHost( 3063): VSTATE manual connect() returned null
+11-04 13:38:01.077 D/DualHost( 1633): VSTATE after connect +3s: isConnected=true serviceState=SERVICE_CONNECTED CID=172507596
