@@ -56,6 +56,7 @@ object HookInstaller {
                 PermProxy.install()
                 NmProxy.install()
                 AmProxy.install()
+                AccFix.install()
                 // Added 2026-10-31: see TmProxy's file comment. Must come after AmProxy.install()
                 // since it calls AmProxy.fix() directly (no dependency on AmProxy's installed
                 // proxy object itself, just the function, but keeping the order documents intent).

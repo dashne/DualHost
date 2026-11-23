@@ -19,6 +19,7 @@ import android.os.IBinder
 import android.app.Instrumentation.ActivityResult
 import java.lang.reflect.InvocationTargetException
 import android.content.ClipData
+import android.content.res.Configuration
 import android.graphics.Bitmap.createBitmap
 import android.net.Uri
 import android.provider.MediaStore
@@ -276,7 +277,8 @@ class HostInstrumentation(private val base: Instrumentation) : Instrumentation()
         ai.splitSourceDirs = splitPaths
         ai.splitPublicSourceDirs = splitPaths
         val raw = pm.getResourcesForApplication(ai)
-        val resources = GuestResources(raw.assets, raw.displayMetrics, raw.configuration, ai.packageName)
+        //val resources = GuestResources(raw.assets, raw.displayMetrics, raw.configuration, ai.packageName)
+        val resources = GuestResources(raw.assets, raw.displayMetrics, liveNightConfig(raw, ai.packageName), ai.packageName)
         val loader = getGuestLoader(hostApp.classLoader, apkPath)
 
         val appClassName = ai.className
@@ -494,6 +496,7 @@ class HostInstrumentation(private val base: Instrumentation) : Instrumentation()
         GuestReceivers.register(hostApp, apkPath, loader)
         FileLog.d("guest application ready: " + app.javaClass.name)
         try { NetDiag.start(app) } catch (e: Throwable) { FileLog.d("NetDiag start failed: " + e) }
+        try { EngineProbe.start(app) } catch (e: Throwable) { FileLog.d("EngineProbe start failed: " + e) }
         try { GuestSync.start(ctx) } catch (e: Throwable) { FileLog.d("GuestSync start failed: " + e) }
 
 
@@ -511,11 +514,27 @@ class HostInstrumentation(private val base: Instrumentation) : Instrumentation()
         ai.splitSourceDirs = splits
         ai.splitPublicSourceDirs = splits
         val raw = pm.getResourcesForApplication(ai)
-        return GuestResources(raw.assets, raw.displayMetrics, raw.configuration, ai.packageName)
+        //return GuestResources(raw.assets, raw.displayMetrics, raw.configuration, ai.packageName)
+        return GuestResources(raw.assets, raw.displayMetrics, liveNightConfig(raw, ai.packageName), ai.packageName)
+    }
+    // Night mode follows the live system setting, not whatever configuration
+    // getResourcesForApplication() handed back.
+    private fun liveNightConfig(raw: Resources, guestPkg: String): Configuration {
+        val cfg = Configuration(raw.configuration)
+        val host = hostApp().resources.configuration
+        val mask = Configuration.UI_MODE_NIGHT_MASK
+        cfg.uiMode = (cfg.uiMode and mask.inv()) or (host.uiMode and mask)
+        FileLog.d("NIGHT guest=$guestPkg hostUiMode=0x${Integer.toHexString(host.uiMode and mask)} " +
+                "rawUiMode=0x${Integer.toHexString(raw.configuration.uiMode and mask)}")
+        return cfg
     }
 
     private fun prepareGuest(activity: Activity?, icicle: Bundle?) {
+        FileLog.d("PREP entered activity=${activity?.javaClass?.name}")
         if (activity == null) return
+        FileLog.d("PREP activity=${activity.javaClass.name} intentNull=${activity.intent == null} " +
+                "guestClass=${activity.intent?.getStringExtra("guestClass")} " +
+                "apkPath=${activity.intent?.getStringExtra("apkPath") != null}")
         val intent = activity.intent ?: return
         val apkPath = intent.getStringExtra("apkPath") ?: return
         if (intent.getStringExtra("guestClass") != activity.javaClass.name) return
@@ -656,7 +675,31 @@ class HostInstrumentation(private val base: Instrumentation) : Instrumentation()
             }
             // ===== END THEME FIX =====
 
+            try {
+                val acd = (activity.javaClass.classLoader ?: return).loadClass("androidx.appcompat.app.AppCompatDelegate")
+                val mode = acd.getMethod("getDefaultNightMode").invoke(null)
+                FileLog.d("NIGHTMODE appcompatDefault=$mode activityUi=0x${Integer.toHexString(activity.resources.configuration.uiMode)}")
+            } catch (e: Throwable) {
+                FileLog.d("NIGHTMODE failed: $e")
+            }
+
             FileLog.d("guest ready: " + activity.javaClass.name)
+
+            try {
+                val tv = android.util.TypedValue()
+                if (activity.theme.resolveAttribute(android.R.attr.windowBackground, tv, true)) {
+                    activity.window.setBackgroundDrawableResource(tv.resourceId)
+                    FileLog.d("WINFIX set windowBackground res=0x${Integer.toHexString(tv.resourceId)}")
+                }
+            } catch (e: Throwable) {
+                FileLog.d("WINFIX failed: $e")
+            }
+
+            FileLog.d("WINCOLOR bg=${(activity.window.decorView.background as? android.graphics.drawable.ColorDrawable)?.color?.let { "0x" + Integer.toHexString(it) } ?: "not-solid"}")
+
+            FileLog.d("WIN bg=${activity.window.decorView.background} " +
+                    "statusColor=0x${Integer.toHexString(activity.window.statusBarColor)} " +
+                    "colorBg=${activity.theme.resolveAttribute(android.R.attr.colorBackground, android.util.TypedValue(), true)}")
         } catch (e: Throwable) {
             FileLog.d("prepareGuest failed: " + e)
         }
@@ -982,10 +1025,23 @@ class HostInstrumentation(private val base: Instrumentation) : Instrumentation()
         base.callApplicationOnCreate(app)
     }
 
-    override fun callActivityOnCreate(activity: Activity?, icicle: Bundle?) {
-        FileLog.d("HOOK callActivityOnCreate: " + activity?.javaClass?.name)
-        prepareGuest(activity, icicle)
-        base.callActivityOnCreate(activity, icicle)
+//    override fun callActivityOnCreate(activity: Activity?, icicle: Bundle?) {
+//        FileLog.d("HOOK callActivityOnCreate: " + activity?.javaClass?.name)
+//        prepareGuest(activity, icicle)
+//        base.callActivityOnCreate(activity, icicle)
+//    }
+override fun callActivityOnCreate(activity: Activity?, icicle: Bundle?) {
+    FileLog.d("HOOK callActivityOnCreate: " + activity?.javaClass?.name)
+    prepareGuest(activity, icicle)
+    base.callActivityOnCreate(activity, icicle)
+    postCreateLog(activity)
+}
+
+    private fun postCreateLog(activity: Activity?) {
+        if (activity == null) return
+        val bg = (activity.window.decorView.background as? android.graphics.drawable.ColorDrawable)?.color
+        FileLog.d("POSTCREATE bg=${bg?.let { "0x" + Integer.toHexString(it) } ?: "not-solid"} " +
+                "uiMode=0x${Integer.toHexString(activity.resources.configuration.uiMode)}")
     }
 
     override fun callActivityOnCreate(activity: Activity?, icicle: Bundle?, persistentState: PersistableBundle?) {

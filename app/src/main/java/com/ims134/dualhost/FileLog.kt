@@ -36,4 +36,20 @@ object FileLog {
             }
         } catch (e: Throwable) { }
     }
+
+    // Added 2026-11-20: names the guest method that is asking, for the CsProxy/PmProxy
+    // diagnostics. Same idea as the PKGSURVEY lines in CloneContext: the next capture shows
+    // WHICH guest code drives each proxied call, not only that the call happened.
+    fun callerChain(): String = try {
+        Thread.currentThread().stackTrace
+            .drop(2)   // getStackTrace + callerChain itself
+            .filter {
+                !it.className.startsWith("com.ims134.dualhost.") &&
+                        !it.className.startsWith("java.") && !it.className.startsWith("javax.") &&
+                        !it.className.startsWith("android.") && !it.className.startsWith("kotlin.")
+            }
+            .take(3)
+            .joinToString(" <- ") { it.className.substringAfterLast('.') + "." + it.methodName }
+            .ifEmpty { "(no guest frames)" }
+    } catch (e: Throwable) { "?" }
 }

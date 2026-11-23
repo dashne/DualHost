@@ -7,11 +7,18 @@ object ViberHacks {
     fun setFactory(loader: ClassLoader, app: Application) {
         scanProcessName()
 
-        // Attempt 1: bypass spf0, call hsv.d directly + ViberEnv.init + gmv0.j()
+        // Real path first: build x3x the way Viber's provider does and call x3x.a().
+        // x3x.a() is what sets obf0.b, which the contacts sync depends on.
+        if (tryX3xDirect(loader, app)) {
+            tryGmv0j(loader)
+            FileLog.d("VFACTORY final sViberFactory = " + (readFactory(loader)?.javaClass?.name ?: "null"))
+            return
+        }
+
+        // Old fallbacks, unchanged
         val direct = tryDirectHsv(loader)
         FileLog.d("SPF0 direct outcome=" + direct)
 
-        // Attempt 2: fall back to spf0.a if direct failed
         val outcome = if (direct == "unit" || direct == "suspended") direct
         else trySpf0Real(loader, app)
         FileLog.d("SPF0 outcome=" + outcome)
@@ -25,6 +32,43 @@ object ViberHacks {
             tryGmv0j(loader)
             val final = readFactory(loader)
             FileLog.d("VFACTORY final sViberFactory = " + (final?.javaClass?.name ?: "null"))
+        }
+    }
+
+    // Builds x3x with its real arguments (static gpf0.b and d0l.a, as y3x does), calls
+    // x3x.a(context, emptySet, null) to get the z3x config, then runs ViberEnv.init(new d(z3x)).
+    private fun tryX3xDirect(loader: ClassLoader, app: Application): Boolean {
+        return try {
+            val tic = loader.loadClass("gpf0").getDeclaredField("b")
+                .apply { isAccessible = true }.get(null)
+            val q6x = loader.loadClass("d0l").getDeclaredField("a")
+                .apply { isAccessible = true }.get(null)
+            FileLog.d("X3X args tic=" + (tic?.javaClass?.name ?: "null") + " q6x=" + (q6x?.javaClass?.name ?: "null"))
+
+            val x3xCls = loader.loadClass("x3x")
+            val ctor = x3xCls.getDeclaredConstructor(loader.loadClass("tic"), loader.loadClass("q6x"))
+                .apply { isAccessible = true }
+            val x3x = ctor.newInstance(tic, q6x)
+
+            val contCls = loader.loadClass("kotlin.coroutines.Continuation")
+            val aM = x3xCls.getDeclaredMethod(
+                "a", android.content.Context::class.java, java.util.HashSet::class.java, contCls
+            ).apply { isAccessible = true }
+            val z3x = aM.invoke(x3x, app, java.util.HashSet<Any>(), null)
+            FileLog.d("X3X a() returned " + (z3x?.javaClass?.name ?: "null"))
+            if (z3x == null) return false
+
+            val envCls = loader.loadClass("com.viber.voip.ViberEnv")
+            val facCls = loader.loadClass("com.viber.voip.ViberFactory")
+            val dCls = loader.loadClass("com.viber.voip.d")
+            val factory = dCls.getDeclaredConstructor(loader.loadClass("z3x"))
+                .apply { isAccessible = true }.newInstance(z3x)
+            envCls.getMethod("init", facCls).invoke(null, factory)
+            FileLog.d("X3X ViberEnv.init done with " + factory.javaClass.name)
+            true
+        } catch (e: Throwable) {
+            FileLog.d("X3X direct failed: " + (e.cause ?: e))
+            false
         }
     }
 

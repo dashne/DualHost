@@ -21,16 +21,118 @@ object PmProxy {
         if (synchronized(seen) { seen.add(s) }) FileLog.d(s)
     }
 
-    // Parse the guest manifest in-process (does not go through IPackageManager)
-    // 2026-11-04: Viber's Engine.getApplicationDataDir() asks the context for its package name
-    // (gets the guest name), then resolves it through PackageManager (getPackageInfo/getApplicationInfo),
-    // which we answer with HOST's record, so the native engine was handed HOST's data dir
-    // (/data/user/0/com.ims134.dualhost) and could not find Viber's own activation data
-    // (getMyCID=-1, never connects). Returns a copy whose dataDir is this clone's own virtual root.
+    // The guest package name is cached; invalidated automatically if guestApk ever changes.
+    @Volatile private var guestPkgCacheFor: String? = null
+    @Volatile private var guestPkgCache: String? = null
+
+    fun guestPkg(): String? {
+        val apk = guestApk ?: return null
+        if (guestPkgCacheFor != apk) {
+            guestPkgCache = File(apk).parentFile?.parentFile?.name
+            guestPkgCacheFor = apk
+        }
+        return guestPkgCache
+    }
+
+    // Component enable/disable state of the guest's OWN components, as Viber sets it. The real
+    // system refuses these calls for a package it does not know (IllegalArgumentException), so
+    // they were dropped and reads came back as the manifest default. Only values the guest itself
+    // sets are stored; components the guest never touched still go to the real system.
+    private object ComponentState {
+        private const val FILE = "virtual_component_state.properties"
+        private val map = HashMap<String, Int>()
+        private var loaded = false
+
+        //private fun file(): File? = GuestSync.ctx?.filesDir?.let { File(it, FILE) }
+
+        // GuestSync.ctx is only set in the :p0 process, but Viber records component state in the
+        // MAIN guest process too. Resolve the app context directly — both guest processes share
+        // the same filesDir, so persisted state is readable from either process.
+        private fun file(): File? = try {
+            val app = Class.forName("android.app.ActivityThread")
+                .getDeclaredMethod("currentApplication").invoke(null) as? android.app.Application
+            app?.filesDir?.let { File(it, FILE) }
+        } catch (e: Throwable) {
+            GuestSync.ctx?.filesDir?.let { File(it, FILE) }
+        }
+
+        @Synchronized
+        private fun ensureLoaded() {
+            if (loaded) return
+            val f = file() ?: return
+            loaded = true
+            try {
+                if (f.exists()) {
+                    val p = java.util.Properties()
+                    f.inputStream().use { p.load(it) }
+                    for (k in p.stringPropertyNames()) {
+                        p.getProperty(k)?.toIntOrNull()?.let { map[k] = it }
+                    }
+                }
+            } catch (e: Throwable) {
+                FileLog.d("PM component state load failed: $e")
+            }
+        }
+
+        @Synchronized
+        fun put(key: String, state: Int) {
+            ensureLoaded()
+            map[key] = state
+            try {
+                val f = file() ?: return
+                val p = java.util.Properties()
+                for ((k, v) in map) p.setProperty(k, v.toString())
+                f.outputStream().use { p.store(it, "DualHost guest component state") }
+            } catch (e: Throwable) {
+                FileLog.d("PM component state save failed: $e")
+            }
+        }
+
+        @Synchronized
+        fun get(key: String): Int? {
+            ensureLoaded()
+            return map[key]
+        }
+    }
+
+    // 2026-11-20: when the guest asks PackageManager about its OWN package and the real
+    // system has no usable record, synthesize the answer from the guest's own APK manifest
+    // instead. Handing the guest "you are not installed" is fatal in several Viber startup paths.
+    private fun synthesizePackageInfo(flags: Int): PackageInfo? {
+        val pi = guestInfo(flags) ?: return null
+        val gp = guestPkg() ?: return pi
+        pi.packageName = gp
+        pi.applicationInfo?.let { ai ->
+            ai.packageName = gp
+            ai.uid = android.os.Process.myUid()
+            guestApk?.let { apk -> ai.sourceDir = apk; ai.publicSourceDir = apk }
+            withGuestDataDir(ai)?.let { ai.dataDir = it.dataDir }
+        }
+        logOnce("PM synthesized PackageInfo for self-lookup pkg=$gp flags=0x" + java.lang.Integer.toHexString(flags))
+        return pi
+    }
+
+    private fun synthesizeApplicationInfo(): ApplicationInfo? {
+        val ai = guestInfo(PackageManager.GET_META_DATA)?.applicationInfo ?: return null
+        val gp = guestPkg()
+        if (gp != null) ai.packageName = gp
+        ai.uid = android.os.Process.myUid()
+        guestApk?.let { apk -> ai.sourceDir = apk; ai.publicSourceDir = apk }
+        withGuestDataDir(ai)?.let { ai.dataDir = it.dataDir }
+        logOnce("PM synthesized ApplicationInfo for self-lookup pkg=" + (gp ?: "?"))
+        return ai
+    }
+
+    // 2026-11-04: Viber's Engine.getApplicationDataDir() resolves its package through
+    // PackageManager. Answering with HOST's record gave the native engine HOST's data dir, so
+    // it could not find its own activation data. Returns a copy whose dataDir is this clone's
+    // own virtual root.
+    private val NATIVE_ENGINE_PACKAGES = setOf("com.viber.voip", "org.telegram.messenger")
+
     private fun withGuestDataDir(ai: ApplicationInfo?): ApplicationInfo? {
         if (ai == null) return null
         try {
-            val gp = guestApk?.let { File(it).parentFile?.parentFile?.name } ?: return ai
+            val gp = guestPkg() ?: return ai
             if (gp !in NATIVE_ENGINE_PACKAGES) return ai
             val id = ProcessClone.id
             if (id < 0) return ai
@@ -109,32 +211,43 @@ object PmProxy {
 
     private fun handle(m: java.lang.reflect.Method, args: Array<Any?>?): Any?
     {
-//        if (args != null && args.isNotEmpty() && args[0] is android.content.Intent)
-//        {
-//            FileLog.d( "PMQ " + m.name + " action=" + (args[0] as android.content.Intent).action)
-//        }
+        // Component state of the guest's own components (see ComponentState). Recorded for
+        // setComponentEnabledSetting; read back for getComponentEnabledSetting when the guest
+        // has set that component. Unset components fall through to the real system below.
+        if ((m.name == "setComponentEnabledSetting" || m.name == "getComponentEnabledSetting") &&
+            args != null && args.isNotEmpty()) {
+            val cn = args[0] as? ComponentName
+            val gp = guestPkg()
+            if (cn != null && gp != null && cn.packageName == gp) {
+                if (m.name == "setComponentEnabledSetting") {
+                    val state = (args.getOrNull(1) as? Number)?.toInt() ?: 0
+                    ComponentState.put(cn.flattenToString(), state)
+                    logOnce("PM component state recorded " + cn.flattenToString() + " -> " + state)
+                    return null
+                }
+                ComponentState.get(cn.flattenToString())?.let { return it }
+            }
+        }
 
-        // Added 2026-10-31: PackageManager.checkPermission(permission, packageName) — the
-        // check-ANY-named-package overload, as opposed to the pid/uid overload CloneContext
-        // already virtualizes correctly via checkPermission/checkSelfPermission — never went
-        // through this proxy at all. A guest (or a shared library inside it, e.g. a
-        // contacts-sync helper) that calls packageManager.checkPermission(perm,
-        // context.getPackageName()) passes OUR SPOOFED guest package name ("com.viber.voip"),
-        // and unredirected that asks the REAL system about the real, separately-installed
-        // Viber app's grant state — not ours. Confirmed from the exact symptom this was added
-        // to fix: Viber's Contacts screen kept showing "Allow access" even after Contacts was
-        // genuinely granted to com.ims134.dualhost, and tapping it opened the REAL Viber's
-        // app-info settings page (Settings.ACTION_APPLICATION_DETAILS_SETTINGS has no explicit
-        // component, just action+data, so nothing else in this project could have redirected
-        // it either — fixing the check here removes the guest's own reason to show that button
-        // at all). Rewritten to ask about HOST instead, then re-applies the same ClonePerms
-        // narrowing CloneContext.gate() already does for the Context-level path, so both paths
-        // agree.
+        if (m.name == "checkSignatures" && args != null && args.size >= 2 &&
+            args[0] is String && args[1] is String) {
+            val s0 = args[0] as String
+            val s1 = args[1] as String
+            val gpSig = guestApk?.let { File(it).parentFile?.parentFile?.name }
+            logOnce("PM checkSignatures $s0 vs $s1")
+            if (gpSig != null && (s0 == HOST || s0 == gpSig) && (s1 == HOST || s1 == gpSig)) {
+                return PackageManager.SIGNATURE_MATCH
+            }
+        }
+
+        // checkPermission(permission, packageName) — the check-ANY-named-package overload. A guest
+        // that passes its own (spoofed) package name must be answered about HOST, then narrowed
+        // by the same ClonePerms rules CloneContext.gate() applies, so both paths agree.
         if ((m.name == "checkPermission" || m.name == "checkUidPermission") &&
             args != null && args.size >= 2 && args[0] is String && args[1] is String) {
             val permName = args[0] as String
             val askedPkg = args[1] as String
-            val gp = guestApk?.let { File(it).parentFile?.parentFile?.name }
+            val gp = guestPkg()
             if (gp != null && askedPkg == gp) {
                 try {
                     val fixedArgs = args.copyOf()
@@ -153,38 +266,42 @@ object PmProxy {
                     return r
                 } catch (e: Throwable) {
                     logOnce("PM " + m.name + " redirect failed: " + e)
-                    // fall through to the normal (pre-existing, unredirected) path below
+                    // fall through to the normal (unredirected) path below
                 }
             }
         }
 
-        // Added 2026-10-31 (Contacts "Allow access" persisted despite real READ_CONTACTS grant,
-        // courtesy of a third-party analysis the user supplied — §5): getPackageInfo(packageName,
-        // GET_PERMISSIONS) is a SEPARATE path from checkPermission/checkUidPermission above. An
-        // app can read its own grant state either by calling checkSelfPermission (virtualized by
-        // CloneContext.gate() + the checkPermission redirect just above) OR by calling
-        // pm.getPackageInfo(getPackageName(), GET_PERMISSIONS) and reading
-        // requestedPermissionsFlags directly off the result — a totally different code path that
-        // nothing here was redirecting. That's almost certainly why Contacts stayed stuck even
-        // after the checkPermission/PermProxy fixes: unredirected, this call asked the REAL
-        // system about the REAL, separately-installed Viber app (own UID, own — likely ungranted
-        // — Contacts permission), never about this clone's genuinely-granted state at all.
-        // Fix: ask HOST for the real flags, but keep the GUEST's own identity (package name,
-        // requestedPermissions list, uid) in what's handed back — only borrow HOST's grant BITS
-        // for whichever permissions the guest's own manifest actually declares, so the result
-        // still looks like "my package, but with my real OS grants" to the caller.
+        // getPackageInfo(packageName, GET_PERMISSIONS) is a separate path from checkPermission.
+        // Ask HOST for the real grant bits, but keep the GUEST's identity in what is handed back,
+        // borrowing HOST's grant bits only for permissions the guest's own manifest declares.
         if (m.name == "getPackageInfo" && args != null && args.isNotEmpty() && args[0] is String) {
             val asked = args[0] as String
-            val gp = guestApk?.let { File(it).parentFile?.parentFile?.name }
+            val gp = guestPkg()
             if (gp != null && asked == gp) {
                 try {
                     val fixedArgs = args.copyOf()
                     fixedArgs[0] = HOST
                     val r = if (fixedArgs.size >= 2) m.invoke(real, *fixedArgs) else m.invoke(real, fixedArgs[0])
                     if (r is PackageInfo) {
-                        // 2026-11-04: this branch RETURNS before the SIGSPOOF block further down
-                        // runs, so a guest asking for its OWN name (com.viber.voip) with signature
-                        // flags still got the host's certificate. Apply the same swap here.
+                        val flags = (args.getOrNull(1) as? Number)?.toInt() ?: 0
+                        val guestPi = guestInfo(flags)
+
+                        // Identity fields: serve the guest archive's own version info and point
+                        // sourceDir at the guest APK. The guest must look like itself, only
+                        // wearing this clone's grant bits and data dir.
+                        guestPi?.let { gpPi ->
+                            r.versionName = gpPi.versionName ?: r.versionName
+                            r.versionCode = gpPi.versionCode
+                        }
+                        r.applicationInfo?.let { ai ->
+                            ai.packageName = gp
+                            ai.uid = android.os.Process.myUid()
+                            guestApk?.let { apk -> ai.sourceDir = apk; ai.publicSourceDir = apk }
+                            withGuestDataDir(ai)?.let { ai.dataDir = it.dataDir }
+                        }
+
+                        // This branch RETURNS before the SIGSPOOF block below runs, so apply the
+                        // same certificate swap here.
                         try {
                             val sf = (args.getOrNull(1) as? Number)?.toLong() ?: 0L
                             if ((sf and (PackageManager.GET_SIGNATURES or 0x08000000).toLong()) != 0L) {
@@ -196,15 +313,10 @@ object PmProxy {
                                 } else logOnce("PM SIGSPOOF (guest-name path) guest signature unavailable")
                             }
                         } catch (e: Throwable) { logOnce("PM SIGSPOOF (guest-name path) failed: $e") }
-                        val flags = (args.getOrNull(1) as? Number)?.toInt() ?: 0
-                        val guestPi = guestInfo(flags)
                         val guestReq = guestPi?.requestedPermissions
                         if (guestPi != null && guestReq != null) {
-                            // android.content.pm.PackageInfo has no copy constructor (unlike
-                            // ApplicationInfo, which does) — "PackageInfo(r)" does not compile.
-                            // `r` is a fresh object this call just got back from m.invoke(), not
-                            // shared or cached anywhere else, so it's safe to mutate in place
-                            // instead of copying.
+                            // PackageInfo has no copy constructor; `r` is a fresh object from
+                            // m.invoke(), so mutating it in place is safe.
                             val hostFlags = r.requestedPermissionsFlags
                             val hostMap = HashMap<String, Int>()
                             r.requestedPermissions?.forEachIndexed { i, p ->
@@ -230,7 +342,10 @@ object PmProxy {
                     return r
                 } catch (e: Throwable) {
                     logOnce("PM getPackageInfo guest-permissions redirect failed: " + e)
-                    // fall through to the normal (pre-existing, unredirected) path below
+                    // If the HOST-based lookup failed, do NOT fall through to a real lookup of the
+                    // guest name (that would hand over the real Viber's record). Synthesize instead.
+                    synthesizePackageInfo((args.getOrNull(1) as? Number)?.toInt() ?: 0)?.let { return it }
+                    // fall through to the normal (unredirected) path below
                 }
             }
         }
@@ -239,16 +354,36 @@ object PmProxy {
         try {
             result = if (args == null) m.invoke(real) else m.invoke(real, *args)
         } catch (e: InvocationTargetException) {
-            val cn = args?.getOrNull(0) as? ComponentName
-            val gp = guestApk?.let { java.io.File(it).parentFile?.parentFile?.name }
             val te = e.targetException
+            val cn = args?.getOrNull(0) as? ComponentName
+            val gp = guestPkg()
+            val asked = args?.getOrNull(0) as? String
+            // Self-lookup the real system cannot answer: synthesize from the guest archive
+            // instead of throwing NameNotFoundException at the guest.
+            if (gp != null && asked == gp &&
+                (m.name == "getPackageInfo" || m.name == "getApplicationInfo") &&
+                te is PackageManager.NameNotFoundException) {
+                val syn = if (m.name == "getPackageInfo")
+                    synthesizePackageInfo((args?.getOrNull(1) as? Number)?.toInt() ?: 0)
+                else synthesizeApplicationInfo()
+                if (syn != null) return syn
+            }
+            // The real system refuses component state for HOST and guest components; the stored
+            // record above covers the guest's own components, and HOST's are left as they were.
             if (m.name == "setComponentEnabledSetting" && cn != null && gp != null &&
                 (cn.packageName == HOST || cn.packageName == gp) &&
                 (te is IllegalArgumentException || te is SecurityException)) {
-                logOnce("PM ignored setComponentEnabledSetting for guest " + cn.className + " (" + te.javaClass.simpleName + ")")
+                logOnce("PM ignored setComponentEnabledSetting for " + cn.className + " (" + te.javaClass.simpleName + ")")
                 return null
             }
-            throw e.targetException
+            // Never-set component the real system does not know: report the default state.
+            if (m.name == "getComponentEnabledSetting" && cn != null && gp != null &&
+                (cn.packageName == HOST || cn.packageName == gp) &&
+                (te is IllegalArgumentException || te is SecurityException)) {
+                logOnce("PM getComponentEnabledSetting default for " + cn.className)
+                return PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
+            }
+            throw te
         }
 
         if (m.name == "getPackageInfo" && args != null && args.isNotEmpty() && args[0] is String) {
@@ -256,10 +391,24 @@ object PmProxy {
             if (result == null) FileLog.d("DIAG getPackageInfo('$asked') = NULL")
         }
 
+        // Same story when the system answers null instead of throwing for the guest's own name.
+        if (result == null && guestApk != null && args != null && args.isNotEmpty()) {
+            val gp = guestPkg()
+            val asked = args.getOrNull(0) as? String
+            if (gp != null && asked == gp) {
+                val syn = when (m.name) {
+                    "getPackageInfo" -> synthesizePackageInfo((args.getOrNull(1) as? Number)?.toInt() ?: 0)
+                    "getApplicationInfo" -> synthesizeApplicationInfo()
+                    else -> null
+                }
+                if (syn != null) return syn
+            }
+        }
+
         if (m.name == "getNameForUid" && guestApk != null && args != null && args.isNotEmpty()) {
             try {
                 val uid = (args[0] as? Number)?.toInt()
-                val gpkg = File(guestApk!!).parentFile?.parentFile?.name
+                val gpkg = guestPkg()
                 if (uid != null && gpkg != null && uid == NativeBridge.getVirtualUid()) {
                     result = gpkg
                     logOnce("PM getNameForUid intercepted for $uid -> $gpkg")
@@ -347,13 +496,13 @@ object PmProxy {
             }
         }
 
-        // Step 206c: Android does not know the guest's manifest receivers, so answer "none"
-// when the guest asks about receivers in its own package
+        // Android does not know the guest's manifest receivers, so answer "none" when the guest
+        // asks about receivers in its own package.
         if (m.name == "queryIntentReceivers" && busy.get() != true && guestApk != null &&
             args != null && args.isNotEmpty()) {
             try {
                 val q = args[0] as? android.content.Intent
-                val gpkg = java.io.File(guestApk!!).parentFile?.parentFile?.name
+                val gpkg = guestPkg()
                 val asked = q?.`package` ?: q?.component?.packageName
                 if (q != null && gpkg != null && asked == gpkg) {
                     result = Class.forName("android.content.pm.ParceledListSlice")
@@ -369,7 +518,7 @@ object PmProxy {
         if (m.name == "getPackagesForUid" && result is Array<*> && busy.get() != true &&
             guestApk != null && args != null && args.isNotEmpty()) {
             try {
-                val gpkg = java.io.File(guestApk!!).parentFile?.parentFile?.name
+                val gpkg = guestPkg()
                 val uid = (args[0] as? Number)?.toInt()
                 @Suppress("UNCHECKED_CAST")
                 val arr = result as Array<String>
@@ -380,12 +529,12 @@ object PmProxy {
             } catch (e: Throwable) { logOnce("PM packagesForUid failed: " + e) }
         }
 
-        // 2026-11-04: guest data dir for HOST-/guest-name lookups (see withGuestDataDir).
+        // Guest data dir for HOST-/guest-name lookups (see withGuestDataDir).
         if (guestApk != null && busy.get() != true && args != null && args.isNotEmpty() &&
             args[0] is String) {
             try {
                 val askedN = args[0] as String
-                val gpN = File(guestApk!!).parentFile?.parentFile?.name
+                val gpN = guestPkg()
                 if (askedN == HOST || askedN == gpN) {
                     if (m.name == "getPackageInfo" && result is PackageInfo) {
                         val pi = result as PackageInfo
@@ -405,7 +554,7 @@ object PmProxy {
                 val askedPkg = args[0] as? String
                 val flags = (args[1] as? Number)?.toLong() ?: 0L
                 val sigFlags = (PackageManager.GET_SIGNATURES or 0x08000000).toLong() // 0x08000000 = GET_SIGNING_CERTIFICATES
-                val gp = File(guestApk!!).parentFile?.parentFile?.name
+                val gp = guestPkg()
                 if ((flags and sigFlags) != 0L && (askedPkg == HOST || askedPkg == gp)) {
                     val g = guestInfo(PackageManager.GET_SIGNATURES or 0x08000000)
                     if (g != null && (g.signatures != null || g.signingInfo != null)) {
@@ -421,7 +570,7 @@ object PmProxy {
             }
         }
 
-        // Step 270b (log only): what do guests ask for, and which certificate do they get?
+        // Log only: what do guests ask for, and which certificate do they get?
         if (guestApk != null && busy.get() != true && args != null && args.isNotEmpty() &&
             (m.name == "getPackageInfo" || m.name == "getInstallerPackageName" ||
                     m.name == "getInstallSourceInfo")) {
@@ -477,9 +626,6 @@ object PmProxy {
                 } else if (result == null) {
                     logOnce("PM guest " + name + " NOT found: " + first.className)
                 }
-//                } else {
-//                    logOnce("PM guest " + name + " NOT found: " + first.className)
-//                }
             }
         } catch (e: Throwable) {
             logOnce("PM proxy error: " + e)
