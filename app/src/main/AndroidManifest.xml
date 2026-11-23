@@ -114,6 +114,8 @@
         <service android:name=".HostJob8" android:process=":p8" android:permission="android.permission.BIND_JOB_SERVICE" android:exported="false"/>
         <service android:name=".HostJob9" android:process=":p9" android:permission="android.permission.BIND_JOB_SERVICE" android:exported="false"/>
 
+        <service android:name=".HostJobV" android:process="com.viber.voip" android:permission="android.permission.BIND_JOB_SERVICE" android:exported="false"/>
+
         <provider android:name=".HostFileProxy0" android:authorities="com.ims134.dualhost.fp0"
             android:process=":p0" android:exported="false" android:grantUriPermissions="true"/>
         <provider android:name=".HostFileProxy1" android:authorities="com.ims134.dualhost.fp1"

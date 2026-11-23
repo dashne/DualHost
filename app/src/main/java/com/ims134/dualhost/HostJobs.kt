@@ -88,3 +88,5 @@ class HostJob6 : BaseHostJob()
 class HostJob7 : BaseHostJob()
 class HostJob8 : BaseHostJob()
 class HostJob9 : BaseHostJob()
+
+class HostJobV : BaseHostJob()

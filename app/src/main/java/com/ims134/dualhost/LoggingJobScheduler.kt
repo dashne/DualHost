@@ -28,7 +28,8 @@ private val hostJobs: List<Class<*>> = Slots.jobs
         val cn = job.service
         if (cn.className.startsWith("com.ims134.dualhost.")) return job
         if (cn.packageName != HOST && cn.packageName != pkg) return job
-        if (vuid !in hostJobs.indices) return job
+        val dedicated = ProcessClone.slot == null && ProcessClone.realName == "com.viber.voip"
+        val target: Class<*> = if (dedicated) HostJobV::class.java else (hostJobs.getOrNull(vuid) ?: return job)
 
         val extras = PersistableBundle(job.extras)
         extras.putString("dh_class", cn.className)
@@ -37,7 +38,7 @@ private val hostJobs: List<Class<*>> = Slots.jobs
         extras.putInt("dh_clone", if (ProcessClone.id >= 0) ProcessClone.id else vuid)
         extras.putString("dh_pkg", pkg)
 
-        val b = JobInfo.Builder(job.id, ComponentName(HOST, hostJobs[vuid].name))
+        val b = JobInfo.Builder(job.id, ComponentName(HOST, target.name))
             .setExtras(extras)
             .setTransientExtras(job.transientExtras)
             //.setBackoffCriteria(job.initialBackoffMillis, job.backoffPolicy)
@@ -60,7 +61,7 @@ private val hostJobs: List<Class<*>> = Slots.jobs
             if (job.minLatencyMillis > 0) b.setMinimumLatency(job.minLatencyMillis)
             if (job.maxExecutionDelayMillis > 0) b.setOverrideDeadline(job.maxExecutionDelayMillis)
         }
-        logOnce("JOB rewritten id=" + job.id + " " + cn.className + " -> " + hostJobs[vuid].simpleName)
+        logOnce("JOB rewritten id=" + job.id + " " + cn.className + " -> " + target.simpleName)
         return b.build()
     }
 
