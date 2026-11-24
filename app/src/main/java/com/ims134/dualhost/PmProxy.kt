@@ -12,6 +12,10 @@ import java.lang.reflect.Proxy
 object PmProxy {
     private const val HOST = "com.ims134.dualhost"
     @Volatile var guestApk: String? = null
+    // Class name of the guest activity most recently prepared in this process. A guest activity
+    // runs under a host stub component, so getComponentName() is the stub; PackageManager lookups
+    // for that stub are answered with this guest activity's own manifest entry (see handle()).
+    @Volatile var currentGuestActivity: String? = null
     @Volatile private var proxy: Any? = null
     private var real: Any? = null
     private val seen = HashSet<String>()
@@ -608,11 +612,13 @@ object PmProxy {
                 }
             } else if (first is ComponentName && first.packageName == HOST &&
                 (name == "getServiceInfo" || name == "getProviderInfo" || name == "getReceiverInfo" ||
-                        (name == "getActivityInfo" && result == null))) {
+                        (name == "getActivityInfo" && result == null)))
+            {
                 val g = guestInfo(PackageManager.GET_SERVICES or PackageManager.GET_PROVIDERS or
                         PackageManager.GET_RECEIVERS or PackageManager.GET_ACTIVITIES or
                         PackageManager.GET_META_DATA)
-                val list: Array<out android.content.pm.ComponentInfo>? = when (name) {
+                val list: Array<out android.content.pm.ComponentInfo>? = when (name)
+                {
                     "getServiceInfo" -> g?.services
                     "getProviderInfo" -> g?.providers
                     "getReceiverInfo" -> g?.receivers
@@ -626,6 +632,25 @@ object PmProxy {
                 } else if (result == null) {
                     logOnce("PM guest " + name + " NOT found: " + first.className)
                 }
+            } else if (name == "getActivityInfo" && first is ComponentName && first.packageName == HOST &&
+                first.className.startsWith("com.ims134.dualhost.Stub")) {
+                // The guest activity's component is the host stub, which declares no theme. Guest
+                // code reads ActivityInfo.theme for itself (Viber: rge0.r) and skips its theme setup
+                // when it is 0. Answer with the real guest activity's manifest entry instead.
+                val ri = result as? android.content.pm.ActivityInfo
+                val want = currentGuestActivity
+                var served = "no"
+                if (want != null) {
+                    val g = guestInfo(PackageManager.GET_ACTIVITIES or PackageManager.GET_META_DATA)
+                    val hit = g?.activities?.firstOrNull { it.name == want }
+                    if (hit != null) {
+                        hit.applicationInfo = g!!.applicationInfo
+                        result = hit
+                        served = "theme=0x" + Integer.toHexString(hit.theme)
+                    }
+                }
+                logOnce("PM getActivityInfo stub=" + first.className + " guest=" + want +
+                        " stubTheme=0x" + Integer.toHexString(ri?.theme ?: 0) + " served=" + served)
             }
         } catch (e: Throwable) {
             logOnce("PM proxy error: " + e)
