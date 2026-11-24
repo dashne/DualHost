@@ -19,6 +19,7 @@ import android.os.IBinder
 import android.app.Instrumentation.ActivityResult
 import java.lang.reflect.InvocationTargetException
 import android.content.ClipData
+import android.content.res.AssetManager
 import android.content.res.Configuration
 import android.graphics.Bitmap.createBitmap
 import android.net.Uri
@@ -274,11 +275,24 @@ class HostInstrumentation(private val base: Instrumentation) : Instrumentation()
             }
         } catch (e: Throwable) { FileLog.d("PROCNAME set failed: " + e) }
 
+        /*
         val splitPaths = guestApks(apkPath).drop(1).toTypedArray()
         ai.splitSourceDirs = splitPaths
         ai.splitPublicSourceDirs = splitPaths
         val raw = pm.getResourcesForApplication(ai)
         //val resources = GuestResources(raw.assets, raw.displayMetrics, raw.configuration, ai.packageName)
+        */
+
+        //-----
+        val am = AssetManager::class.java.getDeclaredConstructor().newInstance()
+        val add = AssetManager::class.java.getMethod("addAssetPath", String::class.java)
+        for (path in guestApks(apkPath))
+            add.invoke(am,path)
+        val appContext = hostApp()
+        @Suppress("DEPRECATION")
+        val raw = Resources(am,appContext.resources.displayMetrics,appContext.resources.configuration)
+        //----
+
         val resources = GuestResources(raw.assets, raw.displayMetrics, liveNightConfig(raw, ai.packageName), ai.packageName)
         val loader = getGuestLoader(hostApp.classLoader, apkPath)
 
@@ -508,14 +522,28 @@ class HostInstrumentation(private val base: Instrumentation) : Instrumentation()
     }
 
     private fun freshResources(apkPath: String): Resources {
-        val pm = hostApp().packageManager
+        //val pm = hostApp().packageManager
+        //-----
+        val appContext = hostApp()
+        val am = AssetManager::class.java.getDeclaredConstructor().newInstance()
+        val add = AssetManager::class.java.getMethod("addAssetPath", String::class.java)
+        for (path in guestApks(apkPath))
+            add.invoke(am,path)
+        val pm = appContext.packageManager
+        //-----
+
         val ai = pm.getPackageArchiveInfo(apkPath, 0)!!.applicationInfo!!
+
+        /*
         ai.sourceDir = apkPath
         val splits = guestApks(apkPath).drop(1).toTypedArray()
         ai.splitSourceDirs = splits
         ai.splitPublicSourceDirs = splits
         val raw = pm.getResourcesForApplication(ai)
+         */
         //return GuestResources(raw.assets, raw.displayMetrics, raw.configuration, ai.packageName)
+        @Suppress("DEPRECATION")
+        val raw = Resources(am,appContext.resources.displayMetrics,appContext.resources.configuration)
         return GuestResources(raw.assets, raw.displayMetrics, liveNightConfig(raw, ai.packageName), ai.packageName)
     }
     // Night mode follows the live system setting, not whatever configuration
@@ -549,6 +577,9 @@ class HostInstrumentation(private val base: Instrumentation) : Instrumentation()
         val apkPath = intent.getStringExtra("apkPath") ?: return
         if (intent.getStringExtra("guestClass") != activity.javaClass.name) return
         val vuid = intent.getIntExtra("vuid", 0)
+
+
+
 
         PmProxy.currentGuestActivity = activity.javaClass.name
 
@@ -1080,6 +1111,7 @@ class HostInstrumentation(private val base: Instrumentation) : Instrumentation()
                 getGuestEnv(app0, apkPath, vuid0, root0)
             } catch (e: Throwable) { }
             val activity = loader.loadClass(guestClass).getDeclaredConstructor().newInstance() as Activity
+
 
             synchronized(pendingGuestIntent) { pendingGuestIntent[activity] = Intent(intent!!) }
 

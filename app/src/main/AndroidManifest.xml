@@ -185,20 +185,20 @@
 
         </service>
         <!--by glm-->
-        <service android:name=".GuestAuthenticatorService" android:exported="false">
-            <intent-filter>
-                <action android:name="android.accounts.AccountAuthenticator" />
-            </intent-filter>
-            <meta-data android:name="android.accounts.AccountAuthenticator"
-                android:resource="@xml/guest_authenticator" />
-        </service>
-        <service android:name=".GuestSyncService" android:exported="false">
-            <intent-filter>
-                <action android:name="android.content.SyncAdapter" />
-            </intent-filter>
-            <meta-data android:name="android.content.SyncAdapter"
-                android:resource="@xml/guest_syncadapter" />
-        </service>
+<!--        <service android:name=".GuestAuthenticatorService" android:exported="false">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="android.accounts.AccountAuthenticator" />-->
+<!--            </intent-filter>-->
+<!--            <meta-data android:name="android.accounts.AccountAuthenticator"-->
+<!--                android:resource="@xml/guest_authenticator" />-->
+<!--        </service>-->
+<!--        <service android:name=".GuestSyncService" android:exported="false">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="android.content.SyncAdapter" />-->
+<!--            </intent-filter>-->
+<!--            <meta-data android:name="android.content.SyncAdapter"-->
+<!--                android:resource="@xml/guest_syncadapter" />-->
+<!--        </service>-->
         <activity
             android:name=".MainActivity"
             android:exported="true"

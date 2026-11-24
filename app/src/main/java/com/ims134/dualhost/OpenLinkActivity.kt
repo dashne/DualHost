@@ -62,6 +62,7 @@ class OpenLinkActivity : ComponentActivity() {
         i.putExtra("cloneId", m.clone.id)
         i.putExtra("cloneNumber", m.number)
         i.putExtra("apkPath", m.apk)
+
         i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         SlotManager.assign(this, slot, m.clone.id)
         CloneStore.touch(this, m.clone.id)

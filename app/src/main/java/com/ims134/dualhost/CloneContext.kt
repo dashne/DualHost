@@ -386,12 +386,45 @@ class CloneContext(
 
     override fun getExternalCacheDirs(): Array<File?> = arrayOf(extRoot(null, true))
 
+
+    override fun getDataDir(): File {
+        val guestPkg = root.parentFile?.name ?: "unknown"
+        // Return the standard path; native hooks will redirect it.
+        // "/data/data/com.viber.voip".split(".") has 3 segments, matching the package name.
+        if (guestPkg in NATIVE_ENGINE_PACKAGES) {
+            return File("/data/data/$guestPkg")
+        }
+        return root
+    }
+
+    override fun getFilesDir(): File {
+        val guestPkg = root.parentFile?.name ?: "unknown"
+        // This is the exact path Viber's n89 clone detector checks.
+        // "/data/data/com.viber.voip/files".split(".") has 3 segments.
+        // 3 <= 3, so Viber's logic sets isClone = false.
+        if (guestPkg in NATIVE_ENGINE_PACKAGES) {
+            return File("/data/data/$guestPkg/files")
+        }
+        return dir("files")
+    }
+
+    override fun getCacheDir(): File {
+        val guestPkg = root.parentFile?.name ?: "unknown"
+        // Proactively apply the same logic to cache to prevent future checks from failing.
+        if (guestPkg in NATIVE_ENGINE_PACKAGES) {
+            return File("/data/data/$guestPkg/cache")
+        }
+        return dir("cache")
+    }
+
+    /*
     // Data separation (Steps 25 and 28)
     override fun getDataDir(): File = root
 
     override fun getFilesDir(): File = dir("files")
 
     override fun getCacheDir(): File = dir("cache")
+    */
 
     override fun getDir(name: String?, mode: Int): File = dir("app_" + name)
 

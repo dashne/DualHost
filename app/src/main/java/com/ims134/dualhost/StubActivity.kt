@@ -19,9 +19,16 @@ class StubActivity : Activity() {
         val guestClass = intent.getStringExtra("guestClass")
         val vuid = intent.getIntExtra("vuid", -1)
         val apkPath = File(filesDir, "guest/0/base.apk").absolutePath
-        val info = packageManager.getPackageArchiveInfo(apkPath, 0)
+        //val info = packageManager.getPackageArchiveInfo(apkPath, 0)
+
+        //-----
+        val apkFile = File(apkPath)
+        var guestLabel = "N/A"
+        var packageName = "N/A"
+        var versionName = "N/A"
 
         // Step 11: read the guest app name from its resources
+        /*
         var guestLabel: String
         try {
             val ai = info!!.applicationInfo!!
@@ -32,9 +39,42 @@ class StubActivity : Activity() {
         } catch (e: Throwable) {
             guestLabel = "Failed: " + e
         }
+        */
+
+        //--------
+        if(apkFile.exists())
+        {
+            try {
+                val info = packageManager.getPackageArchiveInfo(apkPath,0)
+                if(info != null)
+                {
+                    packageName=info.packageName?: "N/A"
+                    versionName=info.versionName?: "N/A"
+                    val ai = info.applicationInfo
+                    ai?.let {
+                        ai.sourceDir=apkPath
+                        ai.publicSourceDir= apkPath
+                        val guestRes = packageManager.getResourcesForApplication(ai)
+                        ai.labelRes?.let { guestLabel = guestRes.getString(ai.labelRes) }
+                    }
+                }
+            }
+            catch (e: Throwable)
+            {
+                guestLabel = "Failed: $e"
+            }
+        }
+        else
+        {
+            guestLabel ="APK not found at $apkPath"
+        }
 
         // Step 12: create the guest object
         var objectResult: String
+
+
+
+        /*
         try {
             val optDir = File(filesDir, "guest/0/odex")
             optDir.mkdirs()
@@ -49,6 +89,28 @@ class StubActivity : Activity() {
             objectResult = "Created. Parent class: " + obj.javaClass.superclass?.name
         } catch (e: Throwable) {
             objectResult = "Failed: " + e
+        }
+        */
+
+        //-----
+        if(apkFile.exists())
+        {
+            try {
+                val optDir = File(filesDir, "guest/0/odex")
+                optDir.mkdir()
+                val loader = dalvik.system.DexClassLoader(apkPath,optDir.absolutePath,null,classLoader)
+                val cls = loader.loadClass(guestClass)
+                val obj = cls.getDeclaredConstructor().newInstance()
+                objectResult = "Created. Parent class: ${obj.javaClass.superclass?.name}"
+            }
+            catch (e: Throwable)
+            {
+                objectResult = "Failed: $e"
+            }
+        }
+        else
+        {
+            objectResult = "Skipped (APK not found)"
         }
 
         // Step 13: test the hidden API
@@ -90,8 +152,10 @@ class StubActivity : Activity() {
         val text = "STUB IS ALIVE" +
                 "\nClone number: " + vuid +
                 "\nApp to open: " + guestClass +
-                "\nGuest package: " + info?.packageName +
-                "\nGuest version: " + info?.versionName +
+//                "\nGuest package: " + info?.packageName +
+//                "\nGuest version: " + info?.versionName +
+                "\nGuest package: " + packageName +
+                "\nGuest version: " + versionName +
                 "\nGuest app name: " + guestLabel +
                 "\nGuest object: " + objectResult +
                 "\nHidden API: " + hiddenResult +

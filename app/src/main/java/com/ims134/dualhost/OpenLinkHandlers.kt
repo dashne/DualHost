@@ -2,6 +2,7 @@ package com.ims134.dualhost
 
 import android.content.Context
 import android.net.Uri
+import android.os.PatternMatcher
 import org.xmlpull.v1.XmlPullParser
 
 // Finds the guest activity whose VIEW + BROWSABLE filter matches a link
@@ -25,6 +26,9 @@ object OpenLinkHandlers {
             val categories = ArrayList<String>()
             val schemes = ArrayList<String>()
             val hosts = ArrayList<String>()
+            val paths = ArrayList<PatternMatcher>()
+            var best: String? = null
+            var bestScore = 0
 
             fun full(name: String?): String? {
                 if (name == null) return null
@@ -51,7 +55,7 @@ object OpenLinkHandlers {
                         "service", "receiver", "provider" -> component = null
                         "intent-filter" -> {
                             inFilter = true
-                            actions.clear(); categories.clear(); schemes.clear(); hosts.clear()
+                            actions.clear(); categories.clear(); schemes.clear(); hosts.clear(); paths.clear()
                         }
                         "action" -> if (inFilter) p.getAttributeValue(NS, "name")?.let { actions.add(it) }
                         "category" -> if (inFilter) p.getAttributeValue(NS, "name")?.let { categories.add(it) }
@@ -62,6 +66,11 @@ object OpenLinkHandlers {
                             } else p.getAttributeValue(NS, "scheme")
                             sv?.let { schemes.add(it) }
                             p.getAttributeValue(NS, "host")?.let { hosts.add(it) }
+                            p.getAttributeValue(NS, "path")?.let { paths.add(PatternMatcher(it, PatternMatcher.PATTERN_LITERAL)) }
+                            p.getAttributeValue(NS, "pathPrefix")?.let { paths.add(PatternMatcher(it, PatternMatcher.PATTERN_PREFIX)) }
+                            p.getAttributeValue(NS, "pathPattern")?.let { paths.add(PatternMatcher(it, PatternMatcher.PATTERN_SIMPLE_GLOB)) }
+                            p.getAttributeValue(NS, "pathAdvancedPattern")?.let { paths.add(PatternMatcher(it, PatternMatcher.PATTERN_ADVANCED_GLOB)) }
+                            p.getAttributeValue(NS, "pathSuffix")?.let { paths.add(PatternMatcher(it, PatternMatcher.PATTERN_SUFFIX)) }
                         }
                     }
                 } else if (event == XmlPullParser.END_TAG && p.name == "intent-filter") {
@@ -72,12 +81,15 @@ object OpenLinkHandlers {
                         schemes.any { it.equals(scheme, ignoreCase = true) } &&
                         (if (hosts.isEmpty()) !scheme.startsWith("http", ignoreCase = true)
                         else hosts.any { hostMatches(it) })) {
-                        return component
+                        // a filter that lists paths must match the link's path; one without paths accepts any
+                        val path = uri.path ?: ""
+                        val score = if (paths.isEmpty()) 1 else if (paths.any { it.match(path) }) 2 else 0
+                        if (score > bestScore) { best = component; bestScore = score }
                     }
                 }
                 event = p.next()
             }
-            return null
+            return best
         } finally {
             p.close()
         }
