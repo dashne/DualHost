@@ -38,4 +38,15 @@ class DualApplication : Application() {
 
         HookInstaller.install()
     }
+
+    override fun onCreate() {
+        super.onCreate()
+        try {
+            val uiManager = getSystemService(Context.UI_MODE_SERVICE) as? android.app.UiModeManager
+            val isDark = (uiManager?.nightMode == android.app.UiModeManager.MODE_NIGHT_YES) ||
+                         ((resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES)
+            val mode = if (isDark) androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES else androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
+            androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(mode)
+        } catch (_: Throwable) {}
+    }
 }

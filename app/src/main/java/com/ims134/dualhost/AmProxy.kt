@@ -5,6 +5,8 @@ import android.app.Notification
 import android.content.ComponentName
 import android.content.ContentProvider
 import android.content.Intent
+import android.os.Build
+import android.os.Process
 import java.io.File
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Proxy
@@ -31,19 +33,85 @@ object AmProxy {
     // registration under a different UID. For THIS process there's no real numbered authority to
     // route through, so skip the real AMS round trip altogether and hand back a
     // ContentProviderHolder built entirely in-process from our own already-started guest provider.
+    fun setCallingPkg(cp: ContentProvider, pkg: String = HOST) {
+        val targetPkg = if (pkg.isNotEmpty()) pkg else HOST
+        try {
+            val attrSource = if (Build.VERSION.SDK_INT >= 31) {
+                try {
+                    val bCls = Class.forName("android.content.AttributionSource\$Builder")
+                    val bCtor = bCls.getDeclaredConstructor(Int::class.javaPrimitiveType)
+                    bCtor.isAccessible = true
+                    val b = bCtor.newInstance(Process.myUid())
+                    val setPkg = bCls.getMethod("setPackageName", String::class.java)
+                    setPkg.isAccessible = true
+                    setPkg.invoke(b, targetPkg)
+                    val build = bCls.getMethod("build")
+                    build.isAccessible = true
+                    build.invoke(b)
+                } catch (e: Throwable) {
+                    FileLog.d("AttributionSource build failed: $e")
+                    null
+                }
+            } else null
+
+            if (attrSource != null) {
+                try {
+                    for (m in ContentProvider::class.java.declaredMethods) {
+                        if (m.name == "setCallingAttributionSource") {
+                            m.isAccessible = true
+                            m.invoke(cp, attrSource)
+                            break
+                        }
+                    }
+                } catch (_: Throwable) {}
+            }
+
+            var currClass: Class<*>? = cp.javaClass
+            while (currClass != null && currClass != Any::class.java) {
+                for (f in currClass.declaredFields) {
+                    try {
+                        f.isAccessible = true
+                        val name = f.name
+                        if (name == "mCallingAttributionSource" || name.contains("Attribution", ignoreCase = true)) {
+                            if (ThreadLocal::class.java.isAssignableFrom(f.type)) {
+                                @Suppress("UNCHECKED_CAST")
+                                val tl = f.get(cp) as? ThreadLocal<Any?>
+                                if (tl != null && attrSource != null) {
+                                    tl.set(attrSource)
+                                }
+                            }
+                        } else if (name == "mCallingPackage" || name.contains("CallingPackage", ignoreCase = true)) {
+                            if (ThreadLocal::class.java.isAssignableFrom(f.type)) {
+                                @Suppress("UNCHECKED_CAST")
+                                val tl = f.get(cp) as? ThreadLocal<Any?>
+                                tl?.set(targetPkg)
+                            } else if (f.type == String::class.java) {
+                                f.set(cp, targetPkg)
+                            }
+                        }
+                    } catch (_: Throwable) {}
+                }
+                currClass = currClass.superclass
+            }
+        } catch (e: Throwable) {
+            FileLog.d("setCallingPkg outer failed: $e")
+        }
+    }
+
     private fun buildLocalHolder(authority: String, cp: ContentProvider): Any? {
         return try {
             val gi = ContentProvider::class.java.getDeclaredMethod("getIContentProvider")
             gi.isAccessible = true
             val icp = gi.invoke(cp) ?: return null
 
-            // 2026-10-30 fix: ActivityThread.installProviderAuthoritiesLocked reads
-            // holder.info.applicationInfo.uid unconditionally — a bare ProviderInfo() with that
-            // field left null crashed with a NullPointerException there (confirmed from device log:
-            // "Attempt to read from field 'int android.content.pm.ApplicationInfo.uid' on a null
-            // object reference"), one level past where the earlier SecurityException was happening
-            // (which this buildLocalHolder path DID already fix — no more real-AMS round trip).
-            // DynProxies.get() already does this correctly for the numbered-slot path; mirror it.
+            val wrappedIcp = Proxy.newProxyInstance(
+                icp.javaClass.classLoader ?: cp.javaClass.classLoader,
+                icp.javaClass.interfaces
+            ) { _, method, args ->
+                setCallingPkg(cp, "com.viber.voip")
+                method.invoke(icp, *(args ?: emptyArray()))
+            }
+
             val app = Class.forName("android.app.ActivityThread")
                 .getDeclaredMethod("currentApplication").invoke(null) as Application
             val piClass = Class.forName("android.content.pm.ProviderInfo")
@@ -62,7 +130,7 @@ object AmProxy {
 
             val provF = holderClass.getDeclaredField("provider")
             provF.isAccessible = true
-            provF.set(holder, icp)
+            provF.set(holder, wrappedIcp)
 
             try {
                 val nf = holderClass.getDeclaredField("noReleaseNeeded")

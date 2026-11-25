@@ -19,8 +19,6 @@ import android.os.IBinder
 import android.app.Instrumentation.ActivityResult
 import java.lang.reflect.InvocationTargetException
 import android.content.ClipData
-import android.content.res.AssetManager
-import android.content.res.Configuration
 import android.graphics.Bitmap.createBitmap
 import android.net.Uri
 import android.provider.MediaStore
@@ -31,8 +29,7 @@ class GuestEnv(
     val application: Application
 )
 
-class HostInstrumentation(private val base: Instrumentation) : Instrumentation()
-{
+class HostInstrumentation(private val base: Instrumentation) : Instrumentation() {
 
     companion object {
         @Volatile var current: HostInstrumentation? = null
@@ -207,7 +204,9 @@ class HostInstrumentation(private val base: Instrumentation) : Instrumentation()
             try {
                 pi.applicationInfo = ai
                 val cp = loader.loadClass(pi.name).getDeclaredConstructor().newInstance() as ContentProvider
+                AmProxy.setCallingPkg(cp, "com.ims134.dualhost")
                 cp.attachInfo(ctx, pi)
+                AmProxy.setCallingPkg(cp, "com.ims134.dualhost")
                 pi.authority?.split(";")?.forEach { GuestProviders.map[it] = cp }
                 FileLog.d("guest provider started: " + pi.name + " authority=" + pi.authority)
             } catch (e: Throwable) {
@@ -275,25 +274,11 @@ class HostInstrumentation(private val base: Instrumentation) : Instrumentation()
             }
         } catch (e: Throwable) { FileLog.d("PROCNAME set failed: " + e) }
 
-        /*
         val splitPaths = guestApks(apkPath).drop(1).toTypedArray()
         ai.splitSourceDirs = splitPaths
         ai.splitPublicSourceDirs = splitPaths
         val raw = pm.getResourcesForApplication(ai)
-        //val resources = GuestResources(raw.assets, raw.displayMetrics, raw.configuration, ai.packageName)
-        */
-
-        //-----
-        val am = AssetManager::class.java.getDeclaredConstructor().newInstance()
-        val add = AssetManager::class.java.getMethod("addAssetPath", String::class.java)
-        for (path in guestApks(apkPath))
-            add.invoke(am,path)
-        val appContext = hostApp()
-        @Suppress("DEPRECATION")
-        val raw = Resources(am,appContext.resources.displayMetrics,appContext.resources.configuration)
-        //----
-
-        val resources = GuestResources(raw.assets, raw.displayMetrics, liveNightConfig(raw, ai.packageName), ai.packageName)
+        val resources = GuestResources(raw.assets, raw.displayMetrics, raw.configuration, ai.packageName)
         val loader = getGuestLoader(hostApp.classLoader, apkPath)
 
         val appClassName = ai.className
@@ -396,7 +381,8 @@ class HostInstrumentation(private val base: Instrumentation) : Instrumentation()
 
         // CRITICAL: set MAIN BEFORE attachBaseContext so ViberApplication.attachBaseContext sees it
         if (viberHacksOn(ai.packageName)) setHai0Main()
-        if (viberHacksOn(ai.packageName)) ViberHacks.setArgV0("com.viber.voip")
+        //if (viberHacksOn(ai.packageName)) ViberHacks.setArgV0("com.viber.voip")
+        if (viberHacksOn(ai.packageName)) Helper.setArgV0("com.viber.voip")
 
         val attach = ContextWrapper::class.java.getDeclaredMethod("attachBaseContext", Context::class.java)
         attach.isAccessible = true
@@ -511,7 +497,6 @@ class HostInstrumentation(private val base: Instrumentation) : Instrumentation()
         GuestReceivers.register(hostApp, apkPath, loader)
         FileLog.d("guest application ready: " + app.javaClass.name)
         try { NetDiag.start(app) } catch (e: Throwable) { FileLog.d("NetDiag start failed: " + e) }
-        try { EngineProbe.start(app) } catch (e: Throwable) { FileLog.d("EngineProbe start failed: " + e) }
         try { GuestSync.start(ctx) } catch (e: Throwable) { FileLog.d("GuestSync start failed: " + e) }
 
 
@@ -521,100 +506,53 @@ class HostInstrumentation(private val base: Instrumentation) : Instrumentation()
         return env
     }
 
+    private fun isSystemDark(context: Context): Boolean {
+        try {
+            val uiManager = context.getSystemService(Context.UI_MODE_SERVICE) as? android.app.UiModeManager
+            if (uiManager?.nightMode == android.app.UiModeManager.MODE_NIGHT_YES) return true
+            val sysMode = context.resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK
+            if (sysMode == android.content.res.Configuration.UI_MODE_NIGHT_YES) return true
+            val setting = android.provider.Settings.Secure.getInt(context.contentResolver, "ui_night_mode", 1)
+            if (setting == 2) return true
+        } catch (_: Throwable) {}
+        return false
+    }
+
     private fun freshResources(apkPath: String): Resources {
-        //val pm = hostApp().packageManager
-        //-----
-        val appContext = hostApp()
-        val am = AssetManager::class.java.getDeclaredConstructor().newInstance()
-        val add = AssetManager::class.java.getMethod("addAssetPath", String::class.java)
-        for (path in guestApks(apkPath))
-            add.invoke(am,path)
-        val pm = appContext.packageManager
-        //-----
-
+        val pm = hostApp().packageManager
         val ai = pm.getPackageArchiveInfo(apkPath, 0)!!.applicationInfo!!
-
-        /*
         ai.sourceDir = apkPath
         val splits = guestApks(apkPath).drop(1).toTypedArray()
         ai.splitSourceDirs = splits
         ai.splitPublicSourceDirs = splits
         val raw = pm.getResourcesForApplication(ai)
-         */
-        //return GuestResources(raw.assets, raw.displayMetrics, raw.configuration, ai.packageName)
-        @Suppress("DEPRECATION")
-        val raw = Resources(am,appContext.resources.displayMetrics,appContext.resources.configuration)
-        return GuestResources(raw.assets, raw.displayMetrics, liveNightConfig(raw, ai.packageName), ai.packageName)
-    }
-    // Night mode follows the live system setting, not whatever configuration
-    // getResourcesForApplication() handed back.
-    private fun liveNightConfig(raw: Resources, guestPkg: String): Configuration {
-        val cfg = Configuration(raw.configuration)
-        val host = hostApp().resources.configuration
-        val mask = Configuration.UI_MODE_NIGHT_MASK
-        cfg.uiMode = (cfg.uiMode and mask.inv()) or (host.uiMode and mask)
-        FileLog.d("NIGHT guest=$guestPkg hostUiMode=0x${Integer.toHexString(host.uiMode and mask)} " +
-                "rawUiMode=0x${Integer.toHexString(raw.configuration.uiMode and mask)}")
-        return cfg
+        val sysCfg = hostApp().resources.configuration
+        val cfg = android.content.res.Configuration(raw.configuration)
+        cfg.updateFrom(sysCfg)
+        if (isSystemDark(hostApp())) {
+            cfg.uiMode = (cfg.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK.inv()) or android.content.res.Configuration.UI_MODE_NIGHT_YES
+        }
+        return GuestResources(raw.assets, raw.displayMetrics, cfg, ai.packageName)
     }
 
     private fun prepareGuest(activity: Activity?, icicle: Bundle?) {
-        FileLog.d("PREP entered activity=${activity?.javaClass?.name}")
         if (activity == null) return
-        // Relaunch fix: restore our launch extras if the activity's intent lost them.
-        run {
-            val saved = synchronized(pendingGuestIntent) { pendingGuestIntent.remove(activity) }
-            val cur = activity.intent
-            if (saved != null && (cur == null || cur.getStringExtra("guestClass") == null)) {
-                if (cur == null) activity.intent = Intent(saved) else cur.putExtras(saved)
-                FileLog.d("PREP restored launch extras for " + activity.javaClass.name)
-            }
-        }
-        FileLog.d("PREP activity=${activity.javaClass.name} intentNull=${activity.intent == null} " +
-                "guestClass=${activity.intent?.getStringExtra("guestClass")} " +
-                "apkPath=${activity.intent?.getStringExtra("apkPath") != null}")
         val intent = activity.intent ?: return
         val apkPath = intent.getStringExtra("apkPath") ?: return
         if (intent.getStringExtra("guestClass") != activity.javaClass.name) return
         val vuid = intent.getIntExtra("vuid", 0)
-
-
-
-
-        PmProxy.currentGuestActivity = activity.javaClass.name
 
         try {
             val root = rootFor(activity.dataDir, intent, vuid)
             root.mkdirs()
             val env = getGuestEnv(hostApp(), apkPath, vuid, root)
             val res = freshResources(apkPath)
-            env.resources.updateConfiguration(res.configuration, res.displayMetrics)
-
-            // Guest code (Viber rvc0.a) reads night mode from the APPLICATION context's resources.
-            // Make the guest app resources + fresh resources carry the real system night bits.
-            try {
-                val sysNight = activity.resources.configuration.uiMode and 0x30
-                val before = env.application.resources.configuration.uiMode
-                for (r in arrayOf<Resources>(env.resources, res)) {
-                    val c = android.content.res.Configuration(r.configuration)
-                    c.uiMode = (c.uiMode and 0x30.inv()) or sysNight
-                    r.updateConfiguration(c, r.displayMetrics)
-                }
-                val appRes = env.application.resources
-                if (appRes !== env.resources && appRes !== res) {
-                    val c = android.content.res.Configuration(appRes.configuration)
-                    c.uiMode = (c.uiMode and 0x30.inv()) or sysNight
-                    appRes.updateConfiguration(c, appRes.displayMetrics)
-                }
-                var pref = "?"
-                try {
-                    pref = env.loader.loadClass("gwc0").getMethod("c").invoke(null).toString()
-                } catch (e: Throwable) { pref = "n/a " + e.javaClass.simpleName }
-                FileLog.d("NIGHTSYNC sys=0x" + Integer.toHexString(sysNight) +
-                        " appBefore=0x" + Integer.toHexString(before) +
-                        " appAfter=0x" + Integer.toHexString(env.application.resources.configuration.uiMode) +
-                        " themePref=" + pref)
-            } catch (e: Throwable) { FileLog.d("NIGHTSYNC failed: $e") }
+            val sysCfg = android.content.res.Configuration(hostApp().resources.configuration)
+            if (isSystemDark(hostApp())) {
+                sysCfg.uiMode = (sysCfg.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK.inv()) or android.content.res.Configuration.UI_MODE_NIGHT_YES
+            }
+            res.updateConfiguration(sysCfg, res.displayMetrics)
+            env.resources.updateConfiguration(sysCfg, res.displayMetrics)
 
             icicle?.classLoader = env.loader
             setField(android.view.ContextThemeWrapper::class.java, "mResources", activity, res)
@@ -744,83 +682,13 @@ class HostInstrumentation(private val base: Instrumentation) : Instrumentation()
             }
             // ===== END THEME FIX =====
 
-            try {
-                val acd = (activity.javaClass.classLoader ?: return).loadClass("androidx.appcompat.app.AppCompatDelegate")
-                val mode = acd.getMethod("getDefaultNightMode").invoke(null)
-                FileLog.d("NIGHTMODE appcompatDefault=$mode activityUi=0x${Integer.toHexString(activity.resources.configuration.uiMode)}")
-            } catch (e: Throwable) {
-                FileLog.d("NIGHTMODE failed: $e")
-            }
-
             FileLog.d("guest ready: " + activity.javaClass.name)
-
-            try {
-                val tv = android.util.TypedValue()
-                if (activity.theme.resolveAttribute(android.R.attr.windowBackground, tv, true)) {
-                    activity.window.setBackgroundDrawableResource(tv.resourceId)
-                    FileLog.d("WINFIX set windowBackground res=0x${Integer.toHexString(tv.resourceId)}")
-                }
-            } catch (e: Throwable) {
-                FileLog.d("WINFIX failed: $e")
-            }
-
-            FileLog.d("WINCOLOR bg=${(activity.window.decorView.background as? android.graphics.drawable.ColorDrawable)?.color?.let { "0x" + Integer.toHexString(it) } ?: "not-solid"}")
-
-            colorDiag(activity, apkPath, 0x7f060575)
-
-            FileLog.d("WIN bg=${activity.window.decorView.background} " +
-                    "statusColor=0x${Integer.toHexString(activity.window.statusBarColor)} " +
-                    "colorBg=${activity.theme.resolveAttribute(android.R.attr.colorBackground, android.util.TypedValue(), true)}")
         } catch (e: Throwable) {
-            FileLog.d("prepareGuest failed: " + e)
-        }
-    }
-
-    private fun colorDiag(activity: android.app.Activity, apkPath: String, id: Int) {
-        try {
-            val cur = activity.resources.getColor(id, null)
-            val am = android.content.res.AssetManager::class.java.getDeclaredConstructor().newInstance()
-            android.content.res.AssetManager::class.java.getMethod("addAssetPath", String::class.java).invoke(am, apkPath)
-            val dm = activity.resources.displayMetrics
-            val cn = android.content.res.Configuration(activity.resources.configuration)
-            cn.uiMode = (cn.uiMode and 0x30.inv()) or 0x20
-            @Suppress("DEPRECATION")
-            val night = android.content.res.Resources(am, dm, cn).getColor(id, null)
-            val cd = android.content.res.Configuration(cn)
-            cd.uiMode = (cd.uiMode and 0x30.inv()) or 0x10
-            @Suppress("DEPRECATION")
-            val day = android.content.res.Resources(am, dm, cd).getColor(id, null)
-            FileLog.d("COLORDIAG activity=0x" + Integer.toHexString(cur) + " freshNight=0x" + Integer.toHexString(night) + " freshDay=0x" + Integer.toHexString(day))
-        } catch (e: Throwable) { FileLog.d("COLORDIAG failed: $e") }
-    }
-
-    // Window background must be resolved AFTER the guest's own onCreate: guests like Viber switch
-    // their theme there (setTheme), and pinning the background earlier blocks the new style.
-    private fun winFix(activity: Activity?) {
-        if (activity == null) return
-        try {
-            val intent = activity.intent ?: return
-            if (intent.getStringExtra("guestClass") != activity.javaClass.name) return
-            val tv = android.util.TypedValue()
-            if (!activity.theme.resolveAttribute(android.R.attr.windowBackground, tv, true)) return
-            if (tv.resourceId != 0) {
-                activity.window.setBackgroundDrawableResource(tv.resourceId)
-            } else if (tv.type >= android.util.TypedValue.TYPE_FIRST_COLOR_INT &&
-                tv.type <= android.util.TypedValue.TYPE_LAST_COLOR_INT) {
-                activity.window.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(tv.data))
-            }
-            FileLog.d("WINFIX post-create res=0x" + Integer.toHexString(tv.resourceId) +
-                    " data=0x" + Integer.toHexString(tv.data))
-        } catch (e: Throwable) {
-            FileLog.d("WINFIX failed: $e")
+            FileLog.d("prepareGuest failed: $e")
         }
     }
 
     private val slotClasses: List<Class<*>> = Slots.stubs
-
-    // Launch intent per created guest activity: a relaunch (system theme change, rotation) can hand
-    // the new instance an intent that no longer carries our extras.
-    private val pendingGuestIntent = java.util.WeakHashMap<Activity, Intent>()
     private val seenLaunch = HashSet<String>()
 
     private fun logLaunch(i: Intent?) {
@@ -889,6 +757,7 @@ class HostInstrumentation(private val base: Instrumentation) : Instrumentation()
         if (cn.className.startsWith("com.ims134.dualhost.")) return intent
 
         // Step 321: dedicated Viber process (named com.viber.voip, no slot number)
+        /*
         if (ProcessClone.realName == "com.viber.voip") {
             if (cn.packageName != "com.ims134.dualhost" && cn.packageName != "com.viber.voip") return intent
             val apkV = target?.intent?.getStringExtra("apkPath") ?: PmProxy.guestApk ?: return intent
@@ -903,6 +772,7 @@ class HostInstrumentation(private val base: Instrumentation) : Instrumentation()
             FileLog.d("REDIRECT viber " + cn.className)
             return iv
         }
+        */
 
         val from = target?.intent
         var apk = from?.getStringExtra("apkPath")
@@ -945,7 +815,7 @@ class HostInstrumentation(private val base: Instrumentation) : Instrumentation()
         val auth = u.authority ?: return u
         if (auth.startsWith("com.ims134.dualhost.fp")) return u
         if (GuestProviders.find(auth) == null) return u
-        val b = Uri.Builder().scheme("content").authority("com.ims134.dualhost.fp" + vuid).appendPath(auth)
+        val b = Uri.Builder().scheme("content").authority("com.ims134.dualhost.fp$vuid").appendPath(auth)
         for (s in u.pathSegments) b.appendPath(s)
         return b.build()
     }
@@ -1111,10 +981,6 @@ class HostInstrumentation(private val base: Instrumentation) : Instrumentation()
                 getGuestEnv(app0, apkPath, vuid0, root0)
             } catch (e: Throwable) { }
             val activity = loader.loadClass(guestClass).getDeclaredConstructor().newInstance() as Activity
-
-
-            synchronized(pendingGuestIntent) { pendingGuestIntent[activity] = Intent(intent!!) }
-
             // Step 324: Android calls activity.setTheme(stub theme) right after attach and builds the theme from
             // HOST resources. If mThemeResource already holds that id, that call does nothing, so prepareGuest
             // can build the theme later from GUEST resources. mResources is not touched (Viber's
@@ -1144,31 +1010,16 @@ class HostInstrumentation(private val base: Instrumentation) : Instrumentation()
         base.callApplicationOnCreate(app)
     }
 
-//    override fun callActivityOnCreate(activity: Activity?, icicle: Bundle?) {
-//        FileLog.d("HOOK callActivityOnCreate: " + activity?.javaClass?.name)
-//        prepareGuest(activity, icicle)
-//        base.callActivityOnCreate(activity, icicle)
-//    }
-override fun callActivityOnCreate(activity: Activity?, icicle: Bundle?) {
-    FileLog.d("HOOK callActivityOnCreate: " + activity?.javaClass?.name)
-    prepareGuest(activity, icicle)
-    base.callActivityOnCreate(activity, icicle)
-    postCreateLog(activity)
-    winFix(activity)
-}
-
-    private fun postCreateLog(activity: Activity?) {
-        if (activity == null) return
-        val bg = (activity.window.decorView.background as? android.graphics.drawable.ColorDrawable)?.color
-        FileLog.d("POSTCREATE bg=${bg?.let { "0x" + Integer.toHexString(it) } ?: "not-solid"} " +
-                "uiMode=0x${Integer.toHexString(activity.resources.configuration.uiMode)}")
+    override fun callActivityOnCreate(activity: Activity?, icicle: Bundle?) {
+        FileLog.d("HOOK callActivityOnCreate: " + activity?.javaClass?.name)
+        prepareGuest(activity, icicle)
+        base.callActivityOnCreate(activity, icicle)
     }
 
     override fun callActivityOnCreate(activity: Activity?, icicle: Bundle?, persistentState: PersistableBundle?) {
         FileLog.d("HOOK callActivityOnCreate(persistable): " + activity?.javaClass?.name)
         prepareGuest(activity, icicle)
         base.callActivityOnCreate(activity, icicle, persistentState)
-        winFix(activity)
     }
 }
 
@@ -1185,6 +1036,4 @@ private class GuestFallbackLoader(
         } catch (e: Throwable) { }
         return guest.loadClass(name)
     }
-
-
 }

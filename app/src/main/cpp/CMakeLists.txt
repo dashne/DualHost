@@ -13,6 +13,7 @@ add_library(
         HookRegistry.cpp
         ElfResolver.cpp
         PltResolver.cpp
+        Reflection.cpp
 )
 
 find_library(log-lib log)

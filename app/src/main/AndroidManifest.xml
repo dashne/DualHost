@@ -213,10 +213,10 @@
         </activity>
 
         <activity android:name=".StaleLaunch" android:exported="false"/>
-        <activity android:name=".StubViber" android:label="Viber"
-            android:taskAffinity="com.ims134.dualhost.viber"
-            android:process="com.viber.voip"
-            android:exported="true" />
+<!--        <activity android:name=".StubViber" android:label="Viber"-->
+<!--            android:taskAffinity="com.ims134.dualhost.viber"-->
+<!--            android:process="com.viber.voip"-->
+<!--            android:exported="true" />-->
 
         <activity android:name=".AppPickerActivity"
             android:exported="false"/>

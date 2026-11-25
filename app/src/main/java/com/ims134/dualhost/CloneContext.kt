@@ -335,7 +335,12 @@ class CloneContext(
 
     // The guest's own Application, Resources and ClassLoader
     override fun getApplicationContext(): Context {
-        return guestApplication ?: super.getApplicationContext()
+        val app = guestApplication ?: super.getApplicationContext()
+        try {
+            PmProxy.patch(app.packageManager)
+            PermProxy.patch(app)
+        } catch (_: Throwable) {}
+        return app
     }
 
     override fun getResources(): Resources {
@@ -436,9 +441,21 @@ class CloneContext(
     {
         ask("prefs " + name)
         val pkg = root.parentFile?.name ?: "unknown"
-        val result = super.getSharedPreferences("clone_" + pkg + "_" + root.name + "_" + name, mode)
+        val prefsName = "clone_" + pkg + "_" + root.name + "_" + name
+        val result = super.getSharedPreferences(prefsName, mode)
+        try {
+            if (name != null && (name.contains("viber") || name.contains("theme") || name.contains("settings")) &&
+                !name.contains("braze") && !name.contains("firebase") && !name.contains("mixpanel")) {
+                val editor = result.edit()
+                var changed = false
+                if (!result.contains("dark_theme")) { editor.putBoolean("dark_theme", true); changed = true }
+                if (!result.contains("night_mode")) { editor.putBoolean("night_mode", true); changed = true }
+                if (!result.contains("theme_mode")) { editor.putInt("theme_mode", 2); changed = true }
+                if (changed) editor.apply()
+            }
+        } catch (_: Throwable) {}
         FileLog.d("DIAG getSharedPreferences('$name') -> ${result.all.size} keys")
-        return super.getSharedPreferences("clone_" + pkg + "_" + root.name + "_" + name, mode)
+        return result
     }
 
     override fun getDatabasePath(name: String): File {

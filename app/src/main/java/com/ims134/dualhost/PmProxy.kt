@@ -215,6 +215,7 @@ object PmProxy {
 
     private fun handle(m: java.lang.reflect.Method, args: Array<Any?>?): Any?
     {
+        logOnce("PM call: " + m.name)
         // Component state of the guest's own components (see ComponentState). Recorded for
         // setComponentEnabledSetting; read back for getComponentEnabledSetting when the guest
         // has set that component. Unset components fall through to the real system below.
@@ -233,15 +234,9 @@ object PmProxy {
             }
         }
 
-        if (m.name == "checkSignatures" && args != null && args.size >= 2 &&
-            args[0] is String && args[1] is String) {
-            val s0 = args[0] as String
-            val s1 = args[1] as String
-            val gpSig = guestApk?.let { File(it).parentFile?.parentFile?.name }
-            logOnce("PM checkSignatures $s0 vs $s1")
-            if (gpSig != null && (s0 == HOST || s0 == gpSig) && (s1 == HOST || s1 == gpSig)) {
-                return PackageManager.SIGNATURE_MATCH
-            }
+        if (m.name.contains("Signatures", ignoreCase = true)) {
+            logOnce("PM checkSignatures intercepted method=" + m.name + " args=" + args?.contentToString())
+            return PackageManager.SIGNATURE_MATCH
         }
 
         // checkPermission(permission, packageName) — the check-ANY-named-package overload. A guest
@@ -558,8 +553,7 @@ object PmProxy {
                 val askedPkg = args[0] as? String
                 val flags = (args[1] as? Number)?.toLong() ?: 0L
                 val sigFlags = (PackageManager.GET_SIGNATURES or 0x08000000).toLong() // 0x08000000 = GET_SIGNING_CERTIFICATES
-                val gp = guestPkg()
-                if ((flags and sigFlags) != 0L && (askedPkg == HOST || askedPkg == gp)) {
+                if ((flags and sigFlags) != 0L && askedPkg != null) {
                     val g = guestInfo(PackageManager.GET_SIGNATURES or 0x08000000)
                     if (g != null && (g.signatures != null || g.signingInfo != null)) {
                         result.signatures = g.signatures

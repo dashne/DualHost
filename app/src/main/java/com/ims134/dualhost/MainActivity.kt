@@ -44,6 +44,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.ims134.dualhost.ui.theme.DualHostTheme
 import java.io.File
+import kotlin.jvm.java
 
 class MainActivity : ComponentActivity() {
 
@@ -76,6 +77,8 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    /*
+
     // Start a clone of an app that needs its own named process
     private fun startNamed(clone: Clone, apk: File, number: Int) {
         val prefs = getSharedPreferences("dualhost", MODE_PRIVATE)
@@ -92,7 +95,9 @@ class MainActivity : ComponentActivity() {
             i.putExtra("cloneId", clone.id)
             i.putExtra("cloneNumber", number)
             i.putExtra("apkPath", apk.absolutePath)
-            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            //i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+
             CloneStore.touch(this, clone.id)
             Log.d("DualHost", "CLONELAUNCH named id=" + clone.id + " " + clone.pkg)
             startActivity(i)
@@ -107,6 +112,7 @@ class MainActivity : ComponentActivity() {
             go()
         }
     }
+    */
 
     // Start the stub of this slot for this clone
     private fun start(clone: Clone, slot: Int, apk: File, clear: Boolean, number: Int = 0) {
@@ -137,10 +143,13 @@ class MainActivity : ComponentActivity() {
             }
             val apk = File(installed.dir, "base.apk")
 
-            if (clone.pkg in namedProcesses) {
+            /*
+            if (clone.pkg in namedProcesses)
+            {
                 startNamed(clone, apk, number)
                 return
             }
+            */
 
             val prefs = getSharedPreferences("dualhost", MODE_PRIVATE)
             val key = clone.pkg + ":" + installed.versionTag
@@ -219,12 +228,17 @@ class MainActivity : ComponentActivity() {
                 val info = t.taskInfo
                 val cn = info?.baseActivity
                 val idx = Slots.stubs.indexOfFirst { it.name == cn?.className }
-                val isNamed = cn?.className == StubViber::class.java.name
+                //-------TODO
+                //val isNamed = cn?.className == StubViber::class.java.name
+                //-------
                 val tid = info?.baseIntent?.getIntExtra("cloneId", -1) ?: -1
                 Log.d("DualHost", "REMOVETASKS task id=" + info?.taskId + " base=" + cn?.className +
                         " stubIndex=" + idx + " cloneId=" + tid)
                 val wanted = if (cloneId != null) tid == cloneId else (slot == null || idx == slot)
-                if ((idx >= 0 || isNamed) && wanted) {
+                    //----------TODO
+                    //if ((idx >= 0 || isNamed) && wanted) {
+                if ((idx >= 0) && wanted) {
+                    //---------
                     t.finishAndRemoveTask()
                     Log.d("DualHost", "REMOVETASKS finishAndRemoveTask called for " + info?.taskId)
                 }

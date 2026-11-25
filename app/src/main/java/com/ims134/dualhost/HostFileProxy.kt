@@ -1,10 +1,13 @@
 package com.ims134.dualhost
 
 import android.content.ContentProvider
+import android.content.ContentProviderOperation
+import android.content.ContentProviderResult
 import android.content.ContentValues
 import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
+import android.os.CancellationSignal
 import android.os.ParcelFileDescriptor
 import android.util.Log
 import java.io.FileNotFoundException
@@ -69,10 +72,25 @@ open class BaseFileProxy : ContentProvider() {
 
     override fun onCreate(): Boolean = true
 
+    private fun setCallingPkg(cp: ContentProvider, pkg: String = "com.ims134.dualhost") {
+        AmProxy.setCallingPkg(cp, pkg)
+    }
+
     override fun openFile(uri: Uri, mode: String): ParcelFileDescriptor? {
         val o = orig(uri) ?: throw FileNotFoundException("No guest provider for " + uri.authority)
-        FileLog.d( "FILEPROXY openFile mode=" + mode + " file=" + o.second.lastPathSegment)
-        return o.first.openFile(o.second, mode)
+        FileLog.d("FILEPROXY openFile mode=" + mode + " file=" + o.second.lastPathSegment)
+        setCallingPkg(o.first)
+        return try {
+            o.first.openFile(o.second, mode)
+        } catch (e: Throwable) {
+            if (e is IllegalStateException && (e.message?.contains("callingPackage", true) == true || e.message?.contains("ContentProvider", true) == true)) {
+                FileLog.d("BaseFileProxy.openFile retrying after setCallingPkg: $e")
+                setCallingPkg(o.first)
+                try { o.first.openFile(o.second, mode) } catch (_: Throwable) { null }
+            } else {
+                throw e
+            }
+        }
     }
 
     override fun query(
@@ -80,32 +98,171 @@ open class BaseFileProxy : ContentProvider() {
         selectionArgs: Array<String>?, sortOrder: String?
     ): Cursor? {
         val o = orig(uri) ?: return null
-        return o.first.query(o.second, projection, selection, selectionArgs, sortOrder)
+        setCallingPkg(o.first)
+        return try {
+            o.first.query(o.second, projection, selection, selectionArgs, sortOrder)
+        } catch (e: Throwable) {
+            if (e is IllegalStateException && (e.message?.contains("callingPackage", true) == true || e.message?.contains("ContentProvider", true) == true)) {
+                FileLog.d("BaseFileProxy.query retrying after setCallingPkg: $e")
+                setCallingPkg(o.first)
+                try { o.first.query(o.second, projection, selection, selectionArgs, sortOrder) } catch (_: Throwable) { android.database.MatrixCursor(projection ?: emptyArray()) }
+            } else {
+                throw e
+            }
+        }
+    }
+
+    override fun query(
+        uri: Uri,
+        projection: Array<String>?,
+        queryArgs: Bundle?,
+        cancellationSignal: CancellationSignal?
+    ): Cursor? {
+        val o = orig(uri) ?: return null
+        setCallingPkg(o.first)
+        return try {
+            o.first.query(o.second, projection, queryArgs, cancellationSignal)
+        } catch (e: Throwable) {
+            if (e is IllegalStateException && (e.message?.contains("callingPackage", true) == true || e.message?.contains("ContentProvider", true) == true)) {
+                FileLog.d("BaseFileProxy.query(Bundle) retrying after setCallingPkg: $e")
+                setCallingPkg(o.first)
+                try { o.first.query(o.second, projection, queryArgs, cancellationSignal) } catch (_: Throwable) { android.database.MatrixCursor(projection ?: emptyArray()) }
+            } else {
+                throw e
+            }
+        }
     }
 
     override fun getType(uri: Uri): String? {
         val o = orig(uri) ?: return null
-        return o.first.getType(o.second)
+        setCallingPkg(o.first)
+        return try {
+            o.first.getType(o.second)
+        } catch (e: Throwable) {
+            if (e is IllegalStateException && (e.message?.contains("callingPackage", true) == true || e.message?.contains("ContentProvider", true) == true)) {
+                FileLog.d("BaseFileProxy.getType retrying after setCallingPkg: $e")
+                setCallingPkg(o.first)
+                try { o.first.getType(o.second) } catch (_: Throwable) { null }
+            } else {
+                throw e
+            }
+        }
     }
 
     override fun insert(uri: Uri, values: ContentValues?): Uri? {
         val o = orig(uri) ?: return null
-        return o.first.insert(o.second, values)
+        setCallingPkg(o.first)
+        return try {
+            o.first.insert(o.second, values)
+        } catch (e: Throwable) {
+            if (e is IllegalStateException && (e.message?.contains("callingPackage", true) == true || e.message?.contains("ContentProvider", true) == true)) {
+                FileLog.d("BaseFileProxy.insert retrying after setCallingPkg: $e")
+                setCallingPkg(o.first)
+                try { o.first.insert(o.second, values) } catch (_: Throwable) { null }
+            } else {
+                throw e
+            }
+        }
+    }
+
+    override fun bulkInsert(uri: Uri, values: Array<ContentValues>): Int {
+        val o = orig(uri) ?: return 0
+        setCallingPkg(o.first)
+        return try {
+            o.first.bulkInsert(o.second, values)
+        } catch (e: Throwable) {
+            if (e is IllegalStateException && (e.message?.contains("callingPackage", true) == true || e.message?.contains("ContentProvider", true) == true)) {
+                FileLog.d("BaseFileProxy.bulkInsert retrying after setCallingPkg: $e")
+                setCallingPkg(o.first)
+                try { o.first.bulkInsert(o.second, values) } catch (_: Throwable) { 0 }
+            } else {
+                throw e
+            }
+        }
     }
 
     override fun delete(uri: Uri, selection: String?, selectionArgs: Array<String>?): Int {
         val o = orig(uri) ?: return 0
-        return o.first.delete(o.second, selection, selectionArgs)
+        setCallingPkg(o.first)
+        return try {
+            o.first.delete(o.second, selection, selectionArgs)
+        } catch (e: Throwable) {
+            if (e is IllegalStateException && (e.message?.contains("callingPackage", true) == true || e.message?.contains("ContentProvider", true) == true)) {
+                FileLog.d("BaseFileProxy.delete retrying after setCallingPkg: $e")
+                setCallingPkg(o.first)
+                try { o.first.delete(o.second, selection, selectionArgs) } catch (_: Throwable) { 0 }
+            } else {
+                throw e
+            }
+        }
     }
 
     override fun update(uri: Uri, values: ContentValues?, selection: String?, selectionArgs: Array<String>?): Int {
         val o = orig(uri) ?: return 0
-        return o.first.update(o.second, values, selection, selectionArgs)
+        setCallingPkg(o.first)
+        return try {
+            o.first.update(o.second, values, selection, selectionArgs)
+        } catch (e: Throwable) {
+            if (e is IllegalStateException && (e.message?.contains("callingPackage", true) == true || e.message?.contains("ContentProvider", true) == true)) {
+                FileLog.d("BaseFileProxy.update retrying after setCallingPkg: $e")
+                setCallingPkg(o.first)
+                try { o.first.update(o.second, values, selection, selectionArgs) } catch (_: Throwable) { 0 }
+            } else {
+                throw e
+            }
+        }
     }
 
     override fun call(authority: String, method: String, arg: String?, extras: Bundle?): Bundle? {
         val cp = GuestProviders.find(authority) ?: return null
-        return cp.call(authority, method, arg, extras)
+        setCallingPkg(cp)
+        return try {
+            cp.call(authority, method, arg, extras)
+        } catch (e: Throwable) {
+            if (e is IllegalStateException && (e.message?.contains("callingPackage", true) == true || e.message?.contains("ContentProvider", true) == true)) {
+                FileLog.d("BaseFileProxy.call retrying after setCallingPkg: $e")
+                setCallingPkg(cp)
+                try { cp.call(authority, method, arg, extras) } catch (_: Throwable) { null }
+            } else {
+                throw e
+            }
+        }
+    }
+
+    override fun applyBatch(
+        authority: String,
+        operations: ArrayList<ContentProviderOperation>
+    ): Array<ContentProviderResult> {
+        val cp = GuestProviders.find(authority) ?: return super.applyBatch(authority, operations)
+        setCallingPkg(cp)
+        return try {
+            cp.applyBatch(authority, operations)
+        } catch (e: Throwable) {
+            if (e is IllegalStateException && (e.message?.contains("callingPackage", true) == true || e.message?.contains("ContentProvider", true) == true)) {
+                FileLog.d("BaseFileProxy.applyBatch(auth) retrying after setCallingPkg: $e")
+                setCallingPkg(cp)
+                try { cp.applyBatch(authority, operations) } catch (_: Throwable) { super.applyBatch(authority, operations) }
+            } else {
+                throw e
+            }
+        }
+    }
+
+    override fun applyBatch(operations: ArrayList<ContentProviderOperation>): Array<ContentProviderResult> {
+        val auth = operations.firstOrNull()?.uri?.authority
+        val cp = auth?.let { GuestProviders.find(it) } ?: return super.applyBatch(operations)
+        setCallingPkg(cp)
+        return try {
+            cp.applyBatch(operations)
+        } catch (e: Throwable) {
+            if (e is IllegalStateException && (e.message?.contains("callingPackage", true) == true || e.message?.contains("ContentProvider", true) == true)) {
+                FileLog.d("BaseFileProxy.applyBatch retrying after setCallingPkg: $e")
+                setCallingPkg(cp)
+                try { cp.applyBatch(operations) } catch (_: Throwable) { super.applyBatch(operations) }
+            } else {
+                throw e
+            }
+        }
     }
 }
 

@@ -10,6 +10,7 @@
 #include "Hooks.h"
 #include "RedirectTable.h"
 #include "PltResolver.h"
+#include "Reflection.h"
 
 #define LOG_TAG "DualCore"
 #define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
@@ -65,9 +66,28 @@ jstring FakeGetMyProcessName(JNIEnv* env, jclass /*clazz*/) {
 // ============================================================
 // JNI lifecycle
 // ============================================================
+// Every entry needs Stub matching `@JvmStatic external fun` in NativeEngine.kt.
+// nativeMark is registered by nativeHookNative itself.
+
+static const char* kNativeBridgeClass = "com/ims134/dualhost/NativeBridge";
+
+static std::vector<JNINativeMethod> kMethods = {
+        {"nativeGetDeclaredMethod",     "(Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;", (void *) Reflection::getDeclaredMethod},
+        {"nativeGetMethod",             "(Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;", (void *) Reflection::getMethod},
+        {"nativeGetDeclaredField",      "(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/reflect/Field;", (void *) Reflection::getDeclaredField},
+
+};
+
 extern "C" JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* /*reserved*/) {
     _GlobalJavaVM = vm;
+    __android_log_print(ANDROID_LOG_INFO, "DualJni", "Before Reflection::Register");
+    Reflection::Register(vm,kNativeBridgeClass,kMethods);
+    __android_log_print(ANDROID_LOG_INFO, "DualJni", "After Reflection::Register");
     return JNI_VERSION_1_6;
+}
+
+extern "C" JNIEXPORT void JNI_OnUnload(JavaVM *vm, void *) {
+    Reflection::UnRegister(vm);
 }
 
 int GetDynamicVirtualUid() {

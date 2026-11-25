@@ -331,7 +331,7 @@ object GuestSync {
     }
     private fun probeContacts(c: Context) {
         FileLog.d("PROBE where pid=" + android.os.Process.myPid() + " proc=" + ProcessClone.realName)
-        if (ProcessClone.realName != "com.viber.voip") return
+        if (ProcessClone.realName != "com.viber.voip" && ProcessClone.slot == null) return
         if (!probed.compareAndSet(false, true)) return
         Thread {
             try {
