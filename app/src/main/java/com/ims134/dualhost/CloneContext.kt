@@ -378,7 +378,7 @@ class CloneContext(
     private fun extRoot(type: String?, cache: Boolean): File? {
         val base = (if (cache) super.getExternalCacheDir() else super.getExternalFilesDir(null)) ?: return null
         val d = File(base, "virtual/" + (root.parentFile?.name ?: "unknown") + "/" + root.name +
-                (if (type != null) "/" + type else ""))
+                (if (type != null) "/$type" else ""))
         d.mkdirs()
         return d
     }
@@ -431,7 +431,7 @@ class CloneContext(
     override fun getCacheDir(): File = dir("cache")
     */
 
-    override fun getDir(name: String?, mode: Int): File = dir("app_" + name)
+    override fun getDir(name: String?, mode: Int): File = dir("app_$name")
 
     override fun getNoBackupFilesDir(): File = dir("no_backup")
 
@@ -439,22 +439,22 @@ class CloneContext(
 
     override fun getSharedPreferences(name: String?, mode: Int): SharedPreferences
     {
-        ask("prefs " + name)
+        ask("prefs $name")
         val pkg = root.parentFile?.name ?: "unknown"
         val prefsName = "clone_" + pkg + "_" + root.name + "_" + name
         val result = super.getSharedPreferences(prefsName, mode)
-        try {
-            if (name != null && (name.contains("viber") || name.contains("theme") || name.contains("settings")) &&
-                !name.contains("braze") && !name.contains("firebase") && !name.contains("mixpanel")) {
-                val editor = result.edit()
-                var changed = false
-                if (!result.contains("dark_theme")) { editor.putBoolean("dark_theme", true); changed = true }
-                if (!result.contains("night_mode")) { editor.putBoolean("night_mode", true); changed = true }
-                if (!result.contains("theme_mode")) { editor.putInt("theme_mode", 2); changed = true }
-                if (changed) editor.apply()
-            }
-        } catch (_: Throwable) {}
+        // Removed: the old dark_theme / night_mode / theme_mode seeding. A probe over the clone's real
+        // Viber prefs store proved all 11 of those keys (dark_theme, night, is_dark_theme,
+        // pref_dark_theme, pref_theme_mode, pref_night_mode, dark_theme_enabled, day_night_mode, ...)
+        // are never read by the guest — Viber's genuine switch is pref_auto_theme_key / current_theme /
+        // ui_mode, which only Viber itself writes. Injecting lookalike keys just polluted every clone
+        // prefs file and made real state impossible to audit.
         FileLog.d("DIAG getSharedPreferences('$name') -> ${result.all.size} keys")
+        // Viber's Appearance toggles only touch this store; HostInstrumentation re-decides the night
+        // mode from it so a switch takes effect immediately instead of waiting for a system change.
+        if (name != null && name.endsWith("ViberPrefs")) {
+            HostInstrumentation.current?.watchGuestAppearance(result, root)
+        }
         return result
     }
 

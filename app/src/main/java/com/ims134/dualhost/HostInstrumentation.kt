@@ -6,8 +6,11 @@ import android.app.Instrumentation
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.res.Resources
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.os.PersistableBundle
 import dalvik.system.DexClassLoader
 import java.io.File
@@ -26,13 +29,26 @@ import android.provider.MediaStore
 class GuestEnv(
     val loader: DexClassLoader,
     val resources: Resources,
-    val application: Application
+    val application: Application,
+    // Clone data dir this env was built for. prepareGuest needs it again when an activity arrives
+    // WITHOUT our stub extras (see the relaunch fallback there) and there is no intent to derive it
+    // from — a fresh root would quietly point the activity at another clone's prefs/databases.
+    val root: File
 )
 
 class HostInstrumentation(private val base: Instrumentation) : Instrumentation() {
 
     companion object {
         @Volatile var current: HostInstrumentation? = null
+
+        // Viber's dark mode is a PARALLEL style family prefixed "Darknight.", not a -night variant:
+        // every light style has a twin (Theme.Viber.Home -> Darknight.Theme.Viber.Home,
+        // Base.Theme.Viber.Light -> Base.Darknight.Theme.Viber.Light, 104 of them in the apk) and the
+        // twins mirror the NoActionBar shape, so Viber's setSupportActionBar() keeps working. Viber
+        // selects the family in code from current_theme="darknight"; inside the clone that selection
+        // never happens, so we resolve the twin by name and apply it ourselves.
+        private const val VIBER_PKG = "com.viber.voip"
+        private const val VIBER_DARK_PREFIX = "Darknight."
     }
 
     init { current = this }
@@ -269,16 +285,22 @@ class HostInstrumentation(private val base: Instrumentation) : Instrumentation()
                     val copy = ApplicationInfo(old)
                     copy.packageName = gpkg
                     af.set(bound, copy)
-                } catch (e: Throwable) { FileLog.d("APPINFO failed: " + e) }
+                } catch (e: Throwable) { FileLog.d("APPINFO failed: $e") }
                 FileLog.d("PROCNAME set to " + gpkg + ", now reads " + Application.getProcessName())
             }
-        } catch (e: Throwable) { FileLog.d("PROCNAME set failed: " + e) }
+        } catch (e: Throwable) { FileLog.d("PROCNAME set failed: $e") }
 
         val splitPaths = guestApks(apkPath).drop(1).toTypedArray()
         ai.splitSourceDirs = splitPaths
         ai.splitPublicSourceDirs = splitPaths
         val raw = pm.getResourcesForApplication(ai)
-        val resources = GuestResources(raw.assets, raw.displayMetrics, raw.configuration, ai.packageName)
+        val initialCfg = android.content.res.Configuration(raw.configuration)
+        initialCfg.updateFrom(hostApp.resources.configuration)
+        // Effective darkness for this guest: Viber's own Appearance choice when Auto mode is off,
+        // otherwise the system theme (see viberWantsDark).
+        val wantDark = guestDarkChoice(ai.packageName, root)
+        applyNight(initialCfg, wantDark)
+        val resources = GuestResources(raw.assets, raw.displayMetrics, initialCfg, ai.packageName)
         val loader = getGuestLoader(hostApp.classLoader, apkPath)
 
         val appClassName = ai.className
@@ -291,7 +313,21 @@ class HostInstrumentation(private val base: Instrumentation) : Instrumentation()
         ctx.guestLoader = loader
         ctx.guestApplication = app
         val th = resources.newTheme()
-        if (ai.theme != 0) th.applyStyle(ai.theme, true)
+        if (ai.theme != 0) {
+            // Viber dark (env-side): contexts built from this theme (dialogs, popups, and the copy
+            // ContextThemeWrapper.initializeTheme() pulls in) must use the Darknight family too.
+            var appStyle = ai.theme
+            if (ai.packageName == VIBER_PKG && wantDark) {
+                val darkId = viberDarkStyle(resources, ai.packageName, appStyle)
+                if (darkId != 0) {
+                    appStyle = darkId
+                    FileLog.d("VIBERDARK env theme 0x" + Integer.toHexString(darkId) + " " + resName(resources, darkId))
+                } else {
+                    FileLog.d("VIBERDARK env: no Darknight twin for 0x" + Integer.toHexString(ai.theme))
+                }
+            }
+            th.applyStyle(appStyle, true)
+        }
         ctx.guestTheme = th
 
         //added by another Claude account
@@ -500,7 +536,7 @@ class HostInstrumentation(private val base: Instrumentation) : Instrumentation()
         try { GuestSync.start(ctx) } catch (e: Throwable) { FileLog.d("GuestSync start failed: " + e) }
 
 
-        val env = GuestEnv(loader, resources, app)
+        val env = GuestEnv(loader, resources, app, root)
         guestEnvs[apkPath] = env
         GuestEnvs.map[apkPath] = env
         return env
@@ -509,16 +545,168 @@ class HostInstrumentation(private val base: Instrumentation) : Instrumentation()
     private fun isSystemDark(context: Context): Boolean {
         try {
             val uiManager = context.getSystemService(Context.UI_MODE_SERVICE) as? android.app.UiModeManager
-            if (uiManager?.nightMode == android.app.UiModeManager.MODE_NIGHT_YES) return true
+            val nm = uiManager?.nightMode
             val sysMode = context.resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK
-            if (sysMode == android.content.res.Configuration.UI_MODE_NIGHT_YES) return true
-            val setting = android.provider.Settings.Secure.getInt(context.contentResolver, "ui_night_mode", 1)
-            if (setting == 2) return true
-        } catch (_: Throwable) {}
+            val setting = try { android.provider.Settings.Secure.getInt(context.contentResolver, "ui_night_mode", 1) } catch (e: Throwable) { -1 }
+            val result = nm == android.app.UiModeManager.MODE_NIGHT_YES ||
+                    sysMode == android.content.res.Configuration.UI_MODE_NIGHT_YES ||
+                    setting == 2
+            FileLog.d("ISDARK nightMode=$nm cfgUiMode=0x${Integer.toHexString(context.resources.configuration.uiMode)} sysMode=0x${Integer.toHexString(sysMode)} setting=$setting -> $result")
+            return result
+        } catch (e: Throwable) { FileLog.d("ISDARK failed: $e") }
         return false
     }
 
-    private fun freshResources(apkPath: String): Resources {
+    // Overrides the night bit OUTRIGHT instead of only setting it: the guest config starts as a copy
+    // of the host's, so when Viber picks Light on a dark system the night bit has to be actively
+    // cleared, or AppCompat/Material views inside a light Viber would still inflate their night
+    // variants while Viber's own chrome uses the light family.
+    private fun applyNight(cfg: android.content.res.Configuration, dark: Boolean) {
+        val mask = android.content.res.Configuration.UI_MODE_NIGHT_MASK
+        cfg.uiMode = (cfg.uiMode and mask.inv()) or
+                (if (dark) android.content.res.Configuration.UI_MODE_NIGHT_YES
+                 else android.content.res.Configuration.UI_MODE_NIGHT_NO)
+    }
+
+    /**
+     * The guest's own appearance prefs file. CloneContext hands the guest
+     * "clone_<pkg>_<clone>_<name>", so the same file is reachable from the host context by that
+     * exact name — no XML parsing, and it is the same SharedPreferences instance the guest writes to.
+     */
+    private fun viberPrefsFor(root: File): SharedPreferences? {
+        return try {
+            val pkg = root.parentFile?.name ?: return null
+            hostApp().getSharedPreferences("clone_" + pkg + "_" + root.name + "_com.viber.voip.ViberPrefs", 0)
+        } catch (e: Throwable) {
+            FileLog.d("VIBERPREFS failed: $e")
+            null
+        }
+    }
+
+    /**
+     * Viber's own appearance choice. "pref_auto_theme_key" is Viber's Auto mode switch (its UI text:
+     * "Viber matches your device's light or dark mode"); with Auto OFF, "current_theme" names the
+     * family the user picked — "darknight" is the Darknight family. Only when the choice is unknown
+     * (older build, no keys yet) do we fall back to the system theme.
+     */
+    private fun viberWantsDark(root: File): Boolean {
+        val sys = isSystemDark(hostApp())
+        val p = viberPrefsFor(root) ?: return sys
+        val auto = p.getBoolean("pref_auto_theme_key", true)
+        val theme = p.getString("current_theme", null)
+        val want = if (auto) sys
+        else theme != null && (theme.contains("dark", true) || theme.contains("night", true))
+        FileLog.d("VIBERTHEME auto=" + auto + " current_theme=" + theme +
+                " systemDark=" + sys + " -> dark=" + want)
+        return want
+    }
+
+    // Effective darkness for one guest: Viber follows its own Appearance setting, every other guest
+    // follows the system.
+    private fun guestDarkChoice(pkg: String, root: File): Boolean =
+        if (pkg == VIBER_PKG) viberWantsDark(root) else isSystemDark(hostApp())
+
+    // --- live Appearance switches ---------------------------------------------------------------
+    // Viber's Appearance screen only writes pref_auto_theme_key / current_theme and then asks
+    // AppCompat to re-evaluate. AppCompat reads the ACTIVITY's Configuration, which in the clone is a
+    // snapshot decided at env/activity creation — and deliberately night-CLEARED when Viber picked
+    // Light on a dark system. So turning Auto back ON did nothing: the config still claimed the
+    // system was light, and it only caught up on the next real system uiMode change. Watching the
+    // guest's own prefs (same SharedPreferences instance the guest writes) lets us re-decide at once,
+    // rewrite the config and relaunch the visible activity so the Darknight mapping re-applies.
+    private val appearanceWatch = HashMap<String, SharedPreferences.OnSharedPreferenceChangeListener>()
+
+    fun watchGuestAppearance(sp: SharedPreferences, root: File) {
+        if (root.parentFile?.name != VIBER_PKG) return
+        val key = root.absolutePath
+        if (appearanceWatch.containsKey(key)) return
+        val l = SharedPreferences.OnSharedPreferenceChangeListener { _, pref ->
+            if (pref == "pref_auto_theme_key" || pref == "current_theme") onAppearanceChanged(root)
+        }
+        appearanceWatch[key] = l   // SharedPreferencesImpl holds listeners weakly: keep a strong ref
+        sp.registerOnSharedPreferenceChangeListener(l)
+        FileLog.d("VIBERWATCH registered for $key")
+    }
+
+    private fun onAppearanceChanged(root: File) {
+        try {
+            val env = guestEnvs.values.firstOrNull { it.root.absolutePath == root.absolutePath } ?: return
+            val want = viberWantsDark(root)
+            val cur = env.resources.configuration
+            val curDark = (cur.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
+                    android.content.res.Configuration.UI_MODE_NIGHT_YES
+            if (curDark == want) {
+                FileLog.d("VIBERWATCH config already dark=" + want)
+                return
+            }
+            val cfg = android.content.res.Configuration(cur)
+            applyNight(cfg, want)
+            env.resources.updateConfiguration(cfg, env.resources.displayMetrics)
+            FileLog.d("VIBERWATCH config night -> " + want + ", relaunching guest activity")
+            Handler(Looper.getMainLooper()).post {
+                // Viber itself may already have rebuilt its activity by the time this runs; only
+                // relaunch when the live activity still carries the stale configuration.
+                try {
+                    val act = topGuestActivity(env.loader)
+                    if (act == null) {
+                        FileLog.d("VIBERWATCH no live guest activity to relaunch")
+                    } else {
+                        val liveDark = (act.resources.configuration.uiMode and
+                                android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
+                                android.content.res.Configuration.UI_MODE_NIGHT_YES
+                        if (liveDark == want) {
+                            FileLog.d("VIBERWATCH " + act.javaClass.name + " already rebuilt dark=" + want)
+                        } else {
+                            FileLog.d("VIBERWATCH recreate " + act.javaClass.name)
+                            act.recreate()
+                        }
+                    }
+                } catch (t: Throwable) {
+                    FileLog.d("VIBERWATCH relaunch failed: $t")
+                }
+            }
+        } catch (t: Throwable) {
+            FileLog.d("VIBERWATCH failed: $t")
+        }
+    }
+
+    private fun topGuestActivity(loader: ClassLoader): Activity? = try {
+        val at = Class.forName("android.app.ActivityThread")
+        val thread = at.getDeclaredMethod("currentActivityThread").invoke(null)
+        val f = at.getDeclaredField("mActivities").apply { isAccessible = true }
+        val records = f.get(thread) as Map<*, *>
+        records.values.asSequence().mapNotNull { rec ->
+            if (rec == null) null else
+                rec.javaClass.getDeclaredField("activity").apply { isAccessible = true }.get(rec) as? Activity
+        }.lastOrNull { it.javaClass.classLoader === loader && !it.isFinishing }
+    } catch (t: Throwable) {
+        FileLog.d("VIBERWATCH activity scan failed: $t")
+        null
+    }
+
+    private fun resName(r: Resources, id: Int): String =
+        try { r.getResourceName(id) } catch (t: Throwable) { "0x" + Integer.toHexString(id) }
+
+    /**
+     * Maps a Viber light-chain style to its Darknight twin, or 0 when the style has no twin:
+     * "Theme.Viber.Home" -> "Darknight.Theme.Viber.Home",
+     * "Base.Theme.Viber.Light" -> "Base.Darknight.Theme.Viber.Light".
+     * Names are resolved through the guest resource table at runtime, so Viber renumbering its ids in
+     * an update does not break this.
+     */
+    private fun viberDarkStyle(res: Resources, gp: String, styleId: Int): Int {
+        if (styleId == 0) return 0
+        val full = try { res.getResourceName(styleId) } catch (t: Throwable) { return 0 }
+        val bare = full.substringAfter("/")
+        val dark = when {
+            bare.startsWith("Base.Theme.") -> "Base." + VIBER_DARK_PREFIX + bare.removePrefix("Base.")
+            bare.startsWith("Theme.") -> VIBER_DARK_PREFIX + bare
+            else -> return 0
+        }
+        return res.getIdentifier(dark, "style", gp)
+    }
+
+    private fun freshResources(apkPath: String, dark: Boolean): Resources {
         val pm = hostApp().packageManager
         val ai = pm.getPackageArchiveInfo(apkPath, 0)!!.applicationInfo!!
         ai.sourceDir = apkPath
@@ -529,28 +717,55 @@ class HostInstrumentation(private val base: Instrumentation) : Instrumentation()
         val sysCfg = hostApp().resources.configuration
         val cfg = android.content.res.Configuration(raw.configuration)
         cfg.updateFrom(sysCfg)
-        if (isSystemDark(hostApp())) {
-            cfg.uiMode = (cfg.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK.inv()) or android.content.res.Configuration.UI_MODE_NIGHT_YES
-        }
+        applyNight(cfg, dark)
         return GuestResources(raw.assets, raw.displayMetrics, cfg, ai.packageName)
     }
 
     private fun prepareGuest(activity: Activity?, icicle: Bundle?) {
         if (activity == null) return
-        val intent = activity.intent ?: return
-        val apkPath = intent.getStringExtra("apkPath") ?: return
-        if (intent.getStringExtra("guestClass") != activity.javaClass.name) return
-        val vuid = intent.getIntExtra("vuid", 0)
+        val launchIntent = activity.intent
+        var apkExtra = launchIntent?.getStringExtra("apkPath")
+        val guestClassExtra = launchIntent?.getStringExtra("guestClass")
+        var vuid = launchIntent?.getIntExtra("vuid", 0) ?: 0
+        var rootOverride: File? = null
+
+        // 2026-11-27 (Viber "switch theme" crash): Viber's own relaunch (recreate() after the user
+        // changes Appearance) reached callActivityOnCreate WITHOUT our stub extras. These guards used
+        // to bail out silently, so the activity kept the HOST DualApplication and Viber's first
+        // onCreate statement — a cast of getApplication() to its own interface — died with
+        // "com.ims134.dualhost.DualApplication does not implement hus". The guest ClassLoader is proof
+        // that this activity is ours, so resolve the cached env through it and continue with that
+        // env's clone root instead of leaving the instance half-initialised. The root MUST come from
+        // the env (not a fresh rootFor()): a wrong root silently points the activity at another
+        // clone's prefs/databases.
+        if (apkExtra == null || guestClassExtra != activity.javaClass.name) {
+            val byLoader = guestEnvs.entries.firstOrNull { it.value.loader === activity.javaClass.classLoader }
+            FileLog.d("PREP fallback: hasIntent=" + (launchIntent != null) +
+                    " keys=" + launchIntent?.extras?.keySet()?.joinToString() +
+                    " apkPath=" + apkExtra + " guestClass=" + guestClassExtra +
+                    " act=" + activity.javaClass.name + " envByLoader=" + (byLoader != null))
+            if (byLoader == null) return
+            apkExtra = byLoader.key
+            rootOverride = byLoader.value.root
+            // vuid selects which HostService stub receives redirected service intents; recover the
+            // slot from the process name (com.ims134.dualhost:p3 -> 3) since the intent is gone.
+            val slotFromProc = ProcessClone.realName.substringAfterLast(":", "")
+                .removePrefix("p").toIntOrNull()
+            if (slotFromProc != null) vuid = slotFromProc
+        }
+        val apkPath = apkExtra ?: return
 
         try {
-            val root = rootFor(activity.dataDir, intent, vuid)
+            val root = rootOverride ?: rootFor(activity.dataDir, launchIntent, vuid)
             root.mkdirs()
             val env = getGuestEnv(hostApp(), apkPath, vuid, root)
-            val res = freshResources(apkPath)
+            // Effective darkness for THIS activity: Viber's own Appearance choice when Auto mode is
+            // off, otherwise the system theme (see viberWantsDark).
+            val gpChoice = File(apkPath).parentFile?.parentFile?.name ?: ""
+            val dark = guestDarkChoice(gpChoice, root)
+            val res = freshResources(apkPath, dark)
             val sysCfg = android.content.res.Configuration(hostApp().resources.configuration)
-            if (isSystemDark(hostApp())) {
-                sysCfg.uiMode = (sysCfg.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK.inv()) or android.content.res.Configuration.UI_MODE_NIGHT_YES
-            }
+            applyNight(sysCfg, dark)
             res.updateConfiguration(sysCfg, res.displayMetrics)
             env.resources.updateConfiguration(sysCfg, res.displayMetrics)
 
@@ -592,11 +807,29 @@ class HostInstrumentation(private val base: Instrumentation) : Instrumentation()
                     val actInfo = pmi.activities?.firstOrNull { it.name == guestActName }
                     val actTheme = actInfo?.theme ?: 0
                     val appTheme = pmi.applicationInfo?.theme ?: 0
-                    val effective = if (actTheme != 0) actTheme else appTheme
+                    var effective = if (actTheme != 0) actTheme else appTheme
                     FileLog.d("THEME guest=$guestActName actTheme=0x${Integer.toHexString(actTheme)} " +
                             "appTheme=0x${Integer.toHexString(appTheme)} effective=0x${Integer.toHexString(effective)}")
+                    // Dark mode: swap the manifest style for its Darknight twin. Viber's dark theme is
+                    // a parallel style family, not a -night variant of this one (the apk has no night
+                    // resources for any Viber style), so the only way to get Viber's real dark colours
+                    // inside the clone is to select that family ourselves.
+                    val gpTheme = gpChoice
+                    if (gpTheme == VIBER_PKG && dark) {
+                        val darkId = viberDarkStyle(res, gpTheme, effective)
+                        if (darkId != 0) {
+                            FileLog.d("VIBERDARK theme 0x" + Integer.toHexString(darkId) + " " +
+                                    resName(res, darkId) + " instead of 0x" + Integer.toHexString(effective))
+                            effective = darkId
+                        } else {
+                            FileLog.d("VIBERDARK no Darknight twin for 0x" + Integer.toHexString(effective))
+                        }
+                    }
                     if (effective != 0) {
-                        // API 37 removed ContextThemeWrapper.mTheme — walk hierarchy for any Resources.Theme field
+                        // The Activity's cached theme object can survive from before we replaced
+                        // mResources, in which case setTheme() applies a guest style id onto a theme
+                        // bound to the HOST table. Drop it first (ContextThemeWrapper.mTheme holds it
+                        // on this API level), then let setTheme() rebuild it from the guest resources.
                         var cleared = false
                         var k: Class<*>? = activity.javaClass
                         while (k != null && !cleared) {
@@ -617,13 +850,10 @@ class HostInstrumentation(private val base: Instrumentation) : Instrumentation()
                         activity.setTheme(effective)
                         FileLog.d("THEME applied 0x${Integer.toHexString(effective)} to $guestActName (cleared=$cleared)")
 
-                        // Step 328 fix (Calculator crash, Theme.AppCompat InflateException): on this API
-                        // level the Resources.Theme field-walk above never finds anything to clear
-                        // (cleared=false even when nothing crashes), so setTheme() alone leaves the
-                        // activity's live theme object built from the wrong chain. THEMEDIAG already
-                        // proves a theme freshly built from guest resources resolves abar=true for the
-                        // same style id, so force-apply that same style directly onto the live theme
-                        // instead of relying on setTheme() to rebuild it.
+                        // Belt and braces: even with the cached theme dropped, apply the effective
+                        // style straight onto the live theme so the activity never renders with the
+                        // throwaway theme the framework created during attach(). THEMEDIAG below
+                        // verifies the result: live theme must match a freshly built guest theme.
                         try {
                             activity.theme.applyStyle(effective, true)
                             FileLog.d("THEME force-applied 0x${Integer.toHexString(effective)} onto live theme")
@@ -631,14 +861,8 @@ class HostInstrumentation(private val base: Instrumentation) : Instrumentation()
                             FileLog.d("THEME force-apply failed: $t")
                         }
 
-                        // Unproven, diagnostic only: force-apply above ran without throwing but THEMEDIAG
-                        // below still shows abar=false afterward, meaning applyStyle() had no real effect —
-                        // most likely activity.theme is still bound to the HOST AssetManager, so a
-                        // guest-numbered style id resolves against the wrong resource table. The exact-type
-                        // field walk above also never finds anything to clear (cleared=false even here),
-                        // so the cached theme does not live where that walk looks. Log every field anywhere
-                        // in the hierarchy whose type NAME mentions Theme (not exact-type match) so the next
-                        // fix targets the real field instead of guessing again.
+                        // Diagnostic (log only): compare the live activity theme against a theme
+                        // freshly built from guest resources for the same style id.
                         try {
                             var k2: Class<*>? = activity.javaClass
                             while (k2 != null) {
@@ -681,6 +905,36 @@ class HostInstrumentation(private val base: Instrumentation) : Instrumentation()
                 FileLog.d("THEME failed: $e")
             }
             // ===== END THEME FIX =====
+
+            // Diagnostic (Viber clone stays light while the system is dark): shows whether the
+            // guest even SEES the night bit in its Configuration, and what the live theme's
+            // windowBackground actually resolves to. If resUiMode carries night but the colour is
+            // still a light one, the resource path is healthy and the app is just picking its
+            // light style in code — see ViberThemeProbe.
+            try {
+                val uiMode = res.configuration.uiMode
+                val tv = android.util.TypedValue()
+                val theme = activity.theme
+                theme.resolveAttribute(android.R.attr.windowBackground, tv, true)
+                val color = try {
+                    when (tv.type) {
+                        android.util.TypedValue.TYPE_INT_COLOR_ARGB8,
+                        android.util.TypedValue.TYPE_INT_COLOR_RGB8,
+                        android.util.TypedValue.TYPE_INT_COLOR_ARGB4,
+                        android.util.TypedValue.TYPE_INT_COLOR_RGB4 ->
+                            "0x" + Integer.toHexString(tv.data)
+                        else -> if (tv.resourceId != 0)
+                            "0x" + Integer.toHexString(res.getColor(tv.resourceId, theme))
+                        else "unresolved(type=0x" + Integer.toHexString(tv.type) + ")"
+                    }
+                } catch (t: Throwable) { "error($t)" }
+                FileLog.d("THEMECHECK guest=" + activity.javaClass.name +
+                        " systemDark=" + isSystemDark(hostApp()) +
+                        " resUiMode=0x" + Integer.toHexString(uiMode) +
+                        " night=" + ((uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
+                                android.content.res.Configuration.UI_MODE_NIGHT_YES) +
+                        " windowBackground=" + color)
+            } catch (t: Throwable) { FileLog.d("THEMECHECK failed: " + t) }
 
             FileLog.d("guest ready: " + activity.javaClass.name)
         } catch (e: Throwable) {
